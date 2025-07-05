@@ -7,6 +7,7 @@
 #include "GameplayTagContainer.h"
 #include "BSDefine.h"
 #include "Interface/BSComboWindowInterface.h"
+#include "Interface/BSBowFireInterface.h"
 #include "BSCharacterPlayer.generated.h"
 
 
@@ -28,6 +29,7 @@ UCLASS()
 class BLACKSPACE_API ABSCharacterPlayer
 	: public ABSCharacterBase
 	, public IBSComboWindowInterface
+	, public IBSBowFireInterface
 {
 	GENERATED_BODY()
 
@@ -92,8 +94,13 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Stat")
 	bool bIsSprinting = false;
 
+	// Fire 공격, Sprint 플래그
 	UPROPERTY(EditAnywhere, Category = "Stat")
 	bool bAiming = false;
+
+	// Camera View, Animation 플래그
+	UPROPERTY(EditAnywhere, Category = "Stat")
+	bool bProgressAiming = false;
 
 // Combo
 protected:
@@ -115,9 +122,12 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 public:
-	/* BSComboWindowInterface Implement */
+	/* IBSComboWindowInterface Implement */
 	virtual void EnableComboWindow() override;
 	virtual void DisableComboWindow() override;
+
+	/* IBSBowFireInterface Implement */
+	virtual void BowFireFinished() override;
 
 	void AttackFinished(const float ComboResetDelay);
 
@@ -158,8 +168,9 @@ private:
 	void PullStringStart();
 	void PullString();
 	void PullStringCancel();
+	void PullStringComplete();
 
-	void FireArrow();
+	void FireArrow(const FGameplayTag& AttackType);
 
 	void ToggleCameraViewAdjust();
 	void ToggleAimingFlag(bool InIsAiming);

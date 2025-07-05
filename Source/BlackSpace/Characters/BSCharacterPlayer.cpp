@@ -118,6 +118,7 @@ void ABSCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		EnhancedInputComponent->BindAction(InputData->IA_BowStringPull, ETriggerEvent::Started, this, &ThisClass::PullStringStart);
 		EnhancedInputComponent->BindAction(InputData->IA_BowStringPull, ETriggerEvent::Ongoing, this, &ThisClass::PullString);
 		EnhancedInputComponent->BindAction(InputData->IA_BowStringPull, ETriggerEvent::Canceled, this, &ThisClass::PullStringCancel);
+		EnhancedInputComponent->BindAction(InputData->IA_BowStringPull, ETriggerEvent::Completed, this, &ThisClass::PullStringComplete);
 	}
 }
 
@@ -138,6 +139,17 @@ void ABSCharacterPlayer::DisableComboWindow()
 		ComboCounter++;
 		DoAttack(CombatComp->GetLastAttackType());
 	}
+}
+
+void ABSCharacterPlayer::BowFireFinished()
+{
+	check(StateComp);
+
+	StateComp->ToggleMovementInput(true);
+
+	bAiming = false;
+	ToggleAimingFlag(false);
+	ToggleCameraViewAdjust();
 }
 
 void ABSCharacterPlayer::AttackFinished(const float ComboResetDelay)
@@ -186,6 +198,8 @@ void ABSCharacterPlayer::Look(const FInputActionValue& Value)
 
 void ABSCharacterPlayer::Sprint()
 {
+	if (bProgressAiming) return;
+
 	check(AttributeComp);
 
 	if (AttributeComp->CheckHasEnoughStamina(3.f) && IsMoving())
@@ -289,7 +303,7 @@ void ABSCharacterPlayer::LightAttack()
 	}
 	else if (bAiming)
 	{
-		FireArrow();
+		FireArrow(AttackType);
 	}
 }
 
@@ -318,6 +332,10 @@ FGameplayTag ABSCharacterPlayer::GetAttackPerform() const
 	if (bIsSprinting)
 	{
 		return BSGameplayTag::Character_Attack_Running;
+	}
+	else if (bAiming)
+	{
+		return BSGameplayTag::Character_Attack_Fire;
 	}
 	return BSGameplayTag::Character_Attack_Light;
 }
@@ -434,7 +452,7 @@ void ABSCharacterPlayer::PullStringStart()
 			ToggleCameraViewAdjust();
 
 			StateComp->SetState(BSGameplayTag::Character_State_Aiming);
-
+			
 			PlayAnimMontage(Weapon->GetMontageForTag(BSGameplayTag::Character_State_Aiming));
 		}
 	}
@@ -444,11 +462,15 @@ void ABSCharacterPlayer::PullString()
 {
 	check(CombatComp);
 
-	if (IBSBowInterface* BowInterface = Cast<IBSBowInterface>(CombatComp->GetMainWeapon()))
+	// 다른 상태에서 우클릭 시 활 시위 당겨지는 것 방지
+	if (CanPullingString())
 	{
-		const FVector RightHandSocket = GetMesh()->GetSocketLocation(TEXT("RightHandSocket"));
+		if (IBSBowInterface* BowInterface = Cast<IBSBowInterface>(CombatComp->GetMainWeapon()))
+		{
+			const FVector RightHandSocket = GetMesh()->GetSocketLocation(TEXT("RightHandSocket"));
 
-		BowInterface->PullString(RightHandSocket);  
+			BowInterface->PullString(RightHandSocket);
+		}
 	}
 }
 
@@ -463,11 +485,7 @@ void ABSCharacterPlayer::PullStringCancel()
 		{
 			if (Anim->Montage_IsPlaying(Weapon->GetMontageForTag(BSGameplayTag::Character_State_Aiming)))
 			{
-				ToggleAimingFlag(false);
-
-				ToggleCameraViewAdjust();
-
-				StateComp->ClearState();
+				BowFireFinished();
 
 				Anim->Montage_Stop(0.4f, Weapon->GetMontageForTag(BSGameplayTag::Character_State_Aiming));
 			}
@@ -480,7 +498,14 @@ void ABSCharacterPlayer::PullStringCancel()
 	}
 }
 
-void ABSCharacterPlayer::FireArrow()
+void ABSCharacterPlayer::PullStringComplete()
+{
+	bAiming = true;
+
+	// 화살 발사 준비 특수효과 추가..
+}
+
+void ABSCharacterPlayer::FireArrow(const FGameplayTag& AttackType)
 {
 	check(StateComp);
 	check(AttributeComp);
@@ -494,15 +519,11 @@ void ABSCharacterPlayer::FireArrow()
 	if (ABSWeapon* Weapon = CombatComp->GetMainWeapon())
 	{
 		AttributeComp->ToggleStaminaRegen(false);
-		AttributeComp->DecreaseStamina(-5.f);
+		AttributeComp->DecreaseStamina(5.f);
 		
-		StateComp->SetState(BSGameplayTag::Character_Attack_Fire);
-		PlayAnimMontage(Weapon->GetMontageForTag(BSGameplayTag::Character_Attack_Fire));
-
-		ToggleAimingFlag(false);
-
-		// Notify 로 ㄱㄱ
-		ToggleCameraViewAdjust();
+		StateComp->ToggleMovementInput(false);
+		StateComp->SetState(AttackType);
+		PlayAnimMontage(Weapon->GetMontageForTag(AttackType));
 
 		AttributeComp->ToggleStaminaRegen(true, 1.5f);
 	
@@ -515,7 +536,7 @@ void ABSCharacterPlayer::FireArrow()
 
 void ABSCharacterPlayer::ToggleCameraViewAdjust()
 {
-	if (bAiming)
+	if (bProgressAiming)
 	{
 		GetCharacterMovement()->bOrientRotationToMovement = false;
 		GetCharacterMovement()->MaxWalkSpeed = 250.f;
@@ -543,11 +564,11 @@ void ABSCharacterPlayer::ToggleCameraViewAdjust()
 
 void ABSCharacterPlayer::ToggleAimingFlag(bool InIsAiming)
 {
-	bAiming = InIsAiming;
+	bProgressAiming = InIsAiming;
 
 	if (UBSAnimInstance* Anim = Cast<UBSAnimInstance>(GetMesh()->GetAnimInstance()))
 	{
-		Anim->bIsAiming = bAiming;
+		Anim->bIsAiming = bProgressAiming;
 	}
 }
 
