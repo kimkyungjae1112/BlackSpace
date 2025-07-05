@@ -129,6 +129,10 @@ public:
 	/* IBSBowFireInterface Implement */
 	virtual void BowFireFinished() override;
 
+	/* IBSCombatInterface Implement */
+	virtual void ActivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType);
+	virtual void DeactivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType);
+
 	void AttackFinished(const float ComboResetDelay);
 
 private:

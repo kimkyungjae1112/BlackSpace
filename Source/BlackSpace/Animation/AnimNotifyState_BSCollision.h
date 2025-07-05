@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
+#include "BSDefine.h"
 #include "AnimNotifyState_BSCollision.generated.h"
 
 UCLASS(meta=(DisplayName="Weapon Collision"))
@@ -11,6 +12,10 @@ class BLACKSPACE_API UAnimNotifyState_BSCollision : public UAnimNotifyState
 {
 	GENERATED_BODY()
 	
+protected:
+	UPROPERTY(EditAnywhere)
+	EWeaponCollisionType WeaponCollisionType = EWeaponCollisionType::First;
+
 public:
 	UAnimNotifyState_BSCollision(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 

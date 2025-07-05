@@ -152,6 +152,26 @@ void ABSCharacterPlayer::BowFireFinished()
 	ToggleCameraViewAdjust();
 }
 
+void ABSCharacterPlayer::ActivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType)
+{
+	check(CombatComp);
+
+	if (ABSWeapon* Weapon = CombatComp->GetMainWeapon())
+	{
+		Weapon->ActivateWeaponCollision(WeaponCollisionType);
+	}
+}
+
+void ABSCharacterPlayer::DeactivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType)
+{
+	check(CombatComp);
+
+	if (ABSWeapon* Weapon = CombatComp->GetMainWeapon())
+	{
+		Weapon->DeactivateWeaponCollision(WeaponCollisionType);
+	}
+}
+
 void ABSCharacterPlayer::AttackFinished(const float ComboResetDelay)
 {
 	check(StateComp);

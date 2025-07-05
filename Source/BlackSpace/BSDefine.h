@@ -28,3 +28,10 @@ enum class EWeaponType : uint8
 	Polearm,
 	Bow
 };
+
+UENUM(BlueprintType)
+enum class EWeaponCollisionType : uint8
+{
+	First,
+	Second
+};

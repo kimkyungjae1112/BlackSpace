@@ -4,10 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Interface/BSCombatInterface.h"
 #include "BSCharacterBase.generated.h"
 
 UCLASS()
-class BLACKSPACE_API ABSCharacterBase : public ACharacter
+class BLACKSPACE_API ABSCharacterBase 
+	: public ACharacter
+	, public IBSCombatInterface
 {
 	GENERATED_BODY()
 
@@ -20,5 +23,10 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
+
+public:
+	/* IBSCombatInterface Implement */
+	virtual void ActivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType) {};
+	virtual void DeactivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType) {};
 
 };
