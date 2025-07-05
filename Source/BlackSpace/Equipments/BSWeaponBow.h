@@ -4,10 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Equipments/BSWeapon.h"
+#include "BSDefine.h"
 #include "Interface/BSBowInterface.h"
 #include "BSWeaponBow.generated.h"
 
 class UPoseableMeshComponent;
+class UBSWeaponCollisionComponent;
 
 UCLASS()
 class BLACKSPACE_API ABSWeaponBow 
@@ -21,10 +23,11 @@ protected:
 	FName StringBoneName = TEXT("bow_string");
 
 	UPROPERTY(VisibleAnywhere, Category = "Bow")
-	FVector CacheStringLocation;
+	FVector CacheStringLocation = FVector::ZeroVector;
 
+// Component
 protected:
-	UPROPERTY(VisibleAnywhere, Category = "Bow")
+	UPROPERTY(VisibleAnywhere, Category = "Equipment | Component")
 	TObjectPtr<UPoseableMeshComponent> BowMeshComp;
 
 public:
@@ -35,6 +38,9 @@ protected:
 
 public:
 	virtual void OnConstruction(const FTransform& Transform) override;
+
+public:
+	virtual void EquipItem() override;
 
 public:
 	virtual void PullString(const FVector& HandSocketLoc) override;

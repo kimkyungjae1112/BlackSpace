@@ -19,6 +19,9 @@ ABSWeapon::ABSWeapon()
 	CollisionComp = CreateDefaultSubobject<UBSWeaponCollisionComponent>(TEXT("Collision Component"));
 	CollisionComp->OnHitActor.AddUObject(this, &ThisClass::OnHitActor);
 
+	SecondaryCollisionComp = CreateDefaultSubobject<UBSWeaponCollisionComponent>(TEXT("Secondary Collision Component"));
+	SecondaryCollisionComp->OnHitActor.AddUObject(this, &ThisClass::OnHitActor);
+
 	StaminaCosts.Add(BSGameplayTag::Character_Attack_Light, 5.f);
 	StaminaCosts.Add(BSGameplayTag::Character_Attack_Heavy, 7.f);
 	StaminaCosts.Add(BSGameplayTag::Character_Attack_Running, 6.f);
@@ -32,10 +35,12 @@ void ABSWeapon::EquipItem()
 	CombatComp = GetOwner()->GetComponentByClass<UBSCombatComponent>();
 	if (CombatComp)
 	{
+		// 메인, 보조 무기가 모두 있을 때, 메인 무기 탈부착
 		if (CombatComp->CheckHasMainWeapon() && CombatComp->CheckHasSecondaryWeapon())
 		{
 			AttachToOwner(EquipSocket);
 		}
+		// 메인 무기가 없으면 메인 무기 부착
 		else if (CombatComp->CheckHasMainWeapon() == false)
 		{
 			AttachToOwner(EquipSocket);
@@ -46,6 +51,10 @@ void ABSWeapon::EquipItem()
 		CollisionComp->SetWeaponMesh(MeshComp);
 
 		CollisionComp->AddIgnoreActor(GetOwner());
+
+		SecondaryCollisionComp->SetWeaponMesh(MeshComp);
+
+		SecondaryCollisionComp->AddIgnoreActor(GetOwner());
 	}
 }
 
@@ -92,6 +101,32 @@ float ABSWeapon::GetStaminaCost(const FGameplayTag& InAttackType) const
 float ABSWeapon::GetAttackDamage() const
 {
 	return BaseDamage;
+}
+
+void ABSWeapon::ActivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType)
+{
+	switch (WeaponCollisionType)
+	{
+	case EWeaponCollisionType::First:
+		CollisionComp->TurnOnCollision();
+		break;
+	case EWeaponCollisionType::Second:
+		SecondaryCollisionComp->TurnOnCollision();
+		break;
+	}
+}
+
+void ABSWeapon::DeactivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType)
+{
+	switch (WeaponCollisionType)
+	{
+	case EWeaponCollisionType::First:
+		CollisionComp->TurnOffCollision();
+		break;
+	case EWeaponCollisionType::Second:
+		SecondaryCollisionComp->TurnOffCollision();
+		break;
+	}
 }
 
 void ABSWeapon::OnHitActor(const FHitResult& HitResult)

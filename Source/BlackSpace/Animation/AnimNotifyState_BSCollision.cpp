@@ -3,9 +3,7 @@
 
 #include "Animation/AnimNotifyState_BSCollision.h"
 
-#include "Components/BSWeaponCollisionComponent.h"
-#include "Components/BSCombatComponent.h"
-#include "Equipments/BSWeapon.h"
+#include "Interface/BSCombatInterface.h"
 
 UAnimNotifyState_BSCollision::UAnimNotifyState_BSCollision(const FObjectInitializer& ObjectInitializer)
 {
@@ -17,15 +15,9 @@ void UAnimNotifyState_BSCollision::NotifyBegin(USkeletalMeshComponent* MeshComp,
 
 	if (AActor* OwnerCharacter = MeshComp->GetOwner())
 	{
-		if (UBSCombatComponent* CombatComp = OwnerCharacter->GetComponentByClass<UBSCombatComponent>())
+		if (IBSCombatInterface* Interface = Cast<IBSCombatInterface>(OwnerCharacter))
 		{
-			if (ABSWeapon* Weapon = CombatComp->GetMainWeapon())
-			{
-				if (UBSWeaponCollisionComponent* CollisionComp = Weapon->GetCollision())
-				{
-					CollisionComp->TurnOnCollision();
-				}
-			}
+			Interface->ActivateWeaponCollision(WeaponCollisionType);
 		}
 	}
 }
@@ -36,15 +28,9 @@ void UAnimNotifyState_BSCollision::NotifyEnd(USkeletalMeshComponent* MeshComp, U
 
 	if (AActor* OwnerCharacter = MeshComp->GetOwner())
 	{
-		if (UBSCombatComponent* CombatComp = OwnerCharacter->GetComponentByClass<UBSCombatComponent>())
+		if (IBSCombatInterface* Interface = Cast<IBSCombatInterface>(OwnerCharacter))
 		{
-			if (ABSWeapon* Weapon = CombatComp->GetMainWeapon())
-			{
-				if (UBSWeaponCollisionComponent* CollisionComp = Weapon->GetCollision())
-				{
-					CollisionComp->TurnOffCollision();
-				}
-			}
+			Interface->DeactivateWeaponCollision(WeaponCollisionType);
 		}
 	}
 }

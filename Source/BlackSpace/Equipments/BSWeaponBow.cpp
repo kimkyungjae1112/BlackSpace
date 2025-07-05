@@ -5,6 +5,8 @@
 #include "Components/PoseableMeshComponent.h"
 #include "GameFramework/Character.h"
 
+#include "Components/BSWeaponCollisionComponent.h"
+
 ABSWeaponBow::ABSWeaponBow()
 {
 	BowMeshComp = CreateDefaultSubobject<UPoseableMeshComponent>(TEXT("Poseable Component"));
@@ -25,12 +27,23 @@ void ABSWeaponBow::OnConstruction(const FTransform& Transform)
 	if (SkeletalMeshAsset)
 	{
 		BowMeshComp->SetSkeletalMesh(SkeletalMeshAsset);
-		
+
 		SkeletalMeshComp->SetSkeletalMesh(nullptr);
 		SkeletalMeshComp->SetVisibility(false);
-		
+
 		MeshComp->SetStaticMesh(nullptr);
 		MeshComp->SetVisibility(false);
+	}
+}
+
+void ABSWeaponBow::EquipItem()
+{
+	Super::EquipItem();
+
+	if (ACharacter* Player = Cast<ACharacter>(GetOwner()))
+	{
+		CollisionComp->SetWeaponMesh(Player->GetMesh());
+		SecondaryCollisionComp->SetWeaponMesh(Player->GetMesh());
 	}
 }
 

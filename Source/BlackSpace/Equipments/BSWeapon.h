@@ -40,6 +40,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Equipment | Component")
 	TObjectPtr<UBSWeaponCollisionComponent> CollisionComp;
 
+	UPROPERTY(VisibleAnywhere, Category = "Equipment | Component")
+	TObjectPtr<UBSWeaponCollisionComponent> SecondaryCollisionComp;
+
 // Stat
 protected:
 	UPROPERTY(EditAnywhere, Category = "Equipment | Stamina")
@@ -66,6 +69,10 @@ public:
 
 	float GetStaminaCost(const FGameplayTag& InAttackType) const;
 	float GetAttackDamage() const;
+
+public:
+	void ActivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType);
+	void DeactivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType);
 
 protected:
 	void OnHitActor(const FHitResult& HitResult);
