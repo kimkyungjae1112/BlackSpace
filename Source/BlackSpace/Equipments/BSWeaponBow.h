@@ -18,17 +18,17 @@ class BLACKSPACE_API ABSWeaponBow
 {
 	GENERATED_BODY()
 
+// Component
+public:
+	UPROPERTY(VisibleAnywhere, Category = "Equipment | Component")
+	TObjectPtr<UPoseableMeshComponent> BowMeshComp;
+
 protected:
 	UPROPERTY(EditAnywhere, Category = "Bow")
 	FName StringBoneName = TEXT("bow_string");
 
 	UPROPERTY(VisibleAnywhere, Category = "Bow")
 	FVector CacheStringLocation = FVector::ZeroVector;
-
-// Component
-protected:
-	UPROPERTY(VisibleAnywhere, Category = "Equipment | Component")
-	TObjectPtr<UPoseableMeshComponent> BowMeshComp;
 
 public:
 	ABSWeaponBow();

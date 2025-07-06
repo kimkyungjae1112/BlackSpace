@@ -11,10 +11,11 @@
 #include "GameFramework/PlayerController.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Animation/AnimMontage.h"
+#include "Components/PoseableMeshComponent.h"
 
 #include "Data/BSInputData.h"
 #include "BSGameplayTag.h"
-#include "Equipments/BSWeapon.h"
+#include "Equipments/BSWeaponBow.h"
 #include "Components/BSAttributeComponent.h"
 #include "Components/BSInventoryComponent.h"
 #include "Components/BSCombatComponent.h"
@@ -25,6 +26,7 @@
 #include "Interface/BSBowInterface.h"
 #include "Player/BSPlayerController.h"
 #include "Animation/BSAnimInstance.h"
+#include "Projectiles/BSArrow.h"
 
 ABSCharacterPlayer::ABSCharacterPlayer()
 {
@@ -116,9 +118,8 @@ void ABSCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 		/* Bow */
 		EnhancedInputComponent->BindAction(InputData->IA_BowStringPull, ETriggerEvent::Started, this, &ThisClass::PullStringStart);
-		EnhancedInputComponent->BindAction(InputData->IA_BowStringPull, ETriggerEvent::Ongoing, this, &ThisClass::PullString);
 		EnhancedInputComponent->BindAction(InputData->IA_BowStringPull, ETriggerEvent::Canceled, this, &ThisClass::PullStringCancel);
-		EnhancedInputComponent->BindAction(InputData->IA_BowStringPull, ETriggerEvent::Completed, this, &ThisClass::PullStringComplete);
+		EnhancedInputComponent->BindAction(InputData->IA_BowStringPull, ETriggerEvent::Triggered, this, &ThisClass::PullStringComplete);
 	}
 }
 
@@ -458,6 +459,21 @@ bool ABSCharacterPlayer::CanPullingString()
 	return StateComp->IsCurrentStateEqualToAny(CheckTags) == false;
 }
 
+void ABSCharacterPlayer::PullString()
+{
+	check(CombatComp);
+
+	if (IBSBowInterface* BowInterface = Cast<IBSBowInterface>(CombatComp->GetMainWeapon()))
+	{
+		bAiming = true;
+
+		const FVector RightHandSocket = GetMesh()->GetSocketLocation(TEXT("RightHandSocket"));
+
+		BowInterface->PullString(RightHandSocket);
+	}
+}
+
+
 void ABSCharacterPlayer::PullStringStart()
 {
 	check(StateComp);
@@ -472,24 +488,8 @@ void ABSCharacterPlayer::PullStringStart()
 			ToggleCameraViewAdjust();
 
 			StateComp->SetState(BSGameplayTag::Character_State_Aiming);
-			
+
 			PlayAnimMontage(Weapon->GetMontageForTag(BSGameplayTag::Character_State_Aiming));
-		}
-	}
-}
-
-void ABSCharacterPlayer::PullString()
-{
-	check(CombatComp);
-
-	// 다른 상태에서 우클릭 시 활 시위 당겨지는 것 방지
-	if (CanPullingString())
-	{
-		if (IBSBowInterface* BowInterface = Cast<IBSBowInterface>(CombatComp->GetMainWeapon()))
-		{
-			const FVector RightHandSocket = GetMesh()->GetSocketLocation(TEXT("RightHandSocket"));
-
-			BowInterface->PullString(RightHandSocket);
 		}
 	}
 }
@@ -498,6 +498,11 @@ void ABSCharacterPlayer::PullStringCancel()
 {
 	check(StateComp);
 	check(CombatComp);
+
+	if (Arrow)
+	{
+		Arrow->Destroy();
+	}
 
 	if (ABSWeapon* Weapon = CombatComp->GetMainWeapon())
 	{
@@ -520,9 +525,29 @@ void ABSCharacterPlayer::PullStringCancel()
 
 void ABSCharacterPlayer::PullStringComplete()
 {
-	bAiming = true;
+	check(CombatComp);
 
-	// 화살 발사 준비 특수효과 추가..
+	if (CanPullingString())
+	{
+		PullString();
+
+		FActorSpawnParameters Param;
+		Param.Owner = this;
+		Param.Instigator = this;
+
+		Arrow = GetWorld()->SpawnActor<ABSArrow>(ArrowClass, GetActorTransform(), Param);
+		if (Arrow)
+		{
+			if (ABSWeaponBow* Bow = Cast<ABSWeaponBow>(CombatComp->GetMainWeapon()))
+			{
+				Arrow->AddIgnoreActor(this);
+				Arrow->AddIgnoreActor(Bow);
+
+				USceneComponent* DownCasting = Cast<USceneComponent>(Bow->BowMeshComp);
+				Arrow->AttachToComponent(DownCasting, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("ArrowSocket"));
+			}
+		}
+	}
 }
 
 void ABSCharacterPlayer::FireArrow(const FGameplayTag& AttackType)
@@ -530,6 +555,7 @@ void ABSCharacterPlayer::FireArrow(const FGameplayTag& AttackType)
 	check(StateComp);
 	check(AttributeComp);
 	check(CombatComp);
+	check(Arrow);
 
 	if (AttributeComp->CheckHasEnoughStamina(5.f) == false)
 	{
@@ -540,18 +566,31 @@ void ABSCharacterPlayer::FireArrow(const FGameplayTag& AttackType)
 	{
 		AttributeComp->ToggleStaminaRegen(false);
 		AttributeComp->DecreaseStamina(5.f);
-		
+
 		StateComp->ToggleMovementInput(false);
 		StateComp->SetState(AttackType);
+
 		PlayAnimMontage(Weapon->GetMontageForTag(AttackType));
 
+		Arrow->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		Arrow->Fire(CalculateViewDirection());
+
 		AttributeComp->ToggleStaminaRegen(true, 1.5f);
-	
+
 		if (IBSBowInterface* BowInterface = Cast<IBSBowInterface>(Weapon))
 		{
 			BowInterface->ReleaseString();
 		}
 	}
+}
+
+FVector ABSCharacterPlayer::CalculateViewDirection() const
+{
+	FRotator ControlRot = Controller->GetControlRotation();
+
+	FVector ControlDir = ControlRot.Vector();
+
+	return ControlDir;
 }
 
 void ABSCharacterPlayer::ToggleCameraViewAdjust()
