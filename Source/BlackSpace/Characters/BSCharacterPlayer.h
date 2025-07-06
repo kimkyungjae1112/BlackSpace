@@ -24,6 +24,7 @@ class UBSCombatComponent;
 class UBSStateComponent;
 class UBSPlayerStatusWidget;
 class ABSPlayerController;
+class ABSArrow;
 
 UCLASS()
 class BLACKSPACE_API ABSCharacterPlayer
@@ -110,6 +111,14 @@ protected:
 	int32 ComboCounter = 0;
 	FTimerHandle ComboResetTimerHandle;
 
+// Arrow
+protected:
+	UPROPERTY(EditAnywhere, Category = "Arrow")
+	TSubclassOf<ABSArrow> ArrowClass;
+
+	UPROPERTY(VisibleAnywhere, Category = "Arrow")
+	TObjectPtr<ABSArrow> Arrow;
+
 public:
 	ABSCharacterPlayer();
 
@@ -168,13 +177,14 @@ private:
 // 활 공격
 private:
 	bool CanPullingString();
+	void PullString();
 
 	void PullStringStart();
-	void PullString();
 	void PullStringCancel();
 	void PullStringComplete();
 
 	void FireArrow(const FGameplayTag& AttackType);
+	FVector CalculateViewDirection() const;
 
 	void ToggleCameraViewAdjust();
 	void ToggleAimingFlag(bool InIsAiming);
