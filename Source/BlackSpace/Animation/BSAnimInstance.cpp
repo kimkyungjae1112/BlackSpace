@@ -6,6 +6,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "KismetAnimationLibrary.h"
 
+#include "Components/BSStateComponent.h"
+
 void UBSAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
@@ -34,6 +36,22 @@ void UBSAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 		AimYaw = DeltaRot.Yaw;
 		AimPitch = DeltaRot.Pitch;
+	}
+}
+
+void UBSAnimInstance::AnimNotify_ResetMovementInput()
+{
+	if (UBSStateComponent* StateComp = GetOwningActor()->GetComponentByClass<UBSStateComponent>())
+	{
+		StateComp->ToggleMovementInput(true);
+	}
+}
+
+void UBSAnimInstance::AnimNotify_ResetState()
+{
+	if (UBSStateComponent* StateComp = GetOwningActor()->GetComponentByClass<UBSStateComponent>())
+	{
+		StateComp->ClearState();
 	}
 }
 

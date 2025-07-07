@@ -7,6 +7,8 @@
 #include "BSDefine.h"
 #include "BSCombatInterface.generated.h"
 
+struct FGameplayTag;
+
 UINTERFACE(MinimalAPI)
 class UBSCombatInterface : public UInterface
 {
@@ -22,4 +24,6 @@ public:
 	virtual void ActivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType) = 0;
 
 	virtual void DeactivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType) = 0;
+
+	virtual void PerformAttack(const FGameplayTag& AttackTypeTag, FOnMontageEnded& MontageEndedDelegate) {}
 };

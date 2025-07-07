@@ -3,6 +3,7 @@
 
 #include "Equipments/BSWeapon.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/Character.h"
 #include "Animation/AnimInstance.h"
 
@@ -87,6 +88,38 @@ void ABSWeapon::OnUpdateWeaponType()
 UAnimMontage* ABSWeapon::GetMontageForTag(const FGameplayTag& GroupTag, const int32 Index) const
 {
 	return MontageData->GetMontageForTag(GroupTag, Index);
+}
+
+UAnimMontage* ABSWeapon::GetRandomMontageForTag(const FGameplayTag& GroupTag) const
+{
+	return MontageData->GetRandomMontageForTag(GroupTag);
+}
+
+UAnimMontage* ABSWeapon::GetHitReactMontage(const AActor* Attacker) const
+{
+	const FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), Attacker->GetActorLocation());
+	const FRotator DeltaRotation = UKismetMathLibrary::NormalizedDeltaRotator(GetActorRotation(), LookAtRotation);
+	const float DeltaZ = DeltaRotation.Yaw;
+
+	if (UKismetMathLibrary::InRange_FloatFloat(DeltaZ, -45.f, 45.f))
+	{
+		return GetMontageForTag(BSGameplayTag::Character_Action_HitReaction, 0);
+	}
+	else if (UKismetMathLibrary::InRange_FloatFloat(DeltaZ, 45.f, 135.f))
+	{
+		return GetMontageForTag(BSGameplayTag::Character_Action_HitReaction, 1);
+	}
+	else if (UKismetMathLibrary::InRange_FloatFloat(DeltaZ, 135.f, 180.f)
+		|| UKismetMathLibrary::InRange_FloatFloat(DeltaZ, -180.f, -135.f))
+	{
+		return GetMontageForTag(BSGameplayTag::Character_Action_HitReaction, 2);
+	}
+	else if (UKismetMathLibrary::InRange_FloatFloat(DeltaZ, -135.f, -45.f))
+	{
+		return GetMontageForTag(BSGameplayTag::Character_Action_HitReaction, 3);
+	}
+
+	return nullptr;
 }
 
 float ABSWeapon::GetStaminaCost(const FGameplayTag& InAttackType) const

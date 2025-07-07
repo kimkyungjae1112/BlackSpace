@@ -4,11 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "Characters/BSCharacterBase.h"
+#include "BSDefine.h"
 #include "BSCharacterEnemy.generated.h"
 
 class UBSStateComponent;
 class UBSAttributeComponent;
+class UBSCombatComponent;
+class UBSRotationComponent;
+class UWidgetComponent;
 class USoundCue;
+class ATargetPoint;
+class ABSWeapon;
 
 UCLASS()
 class BLACKSPACE_API ABSCharacterEnemy : public ABSCharacterBase
@@ -22,28 +28,33 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Enemy | Component")
 	TObjectPtr<UBSAttributeComponent> AttributeComp;
 
+	UPROPERTY(VisibleAnywhere, Category = "Enemy | Component")
+	TObjectPtr<UBSCombatComponent> CombatComp;
+
+	UPROPERTY(VisibleAnywhere, Category = "Enemy | Component")
+	TObjectPtr<UBSRotationComponent> RotationComp;
+
+	UPROPERTY(VisibleAnywhere, Category = "Enemy | Component")
+	TObjectPtr<UWidgetComponent> HealthBarWidgetComp;
+
+// AI
 protected:
-	UPROPERTY(EditAnywhere, Category = "Enemy | Montage")
-	TObjectPtr<UAnimMontage> HitReactAnimFront;
+	UPROPERTY(EditAnywhere, Category = "Enemy | AI")
+	TArray<ATargetPoint*> PatrolPoints;
 
-	UPROPERTY(EditAnywhere, Category = "Enemy | Montage")
-	TObjectPtr<UAnimMontage> HitReactAnimBack;
+	UPROPERTY(VisibleAnywhere, Category = "Enemy | AI")
+	int32 PatrolIndex = 0;
 
-	UPROPERTY(EditAnywhere, Category = "Enemy | Montage")
-	TObjectPtr<UAnimMontage> HitReactAnimLeft;
-
-	UPROPERTY(EditAnywhere, Category = "Enemy | Montage")
-	TObjectPtr<UAnimMontage> HitReactAnimRight;
-
+// Weapon
 protected:
-	UPROPERTY(EditAnywhere, Category = "Effect")
-	TObjectPtr<USoundCue> ImpactSound;
-
-	UPROPERTY(EditAnywhere, Category = "Effect")
-	TObjectPtr<UParticleSystem> ImpactParticle;
+	UPROPERTY(EditAnywhere, Category = "Enemy | Weapon")
+	TSubclassOf<ABSWeapon> DefaultWeaponClass;
 
 public:
 	ABSCharacterEnemy();
+
+	FORCEINLINE ATargetPoint* GetPatrolPoint() const { return PatrolPoints.Num() >= (PatrolIndex + 1) ? PatrolPoints[PatrolIndex] : nullptr; }
+	FORCEINLINE void IncrementPatrolIndex() { PatrolIndex = (PatrolIndex + 1) % PatrolPoints.Num(); }
 
 protected:
 	virtual void BeginPlay() override;
@@ -53,10 +64,19 @@ public:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 public:
-	virtual void OnDeath();
+	/* IBSCombatInterface Implement */
+	virtual void ActivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType) override;
+	virtual void DeactivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType) override;
+	virtual void PerformAttack(const FGameplayTag& AttackTypeTag, FOnMontageEnded& MontageEndedDelegate) override;
+
+public:
+	void ToggleHealthBarVisibility(bool bVisibility) const;
 
 protected:
-	void ImpactEffect(const FVector& Location);
-	void HitReaction(const AActor* Attacker);
-	UAnimMontage* GetHitReactAnimation(const AActor* Attacker) const;
+	virtual void OnDeath() override;
+	virtual void ImpactEffect(const FVector& Location) override;
+	virtual void HitReaction(const AActor* Attacker) override;
+
+	void OnChangedAttribute(const EAttributeType& AttributeType, float InRatio);
+	void SetupAttribute();
 };

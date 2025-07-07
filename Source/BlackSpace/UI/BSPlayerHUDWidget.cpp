@@ -19,6 +19,7 @@ void UBSPlayerHUDWidget::NativeConstruct()
 		{
 			AttributeComp->OnChangedAttribute.AddUObject(this, &ThisClass::SetStatBarRatio);
 			AttributeComp->BroadcastAttributeChanged(EAttributeType::Stamina);
+			AttributeComp->BroadcastAttributeChanged(EAttributeType::Health);
 		}
 	}
 }
@@ -31,8 +32,7 @@ void UBSPlayerHUDWidget::SetStatBarRatio(const EAttributeType& AttributeType, fl
 		StaminaBarWidget->SetStatBarRatio(InRatio);
 		break;
 	case EAttributeType::Health:
-		break;
-	default:
+		HealthBarWidget->SetStatBarRatio(InRatio);
 		break;
 	}
 }

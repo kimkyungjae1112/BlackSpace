@@ -9,9 +9,13 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Animation/AnimMontage.h"
 #include "Components/PoseableMeshComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "Sound/SoundCue.h"
+#include "Engine/DamageEvents.h"
 
 #include "Data/BSInputData.h"
 #include "BSGameplayTag.h"
@@ -49,11 +53,17 @@ ABSCharacterPlayer::ABSCharacterPlayer()
 	CameraComp->bUsePawnControlRotation = false;
 
 	AttributeComp = CreateDefaultSubobject<UBSAttributeComponent>(TEXT("Attribute Component"));
-	InventoryComp = CreateDefaultSubobject<UBSInventoryComponent>(TEXT("Inventory Component"));
+	AttributeComp->OnDeath.AddUObject(this, &ThisClass::OnDeath);
+
 	CombatComp = CreateDefaultSubobject<UBSCombatComponent>(TEXT("Combat Component"));
+	CombatComp->OnChangedMainWeapon.AddUObject(this, &ThisClass::ChagnedWeapon);
+
 	StateComp = CreateDefaultSubobject<UBSStateComponent>(TEXT("State Component"));
 
-	CombatComp->OnChangedMainWeapon.AddUObject(this, &ThisClass::ChagnedWeapon);
+	InventoryComp = CreateDefaultSubobject<UBSInventoryComponent>(TEXT("Inventory Component"));
+
+
+	Tags.Add(TEXT("Player"));
 }
 
 void ABSCharacterPlayer::BeginPlay()
@@ -181,6 +191,70 @@ void ABSCharacterPlayer::AttackFinished(const float ComboResetDelay)
 
 	// ComboResetDelay 후에 콤보 시퀀스 완전 종료
 	GetWorld()->GetTimerManager().SetTimer(ComboResetTimerHandle, this, &ThisClass::ResetCombo, ComboResetDelay, false);
+}
+
+float ABSCharacterPlayer::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	if (AttributeComp)
+	{
+		AttributeComp->TakeDamageAmount(ActualDamage);
+	}
+
+	StateComp->SetState(BSGameplayTag::Character_State_Hit);
+	StateComp->ToggleMovementInput(false);
+
+	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
+	{
+		const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
+
+		FVector ShotDirection = PointDamageEvent->ShotDirection;
+		FVector ImpactPoint = PointDamageEvent->HitInfo.ImpactPoint;
+		FVector ImpactDirection = PointDamageEvent->HitInfo.ImpactNormal;
+		FVector HitLocation = PointDamageEvent->HitInfo.Location;
+
+		ImpactEffect(ImpactPoint);
+
+		HitReaction(EventInstigator->GetPawn());
+	}
+
+	return ActualDamage;
+}
+
+void ABSCharacterPlayer::OnDeath()
+{
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	GetMesh()->SetSimulatePhysics(true);
+}
+
+void ABSCharacterPlayer::ImpactEffect(const FVector& Location)
+{
+	if (ImpactSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, Location);
+	}
+
+	if (ImpactParticle)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, Location);
+	}
+}
+
+void ABSCharacterPlayer::HitReaction(const AActor* Attacker)
+{
+	check(CombatComp);
+
+	if (ABSWeapon* MainWeapon = CombatComp->GetMainWeapon())
+	{
+		if (UAnimMontage* HitReactAnimMontage = MainWeapon->GetHitReactMontage(Attacker))
+		{
+			PlayAnimMontage(HitReactAnimMontage);
+		}
+	}
 }
 
 bool ABSCharacterPlayer::IsMoving() const
@@ -370,6 +444,7 @@ bool ABSCharacterPlayer::CanPerformAttack(const FGameplayTag& AttackType)
 	FGameplayTagContainer CheckedTags;
 	CheckedTags.AddTag(BSGameplayTag::Character_State_Rolling);
 	CheckedTags.AddTag(BSGameplayTag::Character_State_GeneralAction);
+	CheckedTags.AddTag(BSGameplayTag::Character_State_Hit);
 	CheckedTags.AddTag(BSGameplayTag::Character_State_Death);
 
 	const float StaminaCost = CombatComp->GetMainWeapon()->GetStaminaCost(AttackType);

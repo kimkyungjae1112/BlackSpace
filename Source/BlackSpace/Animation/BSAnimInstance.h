@@ -62,6 +62,13 @@ public:
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 public:
+	UFUNCTION()
+	void AnimNotify_ResetMovementInput();
+
+	UFUNCTION()
+	void AnimNotify_ResetState();
+
+public:
 	/* IBSUpdateAnyTypeInterface Implement */
 	virtual void UpdateWeaponType(const EWeaponType& InWeaponType) override;
 
