@@ -24,6 +24,7 @@
 #include "Components/BSInventoryComponent.h"
 #include "Components/BSCombatComponent.h"
 #include "Components/BSStateComponent.h"
+#include "Components/BSRotationComponent.h"
 #include "UI/BSPlayerHUDWidget.h"
 #include "UI/BSPlayerStatusWidget.h"
 #include "Interface/BSInteractInterface.h"
@@ -62,6 +63,8 @@ ABSCharacterPlayer::ABSCharacterPlayer()
 
 	InventoryComp = CreateDefaultSubobject<UBSInventoryComponent>(TEXT("Inventory Component"));
 
+	RotationComp = CreateDefaultSubobject<UBSRotationComponent>(TEXT("Rotation Component"));
+	RotationComp->bOwnerIsPlayer = true;
 
 	Tags.Add(TEXT("Player"));
 }
@@ -279,7 +282,26 @@ bool ABSCharacterPlayer::IsMoving() const
 void ABSCharacterPlayer::Move(const FInputActionValue& Value)
 {
 	check(StateComp);
-	if (!StateComp->GetMovementInputEnabled()) return;
+	check(RotationComp);
+
+	if (RotationComp->GetIsActive())
+	{
+		FVector2D InputValue = Value.Get<FVector2D>();
+
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
+
+		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		const FVector FinalDiection = (ForwardDirection * InputValue.X) + (RightDirection * InputValue.Y);
+
+		RotationComp->SetRotationPlayer(FinalDiection);
+	}
+
+	if (!StateComp->GetMovementInputEnabled())
+	{
+		return;
+	}
 
 	FVector2D InputValue = Value.Get<FVector2D>();
 

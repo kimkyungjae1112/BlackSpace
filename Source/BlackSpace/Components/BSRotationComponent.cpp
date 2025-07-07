@@ -20,10 +20,27 @@ void UBSRotationComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (TargetActor == nullptr) return;
 	if (bShouldRotation == false) return;
 
-	const FRotator Rotation = UKismetMathLibrary::FindLookAtRotation(GetOwner()->GetActorLocation(), TargetActor->GetActorLocation());
-	GetOwner()->SetActorRotation(FRotator(0.f, Rotation.Yaw, 0.f));
+	if (bOwnerIsAI && TargetActor)
+	{
+		const FRotator Rotation = UKismetMathLibrary::FindLookAtRotation(GetOwner()->GetActorLocation(), TargetActor->GetActorLocation());
+		GetOwner()->SetActorRotation(FRotator(0.f, Rotation.Yaw, 0.f));
+	}
+}
+
+void UBSRotationComponent::SetRotationPlayer(const FVector& DesireDirection)
+{
+	if (bOwnerIsPlayer)
+	{
+		// 어떻게 부드럽게 회전시킬까
+
+		/*const FRotator CurrentRotation = GetOwner()->GetActorRotation();
+		const FRotator FinalRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, GetWorld()->GetDeltaSeconds(), 10.f);*/
+
+		const FRotator TargetRotation = DesireDirection.Rotation();
+
+		GetOwner()->SetActorRotation(FRotator(0.f, TargetRotation.Yaw, 0.f));
+	}
 }
 

@@ -22,6 +22,7 @@ class UBSAttributeComponent;
 class UBSInventoryComponent;
 class UBSCombatComponent;
 class UBSStateComponent;
+class UBSRotationComponent;
 class UBSPlayerStatusWidget;
 class ABSPlayerController;
 class ABSArrow;
@@ -69,6 +70,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
 	TObjectPtr<UBSStateComponent> StateComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
+	TObjectPtr<UBSRotationComponent> RotationComp;
 
 // UI
 protected:
