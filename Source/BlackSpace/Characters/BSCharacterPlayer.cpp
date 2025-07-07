@@ -222,6 +222,16 @@ float ABSCharacterPlayer::TakeDamage(float DamageAmount, FDamageEvent const& Dam
 	return ActualDamage;
 }
 
+bool ABSCharacterPlayer::IsDead() const
+{
+	check(StateComp);
+
+	FGameplayTagContainer CheckTags;
+	CheckTags.AddTag(BSGameplayTag::Character_State_Death);
+
+	return StateComp->IsCurrentStateEqualToAny(CheckTags);
+}
+
 void ABSCharacterPlayer::OnDeath()
 {
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);

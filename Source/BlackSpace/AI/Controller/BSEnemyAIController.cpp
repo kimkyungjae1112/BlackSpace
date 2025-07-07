@@ -3,11 +3,11 @@
 
 #include "AI/Controller/BSEnemyAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 #include "Perception/AIPerceptionComponent.h"
 
 #include "Characters/BSCharacterEnemy.h"
+#include "Characters/BSCharacterPlayer.h"
 #include "Components/BSRotationComponent.h"
 
 ABSEnemyAIController::ABSEnemyAIController()
@@ -40,12 +40,20 @@ void ABSEnemyAIController::UpdateTarget() const
 	TArray<AActor*> OutActors;
 	AIPerceptionComp->GetKnownPerceivedActors(nullptr, OutActors);
 
-	ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	ABSCharacterPlayer* PlayerCharacter = Cast<ABSCharacterPlayer>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 	
 	if (OutActors.Contains(PlayerCharacter))
 	{
-		SetTarget(PlayerCharacter);
-		ControlledEnemy->ToggleHealthBarVisibility(true);
+		if (!PlayerCharacter->IsDead())
+		{
+			SetTarget(PlayerCharacter);
+			ControlledEnemy->ToggleHealthBarVisibility(true);
+		}
+		else
+		{
+			SetTarget(nullptr);
+			ControlledEnemy->ToggleHealthBarVisibility(false);
+		}
 	}
 	else
 	{

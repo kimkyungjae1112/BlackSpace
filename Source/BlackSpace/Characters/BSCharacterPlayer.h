@@ -145,6 +145,7 @@ public:
 	void AttackFinished(const float ComboResetDelay);
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+	bool IsDead() const;
 
 // 피격
 protected:

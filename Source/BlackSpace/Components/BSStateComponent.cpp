@@ -42,6 +42,8 @@ void UBSStateComponent::ToggleMovementInput(bool bEnabled, float Duration)
 
 void UBSStateComponent::ClearState()
 {
+	if (CurrentState == BSGameplayTag::Character_State_Death) return;
+
 	CurrentState = FGameplayTag::EmptyTag;
 }
 
