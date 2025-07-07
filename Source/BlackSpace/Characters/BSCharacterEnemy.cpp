@@ -3,18 +3,34 @@
 
 #include "Characters/BSCharacterEnemy.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Components/CapsuleComponent.h"
-#include "Engine/DamageEvents.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/CapsuleComponent.h"
+#include "Components/WidgetComponent.h"
+#include "Engine/DamageEvents.h"
 #include "Sound/SoundCue.h"
+#include "Animation/AnimInstance.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Perception/AISenseConfig_Damage.h"
+#include "AIController.h"
+#include "BrainComponent.h"
 
 #include "Components/BSStateComponent.h"
 #include "Components/BSAttributeComponent.h"
+#include "Components/BSCombatComponent.h"
+#include "Components/BSRotationComponent.h"
+#include "Equipments/BSWeapon.h"
+#include "UI/BSStatBarWidget.h"
 #include "BSDefine.h"
+#include "BSGameplayTag.h"
 
 ABSCharacterEnemy::ABSCharacterEnemy()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	bUseControllerRotationYaw = false;
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationRoll = false;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
@@ -22,12 +38,35 @@ ABSCharacterEnemy::ABSCharacterEnemy()
 	StateComp = CreateDefaultSubobject<UBSStateComponent>(TEXT("State Component"));
 	
 	AttributeComp = CreateDefaultSubobject<UBSAttributeComponent>(TEXT("Attribute Component"));
+	AttributeComp->OnChangedAttribute.AddUObject(this, &ThisClass::OnChangedAttribute);
 	AttributeComp->OnDeath.AddUObject(this, &ThisClass::OnDeath);
+
+	CombatComp = CreateDefaultSubobject<UBSCombatComponent>(TEXT("Combat Component"));
+
+	RotationComp = CreateDefaultSubobject<UBSRotationComponent>(TEXT("Rotation Component"));
+
+	HealthBarWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("Widget Component"));
+	HealthBarWidgetComp->SetupAttachment(GetRootComponent());
+	HealthBarWidgetComp->SetRelativeLocation(FVector(0.f, 0.f, 100.f));
+	HealthBarWidgetComp->SetDrawSize(FVector2D(100.f, 5.f));
+	HealthBarWidgetComp->SetWidgetSpace(EWidgetSpace::Screen);
+	HealthBarWidgetComp->SetVisibility(false);
 }
 
 void ABSCharacterEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (DefaultWeaponClass)
+	{
+		FActorSpawnParameters Param;
+		Param.Owner = this;
+
+		ABSWeapon* Weapon = GetWorld()->SpawnActor<ABSWeapon>(DefaultWeaponClass, GetActorTransform(), Param);
+		Weapon->EquipItem();
+	}
+
+	SetupAttribute();
 }
 
 void ABSCharacterEnemy::Tick(float DeltaTime)
@@ -54,6 +93,9 @@ float ABSCharacterEnemy::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 		FVector ImpactDirection = PointDamageEvent->HitInfo.ImpactNormal;
 		FVector HitLocation = PointDamageEvent->HitInfo.Location;
 
+		// AI가 데미지를 인식할 수 있도록 알려줌.
+		UAISense_Damage::ReportDamageEvent(GetWorld(), this, EventInstigator->GetPawn(), ActualDamage, HitLocation, HitLocation);
+
 		ImpactEffect(ImpactPoint);
 
 		HitReaction(EventInstigator->GetPawn());
@@ -62,8 +104,61 @@ float ABSCharacterEnemy::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 	return ActualDamage;
 }
 
+void ABSCharacterEnemy::ActivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType)
+{
+	if (CombatComp)
+	{
+		CombatComp->GetMainWeapon()->ActivateWeaponCollision(WeaponCollisionType);
+	}
+}
+
+void ABSCharacterEnemy::DeactivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType)
+{
+	if (CombatComp)
+	{
+		CombatComp->GetMainWeapon()->DeactivateWeaponCollision(WeaponCollisionType);
+	}
+}
+
+void ABSCharacterEnemy::PerformAttack(const FGameplayTag& AttackTypeTag, FOnMontageEnded& MontageEndedDelegate)
+{
+	check(StateComp);
+	check(CombatComp);
+	check(AttributeComp);
+
+	if (const ABSWeapon* Weapon = CombatComp->GetMainWeapon())
+	{
+		StateComp->SetState(BSGameplayTag::Character_State_Attacking);
+		CombatComp->SetLastAttackType(AttackTypeTag);
+		AttributeComp->ToggleStaminaRegen(false);
+
+		if (UAnimMontage* Montage = Weapon->GetRandomMontageForTag(AttackTypeTag))
+		{
+			if (UAnimInstance* Anim = GetMesh()->GetAnimInstance())
+			{
+				Anim->Montage_Play(Montage);
+				Anim->Montage_SetEndDelegate(MontageEndedDelegate, Montage);
+			}
+		}
+
+		const float StaminaCost = Weapon->GetStaminaCost(AttackTypeTag);
+		AttributeComp->DecreaseStamina(StaminaCost);
+		AttributeComp->ToggleStaminaRegen(true);
+	}
+}
+
+void ABSCharacterEnemy::ToggleHealthBarVisibility(bool bVisibility) const
+{
+	HealthBarWidgetComp->SetVisibility(bVisibility);
+}
+
 void ABSCharacterEnemy::OnDeath()
 {
+	if (AAIController* AIController = Cast<AAIController>(GetController()))
+	{
+		AIController->GetBrainComponent()->StopLogic(TEXT("Death"));
+	}
+
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
@@ -86,35 +181,34 @@ void ABSCharacterEnemy::ImpactEffect(const FVector& Location)
 
 void ABSCharacterEnemy::HitReaction(const AActor* Attacker)
 {
-	if (UAnimMontage* HitReactAnimMontage = GetHitReactAnimation(Attacker))
+	check(CombatComp);
+
+	if (ABSWeapon* MainWeapon = CombatComp->GetMainWeapon())
 	{
-		PlayAnimMontage(HitReactAnimMontage);
+		if (UAnimMontage* HitReactAnimMontage = MainWeapon->GetHitReactMontage(Attacker))
+		{
+			PlayAnimMontage(HitReactAnimMontage);
+		}
 	}
 }
 
-UAnimMontage* ABSCharacterEnemy::GetHitReactAnimation(const AActor* Attacker) const
+void ABSCharacterEnemy::OnChangedAttribute(const EAttributeType& AttributeType, float InRatio)
 {
-	const FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), Attacker->GetActorLocation());
-	const FRotator DeltaRotation = UKismetMathLibrary::NormalizedDeltaRotator(GetActorRotation(), LookAtRotation);
-	const float DeltaZ = DeltaRotation.Yaw;
-
-	if (UKismetMathLibrary::InRange_FloatFloat(DeltaZ, -45.f, 45.f))
+	if (AttributeType == EAttributeType::Health)
 	{
-		return HitReactAnimFront;
+		if (UBSStatBarWidget* StatBarWidget = Cast<UBSStatBarWidget>(HealthBarWidgetComp->GetWidget()))
+		{
+			StatBarWidget->SetStatBarRatio(InRatio);
+		}
 	}
-	else if (UKismetMathLibrary::InRange_FloatFloat(DeltaZ, 45.f, 135.f))
-	{
-		return HitReactAnimLeft;
-	}
-	else if (UKismetMathLibrary::InRange_FloatFloat(DeltaZ, 135.f, 180.f)
-		|| UKismetMathLibrary::InRange_FloatFloat(DeltaZ, -180.f, -135.f))
-	{
-		return HitReactAnimBack;
-	}
-	else if (UKismetMathLibrary::InRange_FloatFloat(DeltaZ, -135.f, -45.f))
-	{
-		return HitReactAnimRight;
-	}
-
-	return nullptr;
 }
+
+void ABSCharacterEnemy::SetupAttribute()
+{
+	if (AttributeComp)
+	{
+		AttributeComp->BroadcastAttributeChanged(EAttributeType::Health);
+	}
+}
+
+

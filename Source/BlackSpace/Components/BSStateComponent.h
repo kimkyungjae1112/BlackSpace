@@ -3,8 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
+#include "BSGameplayTag.h"
 #include "GameplayTagContainer.h"
+#include "Components/ActorComponent.h"
 #include "BSStateComponent.generated.h"
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -33,7 +34,12 @@ public:
 public:
 	FORCEINLINE bool GetMovementInputEnabled() const { return bMovementInputEnabled; }
 	FORCEINLINE FGameplayTag GetCurrentState() const { return CurrentState; }
-	FORCEINLINE void SetState(const FGameplayTag& NewState) { CurrentState = NewState; }
+	FORCEINLINE void SetState(const FGameplayTag& NewState) 
+	{
+		if (CurrentState == BSGameplayTag::Character_State_Death) return;
+
+		CurrentState = NewState; 
+	}
 
 public:
 	void ToggleMovementInput(bool bEnabled, float Duration = 0.f);

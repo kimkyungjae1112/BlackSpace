@@ -144,6 +144,15 @@ public:
 
 	void AttackFinished(const float ComboResetDelay);
 
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+	bool IsDead() const;
+
+// 피격
+protected:
+	virtual void OnDeath() override;
+	virtual void ImpactEffect(const FVector& Location) override;
+	virtual void HitReaction(const AActor* Attacker) override;
+
 private:
 	bool IsMoving() const;
 

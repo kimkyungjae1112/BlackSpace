@@ -16,6 +16,9 @@ class BLACKSPACE_API UBSPlayerHUDWidget : public UUserWidget
 
 protected:
 	UPROPERTY(meta = (BindWidget), BlueprintReadWrite)
+	TObjectPtr<UBSStatBarWidget> HealthBarWidget;
+
+	UPROPERTY(meta = (BindWidget), BlueprintReadWrite)
 	TObjectPtr<UBSStatBarWidget> StaminaBarWidget;
 
 public:

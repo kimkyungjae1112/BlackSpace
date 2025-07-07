@@ -43,7 +43,10 @@ void UBSCombatComponent::SetWeapon(ABSWeapon* NewWeapon)
 	MainWeapon = NewWeapon;
 	MainWeapon->OnUpdateWeaponType();
 
-	OnChangedMainWeapon.Broadcast(MainWeapon->GetInventoryInfo());
+	if (GetOwner()->ActorHasTag(TEXT("Player")))
+	{
+		OnChangedMainWeapon.Broadcast(MainWeapon->GetInventoryInfo());
+	}
 }
 
 void UBSCombatComponent::SetSecondaryWeapon(ABSWeapon* NewWeapon)
@@ -59,7 +62,10 @@ void UBSCombatComponent::SetSecondaryWeapon(ABSWeapon* NewWeapon)
 
 	SecondaryWeapon = NewWeapon;
 
-	OnChangedSecondaryWeapon.Broadcast(SecondaryWeapon->GetInventoryInfo());
+	if (GetOwner()->ActorHasTag(TEXT("Player")))
+	{
+		OnChangedSecondaryWeapon.Broadcast(SecondaryWeapon->GetInventoryInfo());
+	}
 }
 
 void UBSCombatComponent::SetUnequipMainWeapon()
@@ -76,7 +82,10 @@ void UBSCombatComponent::SetUnequipMainWeapon()
 
 	bCombatEnabled = false;
 
-	OnChangedMainWeapon.Broadcast(FInventorySlot());
+	if (GetOwner()->ActorHasTag(TEXT("Player")))
+	{
+		OnChangedMainWeapon.Broadcast(FInventorySlot());
+	}
 }
 
 void UBSCombatComponent::SetUnequipSecondaryWeapon()
@@ -91,7 +100,10 @@ void UBSCombatComponent::SetUnequipSecondaryWeapon()
 
 	bHasSecondaryWeapon = false;
 
-	OnChangedSecondaryWeapon.Broadcast(FInventorySlot());
+	if (GetOwner()->ActorHasTag(TEXT("Player")))
+	{
+		OnChangedSecondaryWeapon.Broadcast(FInventorySlot());
+	}
 }
 
 void UBSCombatComponent::ChangeMainWeapon(ABSWeapon* NewWeapon)
@@ -106,5 +118,8 @@ void UBSCombatComponent::ChangeMainWeapon(ABSWeapon* NewWeapon)
 	MainWeapon = NewWeapon;
 	MainWeapon->OnUpdateWeaponType();
 
-	OnChangedMainWeapon.Broadcast(MainWeapon->GetInventoryInfo());
+	if (GetOwner()->ActorHasTag(TEXT("Player")))
+	{
+		OnChangedMainWeapon.Broadcast(MainWeapon->GetInventoryInfo());
+	}
 }

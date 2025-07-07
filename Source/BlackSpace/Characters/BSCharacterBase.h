@@ -7,12 +7,21 @@
 #include "Interface/BSCombatInterface.h"
 #include "BSCharacterBase.generated.h"
 
+class USoundCue;
+
 UCLASS()
 class BLACKSPACE_API ABSCharacterBase 
 	: public ACharacter
 	, public IBSCombatInterface
 {
 	GENERATED_BODY()
+
+protected:
+	UPROPERTY(EditAnywhere, Category = "Effect")
+	TObjectPtr<USoundCue> ImpactSound;
+
+	UPROPERTY(EditAnywhere, Category = "Effect")
+	TObjectPtr<UParticleSystem> ImpactParticle;
 
 public:
 	ABSCharacterBase();
@@ -23,10 +32,14 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
-
 public:
 	/* IBSCombatInterface Implement */
 	virtual void ActivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType) {};
 	virtual void DeactivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType) {};
+
+protected:
+	virtual void OnDeath() {};
+	virtual void ImpactEffect(const FVector& Location) {};
+	virtual void HitReaction(const AActor* Attacker) {};
 
 };
