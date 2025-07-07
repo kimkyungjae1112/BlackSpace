@@ -44,6 +44,7 @@ ABSCharacterEnemy::ABSCharacterEnemy()
 	CombatComp = CreateDefaultSubobject<UBSCombatComponent>(TEXT("Combat Component"));
 
 	RotationComp = CreateDefaultSubobject<UBSRotationComponent>(TEXT("Rotation Component"));
+	RotationComp->bOwnerIsAI = true;
 
 	HealthBarWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("Widget Component"));
 	HealthBarWidgetComp->SetupAttachment(GetRootComponent());
