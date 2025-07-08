@@ -51,4 +51,6 @@ public:
 	virtual void UnequipItem();
 
 	virtual void AttachToOwner(FName SocketName);
+
+	virtual void DetachToOwner();
 };

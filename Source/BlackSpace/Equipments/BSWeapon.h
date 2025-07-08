@@ -18,7 +18,7 @@ UCLASS()
 class BLACKSPACE_API ABSWeapon : public ABSEquipmentBase
 {
 	GENERATED_BODY()
-	
+
 protected:
 	UPROPERTY(EditAnywhere, Category = "Equipment | Socket")
 	FName EquipSocket;
@@ -32,7 +32,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Equipment | Type")
 	EWeaponType WeaponType = EWeaponType::Sword;
 
-// Component
+	// Component
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "Equipment | Component")
 	TObjectPtr<UBSCombatComponent> CombatComp;
@@ -43,7 +43,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Equipment | Component")
 	TObjectPtr<UBSWeaponCollisionComponent> SecondaryCollisionComp;
 
-// Stat
+	// Stat
 protected:
 	UPROPERTY(EditAnywhere, Category = "Equipment | Stamina")
 	TMap<FGameplayTag, float> StaminaCosts;
@@ -54,6 +54,7 @@ protected:
 public:
 	ABSWeapon();
 
+	FORCEINLINE FName GetEquipSocket() const { return EquipSocket; }
 	FORCEINLINE UBSWeaponCollisionComponent* GetCollision() const { return CollisionComp; }
 	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
 

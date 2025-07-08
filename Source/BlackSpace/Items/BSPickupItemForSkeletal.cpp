@@ -7,6 +7,7 @@
 
 #include "Equipments/BSEquipmentBase.h"
 #include "Components/BSInventoryComponent.h"
+#include "Components/BSCombatComponent.h"
 #include "BSDefine.h"
 
 ABSPickupItemForSkeletal::ABSPickupItemForSkeletal()
@@ -47,9 +48,26 @@ void ABSPickupItemForSkeletal::Interact(AActor* Interactor)
 		{
 			if (ACharacter* Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
 			{
-				if (UBSInventoryComponent* InventoryComp = Player->GetComponentByClass<UBSInventoryComponent>())
+				if (UBSCombatComponent* CombatComp = Player->GetComponentByClass<UBSCombatComponent>())
 				{
-					InventoryComp->AddToSlot(CDO->GetInventoryInfo());
+					if (CombatComp->GetMainWeapon() == nullptr || CombatComp->GetSecondaryWeapon() == nullptr)
+					{
+						FActorSpawnParameters Param;
+						Param.Owner = Player;
+
+						ABSEquipmentBase* Weapon = GetWorld()->SpawnActor<ABSEquipmentBase>(EquipmentClass, Player->GetActorTransform(), Param);
+						if (Weapon)
+						{
+							Weapon->EquipItem();
+						}
+					}
+					else
+					{
+						if (UBSInventoryComponent* InventoryComp = Player->GetComponentByClass<UBSInventoryComponent>())
+						{
+							InventoryComp->AddToSlot(CDO->GetInventoryInfo());
+						}
+					}
 				}
 			}
 		}

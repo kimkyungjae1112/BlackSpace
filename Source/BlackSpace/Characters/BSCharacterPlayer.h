@@ -159,6 +159,7 @@ protected:
 
 private:
 	bool IsMoving() const;
+	bool CanChangeWeapon() const;
 
 private:
 	void Move(const FInputActionValue& Value);
@@ -168,6 +169,7 @@ private:
 	void ToggleInventory();
 	void TogglePlayerStatus();
 	void Interaction();
+	void ChangeWeapon();
 
 	// 공격
 	void LightAttack();

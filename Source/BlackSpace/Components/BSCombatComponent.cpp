@@ -61,10 +61,37 @@ void UBSCombatComponent::SetSecondaryWeapon(ABSWeapon* NewWeapon)
 	bHasSecondaryWeapon = true;
 
 	SecondaryWeapon = NewWeapon;
+	SecondaryWeapon->SetActorHiddenInGame(true);
 
 	if (GetOwner()->ActorHasTag(TEXT("Player")))
 	{
 		OnChangedSecondaryWeapon.Broadcast(SecondaryWeapon->GetInventoryInfo());
+	}
+}
+
+void UBSCombatComponent::ChangeWeapon()
+{
+	if (CanChangeWeapon())
+	{
+		MainWeapon->SetActorHiddenInGame(true);
+		SecondaryWeapon->SetActorHiddenInGame(false);
+
+		ABSWeapon* TempWeapon = MainWeapon;
+
+		MainWeapon = SecondaryWeapon;
+		MainWeapon->AttachToOwner(MainWeapon->GetEquipSocket());
+		MainWeapon->OnUpdateWeaponType();
+		if (GetOwner()->ActorHasTag(TEXT("Player")))
+		{
+			OnChangedMainWeapon.Broadcast(MainWeapon->GetInventoryInfo());
+		}
+
+		SecondaryWeapon = TempWeapon;
+		SecondaryWeapon->DetachToOwner();
+		if (GetOwner()->ActorHasTag(TEXT("Player")))
+		{
+			OnChangedSecondaryWeapon.Broadcast(SecondaryWeapon->GetInventoryInfo());
+		}
 	}
 }
 
