@@ -64,3 +64,8 @@ void ABSEquipmentBase::AttachToOwner(FName SocketName)
 		}
 	}
 }
+
+void ABSEquipmentBase::DetachToOwner()
+{
+	DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+}

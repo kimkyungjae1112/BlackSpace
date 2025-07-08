@@ -116,13 +116,12 @@ void ABSCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	{
 		EnhancedInputComponent->BindAction(InputData->IA_Move, ETriggerEvent::Triggered, this, &ThisClass::Move);
 		EnhancedInputComponent->BindAction(InputData->IA_Look, ETriggerEvent::Triggered, this, &ThisClass::Look);
-		EnhancedInputComponent->BindAction(InputData->IA_Jump, ETriggerEvent::Started, this, &ACharacter::Jump);
-		EnhancedInputComponent->BindAction(InputData->IA_Jump, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 		EnhancedInputComponent->BindAction(InputData->IA_Sprint, ETriggerEvent::Triggered, this, &ThisClass::Sprint);
 		EnhancedInputComponent->BindAction(InputData->IA_Sprint, ETriggerEvent::Completed, this, &ThisClass::StopSprint);
 		EnhancedInputComponent->BindAction(InputData->IA_ToggleInventory, ETriggerEvent::Started, this, &ThisClass::ToggleInventory);
 		EnhancedInputComponent->BindAction(InputData->IA_TogglePlayerStatus, ETriggerEvent::Started, this, &ThisClass::TogglePlayerStatus);
 		EnhancedInputComponent->BindAction(InputData->IA_Interact, ETriggerEvent::Started, this, &ThisClass::Interaction);
+		EnhancedInputComponent->BindAction(InputData->IA_ChangeWeapon, ETriggerEvent::Started, this, &ThisClass::ChangeWeapon);
 
 		/* Sword */
 		EnhancedInputComponent->BindAction(InputData->IA_SwordAttack, ETriggerEvent::Canceled, this, &ThisClass::LightAttack);
@@ -279,6 +278,21 @@ bool ABSCharacterPlayer::IsMoving() const
 	return false;
 }
 
+bool ABSCharacterPlayer::CanChangeWeapon() const
+{
+	check(StateComp);
+
+	FGameplayTagContainer CheckTags;
+	CheckTags.AddTag(BSGameplayTag::Character_State_Attacking);
+	CheckTags.AddTag(BSGameplayTag::Character_State_Rolling);
+	CheckTags.AddTag(BSGameplayTag::Character_State_GeneralAction);
+	CheckTags.AddTag(BSGameplayTag::Character_State_Hit);
+	CheckTags.AddTag(BSGameplayTag::Character_State_Aiming);
+	CheckTags.AddTag(BSGameplayTag::Character_State_Death);
+
+	return StateComp->IsCurrentStateEqualToAny(CheckTags) == false;
+}
+
 void ABSCharacterPlayer::Move(const FInputActionValue& Value)
 {
 	check(StateComp);
@@ -418,6 +432,22 @@ void ABSCharacterPlayer::Interaction()
 		}
 	}
 
+}
+
+void ABSCharacterPlayer::ChangeWeapon()
+{
+	check(CombatComp);
+	check(StateComp);
+
+	if (CombatComp->CanChangeWeapon() && CanChangeWeapon())
+	{
+		if (UAnimMontage* UnequipMontage = CombatComp->GetMainWeapon()->GetMontageForTag(BSGameplayTag::Character_Action_Unequip))
+		{
+			StateComp->SetState(BSGameplayTag::Character_State_GeneralAction);
+
+			PlayAnimMontage(UnequipMontage);
+		}
+	}
 }
 
 void ABSCharacterPlayer::LightAttack()

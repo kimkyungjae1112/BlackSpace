@@ -57,6 +57,8 @@ public:
 	FORCEINLINE FGameplayTag GetLastAttackType() const { return LastAttackType; }
 	FORCEINLINE void SetLastAttackType(const FGameplayTag& NewAttackType) { LastAttackType = NewAttackType; }
 
+	FORCEINLINE bool CanChangeWeapon() const { return bHasMainWeapon && bHasSecondaryWeapon; }
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -66,6 +68,7 @@ public:
 public:
 	void SetWeapon(ABSWeapon* NewWeapon);
 	void SetSecondaryWeapon(ABSWeapon* NewWeapon);
+	void ChangeWeapon();
 
 	void SetUnequipMainWeapon();
 	void SetUnequipSecondaryWeapon();
