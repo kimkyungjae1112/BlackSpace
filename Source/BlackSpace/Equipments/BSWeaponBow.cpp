@@ -9,8 +9,12 @@
 
 ABSWeaponBow::ABSWeaponBow()
 {
-	BowMeshComp = CreateDefaultSubobject<UPoseableMeshComponent>(TEXT("Poseable Component"));
-	BowMeshComp->SetupAttachment(RootComp);
+	if (BowMeshComp = CreateDefaultSubobject<UPoseableMeshComponent>(TEXT("Poseable Component")))
+	{
+		MeshComp->DestroyComponent();
+		MeshComp = BowMeshComp;
+		RootComponent = MeshComp;
+	}
 }
 
 void ABSWeaponBow::BeginPlay()
@@ -18,22 +22,6 @@ void ABSWeaponBow::BeginPlay()
 	Super::BeginPlay();
 
 	CacheStringLocation = BowMeshComp->GetBoneLocationByName(StringBoneName, EBoneSpaces::ComponentSpace);
-}
-
-void ABSWeaponBow::OnConstruction(const FTransform& Transform)
-{
-	Super::OnConstruction(Transform);
-
-	if (SkeletalMeshAsset)
-	{
-		BowMeshComp->SetSkeletalMesh(SkeletalMeshAsset);
-
-		SkeletalMeshComp->SetSkeletalMesh(nullptr);
-		SkeletalMeshComp->SetVisibility(false);
-
-		MeshComp->SetStaticMesh(nullptr);
-		MeshComp->SetVisibility(false);
-	}
 }
 
 void ABSWeaponBow::EquipItem()
