@@ -17,13 +17,7 @@ public:
 	TObjectPtr<UStaticMesh> MeshAsset;
 
 	UPROPERTY(VisibleAnywhere, Category = "Equipment | Mesh")
-	TObjectPtr<UStaticMeshComponent> MeshComp;
-
-	UPROPERTY(EditAnywhere, Category = "Equipment | Mesh")
-	TObjectPtr<USkeletalMesh> SkeletalMeshAsset;
-
-	UPROPERTY(VisibleAnywhere, Category = "Equipment | Mesh")
-	TObjectPtr<USkeletalMeshComponent> SkeletalMeshComp;
+	TObjectPtr<UMeshComponent> MeshComp;
 
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "Equipment")

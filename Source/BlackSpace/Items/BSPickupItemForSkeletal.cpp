@@ -30,14 +30,14 @@ void ABSPickupItemForSkeletal::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 	
-	if (EquipmentClass)
+	/*if (EquipmentClass)
 	{
 		if (ABSEquipmentBase* CDO = EquipmentClass->GetDefaultObject<ABSEquipmentBase>())
 		{
 			MeshComp->SetSkeletalMesh(CDO->SkeletalMeshAsset);
 			MeshComp->SetSimulatePhysics(true);
 		}
-	}
+	}*/
 }
 
 void ABSPickupItemForSkeletal::Interact(AActor* Interactor)

@@ -28,7 +28,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Equipment | Montage")
 	TObjectPtr<UBSMontageActionData> MontageData;
-
+	
 	UPROPERTY(EditAnywhere, Category = "Equipment | Type")
 	EWeaponType WeaponType = EWeaponType::Sword;
 

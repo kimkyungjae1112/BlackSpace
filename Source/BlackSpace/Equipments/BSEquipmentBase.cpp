@@ -8,18 +8,9 @@ ABSEquipmentBase::ABSEquipmentBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	RootComp = CreateDefaultSubobject<USceneComponent>(TEXT("Root Component"));
-	SetRootComponent(RootComp);
-
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh Component"));
-	MeshComp->SetupAttachment(RootComp);
+	SetRootComponent(MeshComp);
 	MeshComp->SetCollisionProfileName(TEXT("NoCollision"));
-	MeshComp->SetVisibility(false);
-
-	SkeletalMeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Skeletal Mesh Component"));
-	SkeletalMeshComp->SetupAttachment(RootComp);
-	SkeletalMeshComp->SetCollisionProfileName(TEXT("NoCollision"));
-	SkeletalMeshComp->SetVisibility(false);
 }
 
 void ABSEquipmentBase::BeginPlay()
@@ -32,17 +23,9 @@ void ABSEquipmentBase::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (MeshAsset)
+	if (UStaticMeshComponent* StaticMeshComp = Cast<UStaticMeshComponent>(MeshComp))
 	{
-		MeshComp->SetStaticMesh(MeshAsset);
-		MeshComp->SetVisibility(true);
-		SkeletalMeshComp->SetVisibility(false);
-	}
-	else if (SkeletalMeshAsset)
-	{
-		SkeletalMeshComp->SetSkeletalMesh(SkeletalMeshAsset);
-		SkeletalMeshComp->SetVisibility(true);
-		MeshComp->SetVisibility(false);
+		StaticMeshComp->SetStaticMesh(MeshAsset);
 	}
 }
 

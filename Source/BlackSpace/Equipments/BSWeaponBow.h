@@ -37,9 +37,6 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	virtual void OnConstruction(const FTransform& Transform) override;
-
-public:
 	virtual void EquipItem() override;
 
 public:
