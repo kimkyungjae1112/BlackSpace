@@ -15,6 +15,11 @@ ABSEnemyAIController::ABSEnemyAIController()
 	AIPerceptionComp = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("Perception Component"));
 }
 
+bool ABSEnemyAIController::IsDetectedPlayer() const
+{
+	return (Blackboard->GetValueAsObject(TEXT("Target")) != nullptr) ? true : false;
+}
+
 void ABSEnemyAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);

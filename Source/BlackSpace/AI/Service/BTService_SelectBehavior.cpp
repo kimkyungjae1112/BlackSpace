@@ -47,7 +47,11 @@ void UBTService_SelectBehavior::UpdateBehavior(UBlackboardComponent* BlackboardC
 	UBSStateComponent* StateComp = ControlledEnemy->GetComponentByClass<UBSStateComponent>();
 	check(StateComp);
 
-	if (StateComp->IsCurrentStateEqualToIt(BSGameplayTag::Character_State_Parried))
+	FGameplayTagContainer CheckTags;
+	CheckTags.AddTag(BSGameplayTag::Character_State_Parried);
+	CheckTags.AddTag(BSGameplayTag::Character_State_BackAttacked);
+
+	if (StateComp->IsCurrentStateEqualToAny(CheckTags))
 	{
 		SetBehaviorKey(BlackboardComp, EAIBehavior::Stunned);
 	}

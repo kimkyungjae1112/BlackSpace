@@ -31,6 +31,8 @@
 #include "Interface/BSInteractInterface.h"
 #include "Interface/BSBowInterface.h"
 #include "Interface/BSUpdateAnyTypeInterface.h"
+#include "Interface/BSAIControllerInterface.h"
+#include "Interface/BSEnemyInterface.h"
 #include "Player/BSPlayerController.h"
 #include "Animation/BSAnimInstance.h"
 #include "Projectiles/BSArrow.h"
@@ -93,8 +95,35 @@ void ABSCharacterPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	/*GEngine->AddOnScreenDebugMessage(0, 1.5f, FColor::Cyan, FString::Printf(TEXT("Stamina : %f"), AttributeComp->GetBaseStamina()));
-	GEngine->AddOnScreenDebugMessage(1, 1.5f, FColor::Cyan, FString::Printf(TEXT("MaxWalkSpeed : %f"), GetCharacterMovement()->MaxWalkSpeed));*/
+	if (CanDetectForBackAttack())
+	{
+		FHitResult HitResult;
+		DetectForBackAttackTarget(HitResult);
+
+		BackAttackTarget = Cast<APawn>(HitResult.GetActor());
+		if (BackAttackTarget)
+		{
+			if (IBSAIControllerInterface* AIInterface = Cast<IBSAIControllerInterface>(BackAttackTarget->GetController()))
+			{
+				if (AIInterface->IsDetectedPlayer() == false)
+				{
+					if (IBSEnemyInterface* EnemyInterface = Cast<IBSEnemyInterface>(BackAttackTarget))
+					{
+						bBackAttack = true;
+						EnemyInterface->ToggleBackAttackWidgetVisibility(true);
+					}
+				}
+				else
+				{
+					if (IBSEnemyInterface* EnemyInterface = Cast<IBSEnemyInterface>(BackAttackTarget))
+					{
+						bBackAttack = false;
+						EnemyInterface->ToggleBackAttackWidgetVisibility(false);
+					}
+				}
+			}
+		}
+	}
 }
 
 void ABSCharacterPlayer::NotifyControllerChanged()
@@ -410,6 +439,31 @@ bool ABSCharacterPlayer::CanParrying() const
 	return bFacingEnemy && bParryEnabled && CanBlockingStance();
 }
 
+bool ABSCharacterPlayer::CanDetectForBackAttack() const
+{
+	check(StateComp);
+	check(CombatComp);
+
+	if (CombatComp->GetMainWeapon() == nullptr)
+	{
+		return false;
+	}
+
+	FGameplayTagContainer CheckTags;
+	CheckTags.AddTag(BSGameplayTag::Character_State_Aiming);
+	CheckTags.AddTag(BSGameplayTag::Character_State_Hit);
+	CheckTags.AddTag(BSGameplayTag::Character_State_Death);
+	CheckTags.AddTag(BSGameplayTag::Character_State_Rolling);
+	CheckTags.AddTag(BSGameplayTag::Character_State_Parrying);
+
+	return StateComp->IsCurrentStateEqualToAny(CheckTags) == false;
+}
+
+bool ABSCharacterPlayer::CanBackAttack() const
+{
+	return bBackAttack && CanDetectForBackAttack();
+}
+
 void ABSCharacterPlayer::Move(const FInputActionValue& Value)
 {
 	check(StateComp);
@@ -706,6 +760,10 @@ FGameplayTag ABSCharacterPlayer::GetAttackPerform() const
 	{
 		return BSGameplayTag::Character_Attack_Fire;
 	}
+	else if (bBackAttack)
+	{
+		return BSGameplayTag::Character_Attack_BackAttack;
+	}
 	return BSGameplayTag::Character_Attack_Light;
 }
 
@@ -780,6 +838,14 @@ void ABSCharacterPlayer::DoAttack(const FGameplayTag& AttackType)
 		}
 
 		PlayAnimMontage(Montage);
+		if (CanBackAttack())
+		{
+			if (IBSEnemyInterface* EnemyInterface = Cast<IBSEnemyInterface>(BackAttackTarget))
+			{
+				EnemyInterface->ToggleBackAttackWidgetVisibility(false);
+				EnemyInterface->BackAttacked(Weapon->GetMontageForTag(BSGameplayTag::Character_Action_BackAttackHit));
+			}
+		}
 
 		const float StaminaCost = Weapon->GetStaminaCost(AttackType);
 
@@ -979,6 +1045,19 @@ void ABSCharacterPlayer::ToggleAimingFlag(bool InIsAiming)
 	{
 		Anim->bIsAiming = bProgressAiming;
 	}
+}
+
+bool ABSCharacterPlayer::DetectForBackAttackTarget(FHitResult& OutResult)
+{
+	const FVector Start = GetActorLocation();
+	const FVector End = Start + GetActorForwardVector() * 500.f;
+	FCollisionObjectQueryParams TraceParam;
+	TraceParam.AddObjectTypesToQuery(ECollisionChannel::ECC_Pawn);
+
+	FCollisionQueryParams IgnoreParam;
+	IgnoreParam.AddIgnoredActor(this);
+
+	return GetWorld()->LineTraceSingleByObjectType(OutResult, Start, End, TraceParam, IgnoreParam);
 }
 
 void ABSCharacterPlayer::ChagnedWeapon(const FInventorySlot&)

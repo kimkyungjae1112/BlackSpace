@@ -110,11 +110,17 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Stat")
 	bool bProgressAiming = false;
 
+	// 적과 마주보고 있는지 검사하는 플래그
 	UPROPERTY(EditAnywhere, Category = "Stat")
 	bool bFacingEnemy = false;
 
+	// 현재 패링할 수 있는 상태인지 검사하는 플래그
 	UPROPERTY(EditAnywhere, Category = "Stat")
 	bool bParryEnabled = false;
+
+	// 상대방을 백어택 할 수 있는지 검사하는 플래그
+	UPROPERTY(EditAnywhere, Category = "Stat")
+	bool bBackAttack = false;
 
 // Combo
 protected:
@@ -136,6 +142,10 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "Arrow")
 	TObjectPtr<ABSArrow> Arrow;
+
+protected:
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<APawn> BackAttackTarget;
 
 public:
 	ABSCharacterPlayer();
@@ -179,6 +189,8 @@ private:
 	bool CanBlockingStance() const;
 	bool CanAttackBlocking() const;
 	bool CanParrying() const;
+	bool CanDetectForBackAttack() const;
+	bool CanBackAttack() const;
 
 private:
 	void Move(const FInputActionValue& Value);
@@ -229,6 +241,10 @@ private:
 
 	void ToggleCameraViewAdjust();
 	void ToggleAimingFlag(bool InIsAiming);
+
+// 급습 공격
+private:
+	bool DetectForBackAttackTarget(FHitResult& OutResult);
 
 // Input 변경
 private:

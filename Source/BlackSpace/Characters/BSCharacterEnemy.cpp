@@ -52,6 +52,12 @@ ABSCharacterEnemy::ABSCharacterEnemy()
 	HealthBarWidgetComp->SetDrawSize(FVector2D(100.f, 5.f));
 	HealthBarWidgetComp->SetWidgetSpace(EWidgetSpace::Screen);
 	HealthBarWidgetComp->SetVisibility(false);
+
+	BackAttackWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("BackAttack Widget Component"));
+	BackAttackWidgetComp->SetupAttachment(GetRootComponent());
+	BackAttackWidgetComp->SetDrawSize(FVector2D(30.f, 30.f));
+	BackAttackWidgetComp->SetWidgetSpace(EWidgetSpace::Screen);
+	BackAttackWidgetComp->SetVisibility(false);
 }
 
 void ABSCharacterEnemy::BeginPlay()
@@ -173,6 +179,32 @@ void ABSCharacterEnemy::Parried()
 	}
 }
 
+void ABSCharacterEnemy::ToggleBackAttackWidgetVisibility(const bool bShouldBackAttack)
+{
+	BackAttackWidgetComp->SetVisibility(bShouldBackAttack);
+}
+
+void ABSCharacterEnemy::BackAttacked(UAnimMontage* BackAttackReactionMontage)
+{
+	check(StateComp);
+
+
+	if (UAnimInstance* Anim = GetMesh()->GetAnimInstance())
+	{
+		UE_LOG(LogTemp, Display, TEXT("Anim"));
+
+		StopAnimMontage();
+
+		StateComp->SetState(BSGameplayTag::Character_State_BackAttacked);
+
+		Anim->Montage_Play(BackAttackReactionMontage);
+
+		FOnMontageEnded MontageEnd;
+		MontageEnd.BindUObject(this, &ThisClass::BackAttackedEnd);
+		Anim->Montage_SetEndDelegate(MontageEnd, BackAttackReactionMontage);
+	}
+}
+
 void ABSCharacterEnemy::ToggleHealthBarVisibility(bool bVisibility) const
 {
 	HealthBarWidgetComp->SetVisibility(bVisibility);
@@ -235,6 +267,11 @@ void ABSCharacterEnemy::SetupAttribute()
 	{
 		AttributeComp->BroadcastAttributeChanged(EAttributeType::Health);
 	}
+}
+
+void ABSCharacterEnemy::BackAttackedEnd(UAnimMontage* Target, bool bInterrupted)
+{
+	OnDeath();
 }
 
 

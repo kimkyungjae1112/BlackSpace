@@ -4,12 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
+#include "Interface/BSAIControllerInterface.h"
 #include "BSEnemyAIController.generated.h"
 
 class ABSCharacterEnemy;
 
 UCLASS()
-class BLACKSPACE_API ABSEnemyAIController : public AAIController
+class BLACKSPACE_API ABSEnemyAIController 
+	: public AAIController
+	, public IBSAIControllerInterface
 {
 	GENERATED_BODY()
 
@@ -28,6 +31,9 @@ protected:
 
 public:
 	ABSEnemyAIController();
+
+public:
+	virtual bool IsDetectedPlayer() const override;
 
 protected:
 	virtual void OnPossess(APawn* InPawn) override;

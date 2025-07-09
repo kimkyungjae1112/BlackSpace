@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Characters/BSCharacterBase.h"
 #include "BSDefine.h"
+#include "Interface/BSEnemyInterface.h"
 #include "BSCharacterEnemy.generated.h"
 
 class UBSStateComponent;
@@ -17,7 +18,9 @@ class ATargetPoint;
 class ABSWeapon;
 
 UCLASS()
-class BLACKSPACE_API ABSCharacterEnemy : public ABSCharacterBase
+class BLACKSPACE_API ABSCharacterEnemy
+	: public ABSCharacterBase
+	, public IBSEnemyInterface
 {
 	GENERATED_BODY()
 	
@@ -36,6 +39,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "Enemy | Component")
 	TObjectPtr<UWidgetComponent> HealthBarWidgetComp;
+
+	UPROPERTY(VisibleAnywhere, Category = "Enemy | Component")
+	TObjectPtr<UWidgetComponent> BackAttackWidgetComp;
 
 // AI
 protected:
@@ -73,6 +79,10 @@ public:
 	virtual void PerformAttack(const FGameplayTag& AttackTypeTag, FOnMontageEnded& MontageEndedDelegate) override;
 	virtual void Parried() override;
 
+	/* IBSEnemyInterface Implement */
+	virtual void ToggleBackAttackWidgetVisibility(const bool bShouldBackAttack) override;
+	virtual void BackAttacked(UAnimMontage* BackAttackReactionMontage) override;
+
 public:
 	void ToggleHealthBarVisibility(bool bVisibility) const;
 
@@ -83,4 +93,7 @@ protected:
 
 	void OnChangedAttribute(const EAttributeType& AttributeType, float InRatio);
 	void SetupAttribute();
+
+protected:
+	void BackAttackedEnd(UAnimMontage* Target, bool bInterrupted);
 };
