@@ -116,8 +116,9 @@ void ABSCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	{
 		EnhancedInputComponent->BindAction(InputData->IA_Move, ETriggerEvent::Triggered, this, &ThisClass::Move);
 		EnhancedInputComponent->BindAction(InputData->IA_Look, ETriggerEvent::Triggered, this, &ThisClass::Look);
-		EnhancedInputComponent->BindAction(InputData->IA_Sprint, ETriggerEvent::Triggered, this, &ThisClass::Sprint);
-		EnhancedInputComponent->BindAction(InputData->IA_Sprint, ETriggerEvent::Completed, this, &ThisClass::StopSprint);
+		EnhancedInputComponent->BindAction(InputData->IA_SprintAndRolling, ETriggerEvent::Triggered, this, &ThisClass::Sprint);
+		EnhancedInputComponent->BindAction(InputData->IA_SprintAndRolling, ETriggerEvent::Completed, this, &ThisClass::StopSprint);
+		EnhancedInputComponent->BindAction(InputData->IA_SprintAndRolling, ETriggerEvent::Canceled, this, &ThisClass::Rolling);
 		EnhancedInputComponent->BindAction(InputData->IA_ToggleInventory, ETriggerEvent::Started, this, &ThisClass::ToggleInventory);
 		EnhancedInputComponent->BindAction(InputData->IA_TogglePlayerStatus, ETriggerEvent::Started, this, &ThisClass::TogglePlayerStatus);
 		EnhancedInputComponent->BindAction(InputData->IA_Interact, ETriggerEvent::Started, this, &ThisClass::Interaction);
@@ -278,6 +279,22 @@ bool ABSCharacterPlayer::IsMoving() const
 	return false;
 }
 
+bool ABSCharacterPlayer::CanRolling() const
+{
+	check(StateComp);
+	check(AttributeComp);
+
+	FGameplayTagContainer CheckTags;
+	CheckTags.AddTag(BSGameplayTag::Character_State_Attacking);
+	CheckTags.AddTag(BSGameplayTag::Character_State_GeneralAction);
+	CheckTags.AddTag(BSGameplayTag::Character_State_Aiming);
+	CheckTags.AddTag(BSGameplayTag::Character_State_Hit);
+	CheckTags.AddTag(BSGameplayTag::Character_State_Rolling);
+
+	return StateComp->IsCurrentStateEqualToAny(CheckTags) == false
+		&& AttributeComp->CheckHasEnoughStamina(5.f);
+}
+
 bool ABSCharacterPlayer::CanChangeWeapon() const
 {
 	check(StateComp);
@@ -368,6 +385,28 @@ void ABSCharacterPlayer::StopSprint()
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 
 	bIsSprinting = false;
+}
+
+void ABSCharacterPlayer::Rolling()
+{
+	check(CombatComp);
+
+	if (CanRolling())
+	{
+		if (ABSWeapon* Weapon = CombatComp->GetMainWeapon())
+		{
+			StateComp->ToggleMovementInput(false);
+
+			AttributeComp->ToggleStaminaRegen(false);
+			AttributeComp->DecreaseStamina(5.f);
+
+			PlayAnimMontage(Weapon->GetMontageForTag(BSGameplayTag::Character_State_Rolling));
+
+			StateComp->SetState(BSGameplayTag::Character_State_Rolling);
+
+			AttributeComp->ToggleStaminaRegen(true, 1.5f);
+		}
+	}
 }
 
 void ABSCharacterPlayer::ToggleInventory()
