@@ -159,6 +159,7 @@ protected:
 
 private:
 	bool IsMoving() const;
+	bool CanRolling() const;
 	bool CanChangeWeapon() const;
 
 private:
@@ -166,6 +167,7 @@ private:
 	void Look(const FInputActionValue& Value);
 	void Sprint();
 	void StopSprint();
+	void Rolling();
 	void ToggleInventory();
 	void TogglePlayerStatus();
 	void Interaction();

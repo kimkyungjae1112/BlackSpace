@@ -25,7 +25,7 @@ public:
 	TObjectPtr<UInputAction> IA_Look;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Common | Sprint")
-	TObjectPtr<UInputAction> IA_Sprint;
+	TObjectPtr<UInputAction> IA_SprintAndRolling;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Common | Interact")
 	TObjectPtr<UInputAction> IA_Interact;
@@ -36,7 +36,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Common | UI")
 	TObjectPtr<UInputAction> IA_TogglePlayerStatus;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Common | UI")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Common | Weapon")
 	TObjectPtr<UInputAction> IA_ChangeWeapon;
 
 	/***********************************************/
