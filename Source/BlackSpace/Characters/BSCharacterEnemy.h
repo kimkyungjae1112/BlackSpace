@@ -50,6 +50,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Enemy | Weapon")
 	TSubclassOf<ABSWeapon> DefaultWeaponClass;
 
+protected:
+	FTimerHandle ParriedDelayTimerHandle;
+
 public:
 	ABSCharacterEnemy();
 
@@ -68,6 +71,7 @@ public:
 	virtual void ActivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType) override;
 	virtual void DeactivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType) override;
 	virtual void PerformAttack(const FGameplayTag& AttackTypeTag, FOnMontageEnded& MontageEndedDelegate) override;
+	virtual void Parried() override;
 
 public:
 	void ToggleHealthBarVisibility(bool bVisibility) const;

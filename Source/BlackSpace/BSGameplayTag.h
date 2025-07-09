@@ -12,10 +12,15 @@ namespace BSGameplayTag
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_State_Death);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_State_Aiming);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_State_Hit);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_State_Blocking);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_State_Parrying);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_State_Parried);
 	
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Action_Equip);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Action_Unequip);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Action_HitReaction);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Action_BlockingHit);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Action_ParriedHit);
 
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Attack_Light);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Attack_Heavy);

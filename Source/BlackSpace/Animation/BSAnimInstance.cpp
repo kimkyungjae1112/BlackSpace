@@ -60,7 +60,12 @@ void UBSAnimInstance::UpdateWeaponType(const EWeaponType& InWeaponType)
 	WeaponType = InWeaponType;
 }
 
-void UBSAnimInstance::OnChangeCombat(bool InCombatEnabled)
+void UBSAnimInstance::UpdateBlcokingState(const bool bBlockingState)
+{
+	bIsBlocking = bBlockingState;
+}
+
+void UBSAnimInstance::OnChangeCombat(const bool InCombatEnabled)
 {
 	bCombatEnabled = InCombatEnabled;
 }

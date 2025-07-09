@@ -27,7 +27,10 @@ EBTNodeResult::Type UBTTask_PerformAttack::ExecuteTask(UBehaviorTreeComponent& O
 
 				if (UBSStateComponent* StateComp = AIPawn->GetComponentByClass<UBSStateComponent>())
 				{
-					StateComp->ClearState();
+					if (StateComp->IsCurrentStateEqualToIt(BSGameplayTag::Character_State_Parried) == false)
+					{
+						StateComp->ClearState();
+					}
 				}
 
 				FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);

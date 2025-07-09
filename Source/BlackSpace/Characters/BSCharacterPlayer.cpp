@@ -11,6 +11,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Animation/AnimMontage.h"
 #include "Components/PoseableMeshComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -29,6 +30,7 @@
 #include "UI/BSPlayerStatusWidget.h"
 #include "Interface/BSInteractInterface.h"
 #include "Interface/BSBowInterface.h"
+#include "Interface/BSUpdateAnyTypeInterface.h"
 #include "Player/BSPlayerController.h"
 #include "Animation/BSAnimInstance.h"
 #include "Projectiles/BSArrow.h"
@@ -124,10 +126,12 @@ void ABSCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		EnhancedInputComponent->BindAction(InputData->IA_Interact, ETriggerEvent::Started, this, &ThisClass::Interaction);
 		EnhancedInputComponent->BindAction(InputData->IA_ChangeWeapon, ETriggerEvent::Started, this, &ThisClass::ChangeWeapon);
 
-		/* Sword */
+		/* Sword & Poleram */
 		EnhancedInputComponent->BindAction(InputData->IA_SwordAttack, ETriggerEvent::Canceled, this, &ThisClass::LightAttack);
 		EnhancedInputComponent->BindAction(InputData->IA_SwordAttack, ETriggerEvent::Triggered, this, &ThisClass::SpecialAttack);
 		EnhancedInputComponent->BindAction(InputData->IA_SwordHeavyAttack, ETriggerEvent::Started, this, &ThisClass::HeavyAttack);
+		EnhancedInputComponent->BindAction(InputData->IA_Blocking, ETriggerEvent::Started, this, &ThisClass::Blocking);
+		EnhancedInputComponent->BindAction(InputData->IA_Blocking, ETriggerEvent::Completed, this, &ThisClass::BlockingEnd);
 
 		/* Bow */
 		EnhancedInputComponent->BindAction(InputData->IA_BowStringPull, ETriggerEvent::Started, this, &ThisClass::PullStringStart);
@@ -198,14 +202,43 @@ void ABSCharacterPlayer::AttackFinished(const float ComboResetDelay)
 
 float ABSCharacterPlayer::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	check(AttributeComp);
+	check(StateComp);
+
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	if (AttributeComp)
+	// 적과 대치중인 방향인지?
+	bFacingEnemy = UKismetMathLibrary::InRange_FloatFloat(GetDotProductTo(EventInstigator->GetPawn()), -0.1f, 1.f);
+
+	if (CanParrying())
 	{
-		AttributeComp->TakeDamageAmount(ActualDamage);
+		if (IBSCombatInterface* CombatInterface = Cast<IBSCombatInterface>(EventInstigator->GetPawn()))
+		{
+			AttributeComp->ToggleStaminaRegen(false);
+			AttributeComp->DecreaseStamina(20.f);
+			AttributeComp->TakeDamageAmount(0.f);
+			ImpactEffect(GetActorLocation());
+
+			CombatInterface->Parried();
+
+			AttributeComp->ToggleStaminaRegen(true, 1.f);
+
+		}
+		return ActualDamage;
 	}
 
-	StateComp->SetState(BSGameplayTag::Character_State_Hit);
+	if (CanAttackBlocking())
+	{
+		AttributeComp->ToggleStaminaRegen(false);
+		AttributeComp->TakeDamageAmount(0.5f);
+		StateComp->SetState(BSGameplayTag::Character_Action_BlockingHit);
+	}
+	else
+	{
+		AttributeComp->TakeDamageAmount(ActualDamage);
+		StateComp->SetState(BSGameplayTag::Character_State_Hit);
+	}
+
 	StateComp->ToggleMovementInput(false);
 
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
@@ -246,26 +279,61 @@ void ABSCharacterPlayer::OnDeath()
 
 void ABSCharacterPlayer::ImpactEffect(const FVector& Location)
 {
-	if (ImpactSound)
+	check(CombatComp);
+
+	if (CanAttackBlocking())
 	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, Location);
+		BlockImpactEffect(Location);
+	}
+	else
+	{
+		if (ImpactSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, Location);
+		}
+
+		if (ImpactParticle)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, Location);
+		}
+	}
+}
+
+void ABSCharacterPlayer::BlockImpactEffect(const FVector& Location)
+{
+	if (BlockingImpactSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), BlockingImpactSound, Location);
 	}
 
-	if (ImpactParticle)
+	if (BlockingImpactParticle)
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, Location);
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BlockingImpactParticle, Location);
 	}
 }
 
 void ABSCharacterPlayer::HitReaction(const AActor* Attacker)
 {
+	check(AttributeComp);
 	check(CombatComp);
 
 	if (ABSWeapon* MainWeapon = CombatComp->GetMainWeapon())
 	{
-		if (UAnimMontage* HitReactAnimMontage = MainWeapon->GetHitReactMontage(Attacker))
+		if (CanAttackBlocking())
 		{
-			PlayAnimMontage(HitReactAnimMontage);
+			if (UAnimMontage* BlockingHitReactAnimMontage = MainWeapon->GetMontageForTag(BSGameplayTag::Character_Action_BlockingHit))
+			{
+				AttributeComp->DecreaseStamina(20.f);
+				AttributeComp->ToggleStaminaRegen(true, 1.f);
+				PlayAnimMontage(BlockingHitReactAnimMontage);
+			}
+		}
+		else
+		{
+			if (UAnimMontage* HitReactAnimMontage = MainWeapon->GetHitReactMontage(Attacker))
+			{
+				PlayAnimMontage(HitReactAnimMontage);
+			}
 		}
 	}
 }
@@ -290,6 +358,7 @@ bool ABSCharacterPlayer::CanRolling() const
 	CheckTags.AddTag(BSGameplayTag::Character_State_Aiming);
 	CheckTags.AddTag(BSGameplayTag::Character_State_Hit);
 	CheckTags.AddTag(BSGameplayTag::Character_State_Rolling);
+	CheckTags.AddTag(BSGameplayTag::Character_State_Blocking);
 
 	return StateComp->IsCurrentStateEqualToAny(CheckTags) == false
 		&& AttributeComp->CheckHasEnoughStamina(5.f);
@@ -306,8 +375,39 @@ bool ABSCharacterPlayer::CanChangeWeapon() const
 	CheckTags.AddTag(BSGameplayTag::Character_State_Hit);
 	CheckTags.AddTag(BSGameplayTag::Character_State_Aiming);
 	CheckTags.AddTag(BSGameplayTag::Character_State_Death);
+	CheckTags.AddTag(BSGameplayTag::Character_State_Blocking);
 
 	return StateComp->IsCurrentStateEqualToAny(CheckTags) == false;
+}
+
+bool ABSCharacterPlayer::CanBlockingStance() const
+{
+	check(AttributeComp);
+	check(StateComp);
+
+	if (bIsSprinting) return false;
+
+	FGameplayTagContainer CheckTags;
+	CheckTags.AddTag(BSGameplayTag::Character_State_Attacking);
+	CheckTags.AddTag(BSGameplayTag::Character_State_GeneralAction);
+	CheckTags.AddTag(BSGameplayTag::Character_State_Hit);
+	CheckTags.AddTag(BSGameplayTag::Character_State_Rolling);
+
+	return StateComp->IsCurrentStateEqualToAny(CheckTags) == false
+		&& AttributeComp->CheckHasEnoughStamina(1.f);
+}
+
+bool ABSCharacterPlayer::CanAttackBlocking() const
+{
+	check(CombatComp);
+	check(AttributeComp);
+
+	return bFacingEnemy && CombatComp->IsBlockingEnabled() && AttributeComp->CheckHasEnoughStamina(20.f);
+}
+
+bool ABSCharacterPlayer::CanParrying() const
+{
+	return bFacingEnemy && bParryEnabled && CanBlockingStance();
 }
 
 void ABSCharacterPlayer::Move(const FInputActionValue& Value)
@@ -356,9 +456,15 @@ void ABSCharacterPlayer::Look(const FInputActionValue& Value)
 
 void ABSCharacterPlayer::Sprint()
 {
+	check(AttributeComp);
+	check(CombatComp);
+
 	if (bProgressAiming) return;
 
-	check(AttributeComp);
+	if (CombatComp->IsBlockingEnabled())
+	{
+		return;
+	}
 
 	if (AttributeComp->CheckHasEnoughStamina(3.f) && IsMoving())
 	{
@@ -379,6 +485,12 @@ void ABSCharacterPlayer::Sprint()
 void ABSCharacterPlayer::StopSprint()
 {
 	check(AttributeComp);
+	check(CombatComp);
+
+	if (CombatComp->IsBlockingEnabled())
+	{
+		return;
+	}
 
 	AttributeComp->ToggleStaminaRegen(true);
 
@@ -435,7 +547,6 @@ void ABSCharacterPlayer::TogglePlayerStatus()
 
 void ABSCharacterPlayer::Interaction()
 {
-	UE_LOG(LogTemp, Display, TEXT("Interact"));
 	FHitResult HitResult;
 
 	const FVector Start = GetActorLocation();
@@ -523,6 +634,68 @@ void ABSCharacterPlayer::SpecialAttack()
 	}
 }
 
+void ABSCharacterPlayer::Blocking()
+{
+	check(CombatComp);
+	check(StateComp);
+
+	if (CanBlockingStance())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = BlockSpeed;
+		CombatComp->SetBlockingEnabled(true);
+		if (IBSUpdateAnyTypeInterface* AnimInterface = Cast<IBSUpdateAnyTypeInterface>(GetMesh()->GetAnimInstance()))
+		{
+			AnimInterface->UpdateBlcokingState(true);
+
+			GetWorld()->GetTimerManager().SetTimer(ParryStartTimer, this, &ThisClass::Parry, 1.f, false, 0.2f);
+
+			GetWorld()->GetTimerManager().SetTimer(ParryEndTimer, this, &ThisClass::ParryEnd, 1.f, false, 1.f);
+		}
+	}
+}
+
+void ABSCharacterPlayer::BlockingEnd()
+{
+	check(CombatComp);
+	check(StateComp);
+
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	CombatComp->SetBlockingEnabled(false);
+	if (IBSUpdateAnyTypeInterface* AnimInterface = Cast<IBSUpdateAnyTypeInterface>(GetMesh()->GetAnimInstance()))
+	{
+		AnimInterface->UpdateBlcokingState(false);
+		StateComp->ClearState();
+	}
+}
+
+void ABSCharacterPlayer::Parry()
+{
+	check(StateComp);
+
+	bParryEnabled = true;
+	StateComp->SetState(BSGameplayTag::Character_State_Parrying);
+}
+
+void ABSCharacterPlayer::ParryEnd()
+{
+	check(CombatComp);
+	check(StateComp);
+
+	bParryEnabled = false;
+
+	if (CombatComp->IsBlockingEnabled())
+	{
+		StateComp->SetState(BSGameplayTag::Character_State_Blocking);
+	}
+	else
+	{
+		StateComp->ClearState();
+	}
+
+	GetWorld()->GetTimerManager().ClearTimer(ParryStartTimer);
+	GetWorld()->GetTimerManager().ClearTimer(ParryEndTimer);
+}
+
 FGameplayTag ABSCharacterPlayer::GetAttackPerform() const
 {
 	if (bIsSprinting)
@@ -547,6 +720,7 @@ bool ABSCharacterPlayer::CanPerformAttack(const FGameplayTag& AttackType)
 	CheckedTags.AddTag(BSGameplayTag::Character_State_GeneralAction);
 	CheckedTags.AddTag(BSGameplayTag::Character_State_Hit);
 	CheckedTags.AddTag(BSGameplayTag::Character_State_Death);
+	CheckedTags.AddTag(BSGameplayTag::Character_Action_BlockingHit);
 
 	const float StaminaCost = CombatComp->GetMainWeapon()->GetStaminaCost(AttackType);
 

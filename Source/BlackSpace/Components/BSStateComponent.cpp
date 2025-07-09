@@ -52,6 +52,11 @@ bool UBSStateComponent::IsCurrentStateEqualToAny(const FGameplayTagContainer& Ta
 	return TagsToCheck.HasTagExact(CurrentState);
 }
 
+bool UBSStateComponent::IsCurrentStateEqualToIt(const FGameplayTag& TagToCheck) const
+{
+	return CurrentState == TagToCheck;
+}
+
 void UBSStateComponent::MovementInputEnableAction()
 {
 	bMovementInputEnabled = true;

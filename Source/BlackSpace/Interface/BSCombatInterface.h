@@ -26,4 +26,6 @@ public:
 	virtual void DeactivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType) = 0;
 
 	virtual void PerformAttack(const FGameplayTag& AttackTypeTag, FOnMontageEnded& MontageEndedDelegate) {}
+
+	virtual void Parried() {}
 };

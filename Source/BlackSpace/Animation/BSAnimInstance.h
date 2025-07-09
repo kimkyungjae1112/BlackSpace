@@ -35,6 +35,9 @@ public:
 	bool bIsAiming;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data")
+	bool bIsBlocking;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data")
 	float GroundSpeed;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
@@ -71,7 +74,8 @@ public:
 public:
 	/* IBSUpdateAnyTypeInterface Implement */
 	virtual void UpdateWeaponType(const EWeaponType& InWeaponType) override;
+	virtual void UpdateBlcokingState(const bool bBlockingState) override;
 
 protected:
-	void OnChangeCombat(bool InCombatEnabled);
+	void OnChangeCombat(const bool InCombatEnabled);
 };

@@ -21,7 +21,13 @@ protected:
 	TObjectPtr<USoundCue> ImpactSound;
 
 	UPROPERTY(EditAnywhere, Category = "Effect")
+	TObjectPtr<USoundCue> BlockingImpactSound;
+
+	UPROPERTY(EditAnywhere, Category = "Effect")
 	TObjectPtr<UParticleSystem> ImpactParticle;
+
+	UPROPERTY(EditAnywhere, Category = "Effect")
+	TObjectPtr<UParticleSystem> BlockingImpactParticle;
 
 public:
 	ABSCharacterBase();
@@ -41,5 +47,4 @@ protected:
 	virtual void OnDeath() {};
 	virtual void ImpactEffect(const FVector& Location) {};
 	virtual void HitReaction(const AActor* Attacker) {};
-
 };
