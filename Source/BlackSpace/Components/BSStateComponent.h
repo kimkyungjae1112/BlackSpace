@@ -49,6 +49,7 @@ public:
 
 	/* 현재 상태가 TagsToCheck 중에 있나? */
 	bool IsCurrentStateEqualToAny(const FGameplayTagContainer& TagsToCheck) const;
+	bool IsCurrentStateEqualToIt(const FGameplayTag& TagToCheck) const;
 		
 protected:
 	UFUNCTION()

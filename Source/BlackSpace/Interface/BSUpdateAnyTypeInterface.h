@@ -19,4 +19,5 @@ class BLACKSPACE_API IBSUpdateAnyTypeInterface
 
 public:
 	virtual void UpdateWeaponType(const EWeaponType& InWeaponType) = 0;
+	virtual void UpdateBlcokingState(const bool bBlockingState) = 0;
 };

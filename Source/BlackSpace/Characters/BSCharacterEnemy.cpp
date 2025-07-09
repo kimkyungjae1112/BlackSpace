@@ -148,6 +148,31 @@ void ABSCharacterEnemy::PerformAttack(const FGameplayTag& AttackTypeTag, FOnMont
 	}
 }
 
+void ABSCharacterEnemy::Parried()
+{
+	check(StateComp);
+	check(CombatComp);
+
+	StopAnimMontage();
+	StateComp->SetState(BSGameplayTag::Character_State_Parried);
+
+	if (const ABSWeapon* MainWeapon = CombatComp->GetMainWeapon())
+	{
+		UAnimMontage* ParriedAnimMontage = MainWeapon->GetMontageForTag(BSGameplayTag::Character_Action_ParriedHit);
+		const float Delay = PlayAnimMontage(ParriedAnimMontage) + 1.f;
+
+		FTimerDelegate TimerDelegate;
+		TimerDelegate.BindLambda([this]()
+			{
+				if (StateComp->IsCurrentStateEqualToIt(BSGameplayTag::Character_State_Death) == false)
+				{
+					StateComp->ClearState();
+				}
+			});
+		GetWorld()->GetTimerManager().SetTimer(ParriedDelayTimerHandle, TimerDelegate, Delay, false);
+	}
+}
+
 void ABSCharacterEnemy::ToggleHealthBarVisibility(bool bVisibility) const
 {
 	HealthBarWidgetComp->SetVisibility(bVisibility);

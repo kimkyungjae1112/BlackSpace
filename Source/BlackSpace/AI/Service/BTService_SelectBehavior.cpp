@@ -3,8 +3,10 @@
 
 #include "AI/Service/BTService_SelectBehavior.h"
 #include "AIController.h"
-#include "Characters/BSCharacterEnemy.h"
 #include "BehaviorTree/BlackboardComponent.h"
+
+#include "Characters/BSCharacterEnemy.h"
+#include "Components/BSStateComponent.h"
 
 UBTService_SelectBehavior::UBTService_SelectBehavior()
 {
@@ -42,28 +44,38 @@ void UBTService_SelectBehavior::UpdateBehavior(UBlackboardComponent* BlackboardC
 
 	AActor* TargetActor = Cast<AActor>(BlackboardComp->GetValueAsObject(TargetKey.SelectedKeyName));
 
-	if (IsValid(TargetActor))
-	{
-		const float Distance = TargetActor->GetDistanceTo(ControlledEnemy);
+	UBSStateComponent* StateComp = ControlledEnemy->GetComponentByClass<UBSStateComponent>();
+	check(StateComp);
 
-		if (Distance <= AttackRangeDistance)
-		{
-			SetBehaviorKey(BlackboardComp, EAIBehavior::MeleeAttack);
-		}
-		else
-		{
-			SetBehaviorKey(BlackboardComp, EAIBehavior::Approach);
-		}
+	if (StateComp->IsCurrentStateEqualToIt(BSGameplayTag::Character_State_Parried))
+	{
+		SetBehaviorKey(BlackboardComp, EAIBehavior::Stunned);
 	}
 	else
 	{
-		if (ControlledEnemy->GetPatrolPoint() != nullptr)
+		if (IsValid(TargetActor))
 		{
-			SetBehaviorKey(BlackboardComp, EAIBehavior::Patrol);
+			const float Distance = TargetActor->GetDistanceTo(ControlledEnemy);
+
+			if (Distance <= AttackRangeDistance)
+			{
+				SetBehaviorKey(BlackboardComp, EAIBehavior::MeleeAttack);
+			}
+			else
+			{
+				SetBehaviorKey(BlackboardComp, EAIBehavior::Approach);
+			}
 		}
 		else
 		{
-			SetBehaviorKey(BlackboardComp, EAIBehavior::Idle);
+			if (ControlledEnemy->GetPatrolPoint() != nullptr)
+			{
+				SetBehaviorKey(BlackboardComp, EAIBehavior::Patrol);
+			}
+			else
+			{
+				SetBehaviorKey(BlackboardComp, EAIBehavior::Idle);
+			}
 		}
 	}
 }

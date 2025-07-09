@@ -47,6 +47,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sword | Attack")
 	TObjectPtr<UInputAction> IA_SwordHeavyAttack;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sword | Block")
+	TObjectPtr<UInputAction> IA_Blocking;
+	
 	/***********************************************/
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bow | Attack")

@@ -97,6 +97,9 @@ protected:
 	float SprintSpeed = 850.f;
 
 	UPROPERTY(EditAnywhere, Category = "Stat")
+	float BlockSpeed = 250.f;
+
+	UPROPERTY(EditAnywhere, Category = "Stat")
 	bool bIsSprinting = false;
 
 	// Fire 공격, Sprint 플래그
@@ -107,6 +110,12 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Stat")
 	bool bProgressAiming = false;
 
+	UPROPERTY(EditAnywhere, Category = "Stat")
+	bool bFacingEnemy = false;
+
+	UPROPERTY(EditAnywhere, Category = "Stat")
+	bool bParryEnabled = false;
+
 // Combo
 protected:
 	bool bComboSequenceRunning = false;
@@ -114,6 +123,11 @@ protected:
 	bool bSavedComboInput = false;
 	int32 ComboCounter = 0;
 	FTimerHandle ComboResetTimerHandle;
+
+// Parry
+protected:
+	FTimerHandle ParryStartTimer;
+	FTimerHandle ParryEndTimer;
 
 // Arrow
 protected:
@@ -155,12 +169,16 @@ public:
 protected:
 	virtual void OnDeath() override;
 	virtual void ImpactEffect(const FVector& Location) override;
+	void BlockImpactEffect(const FVector& Location);
 	virtual void HitReaction(const AActor* Attacker) override;
 
 private:
 	bool IsMoving() const;
 	bool CanRolling() const;
 	bool CanChangeWeapon() const;
+	bool CanBlockingStance() const;
+	bool CanAttackBlocking() const;
+	bool CanParrying() const;
 
 private:
 	void Move(const FInputActionValue& Value);
@@ -177,6 +195,12 @@ private:
 	void LightAttack();
 	void HeavyAttack();
 	void SpecialAttack();
+
+	// 방어
+	void Blocking();
+	void BlockingEnd();
+	void Parry();
+	void ParryEnd();
 
 // 콤보 공격
 private:
