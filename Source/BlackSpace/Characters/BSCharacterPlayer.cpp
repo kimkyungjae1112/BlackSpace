@@ -17,6 +17,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Sound/SoundCue.h"
 #include "Engine/DamageEvents.h"
+#include "MotionWarpingComponent.h"
 
 #include "Data/BSInputData.h"
 #include "BSGameplayTag.h"
@@ -70,6 +71,8 @@ ABSCharacterPlayer::ABSCharacterPlayer()
 	RotationComp = CreateDefaultSubobject<UBSRotationComponent>(TEXT("Rotation Component"));
 	RotationComp->bOwnerIsPlayer = true;
 
+	MotionWarpComp = CreateDefaultSubobject<UMotionWarpingComponent>(TEXT("Motion Warping Component"));
+
 	Tags.Add(TEXT("Player"));
 }
 
@@ -98,30 +101,38 @@ void ABSCharacterPlayer::Tick(float DeltaTime)
 	if (CanDetectForBackAttack())
 	{
 		FHitResult HitResult;
-		DetectForBackAttackTarget(HitResult);
+		bool bHit = DetectForBackAttackTarget(HitResult);
 
-		BackAttackTarget = Cast<APawn>(HitResult.GetActor());
-		if (BackAttackTarget)
+		if (bHit)
 		{
-			if (IBSAIControllerInterface* AIInterface = Cast<IBSAIControllerInterface>(BackAttackTarget->GetController()))
+			BackAttackTarget = Cast<APawn>(HitResult.GetActor());
+
+			if (BackAttackTarget)
 			{
-				if (AIInterface->IsDetectedPlayer() == false)
+				if (IBSAIControllerInterface* AIInterface = Cast<IBSAIControllerInterface>(BackAttackTarget->GetController()))
 				{
-					if (IBSEnemyInterface* EnemyInterface = Cast<IBSEnemyInterface>(BackAttackTarget))
+					if (AIInterface->IsDetectedPlayer() == false)
 					{
-						bBackAttack = true;
-						EnemyInterface->ToggleBackAttackWidgetVisibility(true);
-					}
-				}
-				else
-				{
-					if (IBSEnemyInterface* EnemyInterface = Cast<IBSEnemyInterface>(BackAttackTarget))
-					{
-						bBackAttack = false;
-						EnemyInterface->ToggleBackAttackWidgetVisibility(false);
+						if (IBSEnemyInterface* EnemyInterface = Cast<IBSEnemyInterface>(BackAttackTarget))
+						{
+							if (bBackAttack != bHit)
+							{
+								bBackAttack = bHit;
+								EnemyInterface->ToggleBackAttackWidgetVisibility(bHit);
+							}
+						}
 					}
 				}
 			}
+		}
+		else
+		{
+			if (IBSEnemyInterface* EnemyInterface = Cast<IBSEnemyInterface>(BackAttackTarget))
+			{
+				bBackAttack = false;
+				EnemyInterface->ToggleBackAttackWidgetVisibility(false);
+			}
+			BackAttackTarget = nullptr;
 		}
 	}
 }
@@ -450,6 +461,7 @@ bool ABSCharacterPlayer::CanDetectForBackAttack() const
 	}
 
 	FGameplayTagContainer CheckTags;
+	CheckTags.AddTag(BSGameplayTag::Character_State_Attacking);
 	CheckTags.AddTag(BSGameplayTag::Character_State_Aiming);
 	CheckTags.AddTag(BSGameplayTag::Character_State_Hit);
 	CheckTags.AddTag(BSGameplayTag::Character_State_Death);
@@ -457,11 +469,6 @@ bool ABSCharacterPlayer::CanDetectForBackAttack() const
 	CheckTags.AddTag(BSGameplayTag::Character_State_Parrying);
 
 	return StateComp->IsCurrentStateEqualToAny(CheckTags) == false;
-}
-
-bool ABSCharacterPlayer::CanBackAttack() const
-{
-	return bBackAttack && CanDetectForBackAttack();
 }
 
 void ABSCharacterPlayer::Move(const FInputActionValue& Value)
@@ -703,7 +710,7 @@ void ABSCharacterPlayer::Blocking()
 
 			GetWorld()->GetTimerManager().SetTimer(ParryStartTimer, this, &ThisClass::Parry, 1.f, false, 0.2f);
 
-			GetWorld()->GetTimerManager().SetTimer(ParryEndTimer, this, &ThisClass::ParryEnd, 1.f, false, 1.f);
+			GetWorld()->GetTimerManager().SetTimer(ParryEndTimer, this, &ThisClass::ParryEnd, 1.f, false, 0.8f);
 		}
 	}
 }
@@ -837,15 +844,18 @@ void ABSCharacterPlayer::DoAttack(const FGameplayTag& AttackType)
 			Montage = Weapon->GetMontageForTag(AttackType, ComboCounter);
 		}
 
-		PlayAnimMontage(Montage);
-		if (CanBackAttack())
+		if (AttackType == BSGameplayTag::Character_Attack_BackAttack)
 		{
 			if (IBSEnemyInterface* EnemyInterface = Cast<IBSEnemyInterface>(BackAttackTarget))
 			{
 				EnemyInterface->ToggleBackAttackWidgetVisibility(false);
 				EnemyInterface->BackAttacked(Weapon->GetMontageForTag(BSGameplayTag::Character_Action_BackAttackHit));
+				bBackAttack = false;
+				ResetCombo();
+				BackAttackMotionWarp();
 			}
 		}
+		PlayAnimMontage(Montage);
 
 		const float StaminaCost = Weapon->GetStaminaCost(AttackType);
 
@@ -1050,7 +1060,7 @@ void ABSCharacterPlayer::ToggleAimingFlag(bool InIsAiming)
 bool ABSCharacterPlayer::DetectForBackAttackTarget(FHitResult& OutResult)
 {
 	const FVector Start = GetActorLocation();
-	const FVector End = Start + GetActorForwardVector() * 500.f;
+	const FVector End = Start + GetActorForwardVector() * 200.f;
 	FCollisionObjectQueryParams TraceParam;
 	TraceParam.AddObjectTypesToQuery(ECollisionChannel::ECC_Pawn);
 
@@ -1058,6 +1068,14 @@ bool ABSCharacterPlayer::DetectForBackAttackTarget(FHitResult& OutResult)
 	IgnoreParam.AddIgnoredActor(this);
 
 	return GetWorld()->LineTraceSingleByObjectType(OutResult, Start, End, TraceParam, IgnoreParam);
+}
+
+void ABSCharacterPlayer::BackAttackMotionWarp()
+{
+	const FVector Target = BackAttackTarget->GetActorLocation() + (BackAttackTarget->GetActorForwardVector() * -1) * 100.f;
+	const FRotator TargetRotation = BackAttackTarget->GetActorRotation();
+	MotionWarpComp->AddOrUpdateWarpTargetFromLocationAndRotation(TEXT("BackAttackLoc"), Target, TargetRotation);
+	BackAttackTarget = nullptr;
 }
 
 void ABSCharacterPlayer::ChagnedWeapon(const FInventorySlot&)

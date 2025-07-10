@@ -36,7 +36,7 @@ ABSCharacterEnemy::ABSCharacterEnemy()
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 
 	StateComp = CreateDefaultSubobject<UBSStateComponent>(TEXT("State Component"));
-	
+
 	AttributeComp = CreateDefaultSubobject<UBSAttributeComponent>(TEXT("Attribute Component"));
 	AttributeComp->OnChangedAttribute.AddUObject(this, &ThisClass::OnChangedAttribute);
 	AttributeComp->OnDeath.AddUObject(this, &ThisClass::OnDeath);
@@ -187,22 +187,15 @@ void ABSCharacterEnemy::ToggleBackAttackWidgetVisibility(const bool bShouldBackA
 void ABSCharacterEnemy::BackAttacked(UAnimMontage* BackAttackReactionMontage)
 {
 	check(StateComp);
+	check(AttributeComp);
 
+	StopAnimMontage();
 
-	if (UAnimInstance* Anim = GetMesh()->GetAnimInstance())
-	{
-		UE_LOG(LogTemp, Display, TEXT("Anim"));
+	StateComp->SetState(BSGameplayTag::Character_State_BackAttacked);
 
-		StopAnimMontage();
+	PlayAnimMontage(BackAttackReactionMontage);
 
-		StateComp->SetState(BSGameplayTag::Character_State_BackAttacked);
-
-		Anim->Montage_Play(BackAttackReactionMontage);
-
-		FOnMontageEnded MontageEnd;
-		MontageEnd.BindUObject(this, &ThisClass::BackAttackedEnd);
-		Anim->Montage_SetEndDelegate(MontageEnd, BackAttackReactionMontage);
-	}
+	AttributeComp->TakeDamageAmount(9999.f);
 }
 
 void ABSCharacterEnemy::ToggleHealthBarVisibility(bool bVisibility) const
@@ -212,16 +205,29 @@ void ABSCharacterEnemy::ToggleHealthBarVisibility(bool bVisibility) const
 
 void ABSCharacterEnemy::OnDeath()
 {
+	check(StateComp);
+
 	if (AAIController* AIController = Cast<AAIController>(GetController()))
 	{
 		AIController->GetBrainComponent()->StopLogic(TEXT("Death"));
 	}
 
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	if (!StateComp->IsCurrentStateEqualToIt(BSGameplayTag::Character_State_BackAttacked))
+	{
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
-	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
-	GetMesh()->SetSimulatePhysics(true);
+		GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+		GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+		GetMesh()->SetSimulatePhysics(true);
+	}
+	else
+	{
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		// 메쉬의 콜리전을 바꿔주지 않으면 1대가 남아있던데 왜 그런지 모르겠음;
+		GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+		GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	}
 }
 
 void ABSCharacterEnemy::ImpactEffect(const FVector& Location)
@@ -267,11 +273,6 @@ void ABSCharacterEnemy::SetupAttribute()
 	{
 		AttributeComp->BroadcastAttributeChanged(EAttributeType::Health);
 	}
-}
-
-void ABSCharacterEnemy::BackAttackedEnd(UAnimMontage* Target, bool bInterrupted)
-{
-	OnDeath();
 }
 
 

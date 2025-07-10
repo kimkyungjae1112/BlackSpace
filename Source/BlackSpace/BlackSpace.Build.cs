@@ -17,7 +17,9 @@ public class BlackSpace : ModuleRules
 			"InputCore", 
 			"EnhancedInput",
 			"GameplayTags",
-            "AnimGraphRuntime"
+            "AnimGraphRuntime",
+            "MotionWarping",
+            "Niagara"
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

@@ -41,7 +41,6 @@ void UBTService_SelectBehavior::UpdateBehavior(UBlackboardComponent* BlackboardC
 {
 	check(BlackboardComp);
 	check(ControlledEnemy);
-
 	AActor* TargetActor = Cast<AActor>(BlackboardComp->GetValueAsObject(TargetKey.SelectedKeyName));
 
 	UBSStateComponent* StateComp = ControlledEnemy->GetComponentByClass<UBSStateComponent>();

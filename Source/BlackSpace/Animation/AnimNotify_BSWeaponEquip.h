@@ -7,7 +7,7 @@
 #include "GameplayTagContainer.h"
 #include "AnimNotify_BSWeaponEquip.generated.h"
 
-UCLASS()
+UCLASS(meta = (DisplayName = "Weapon Equip"))
 class BLACKSPACE_API UAnimNotify_BSWeaponEquip : public UAnimNotify
 {
 	GENERATED_BODY()

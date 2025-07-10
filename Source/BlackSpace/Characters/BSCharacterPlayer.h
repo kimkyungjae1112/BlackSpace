@@ -24,6 +24,7 @@ class UBSCombatComponent;
 class UBSStateComponent;
 class UBSRotationComponent;
 class UBSPlayerStatusWidget;
+class UMotionWarpingComponent;
 class ABSPlayerController;
 class ABSArrow;
 
@@ -73,6 +74,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
 	TObjectPtr<UBSRotationComponent> RotationComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
+	TObjectPtr<UMotionWarpingComponent> MotionWarpComp;
 
 // UI
 protected:
@@ -143,6 +147,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Arrow")
 	TObjectPtr<ABSArrow> Arrow;
 
+// BackAttack
 protected:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<APawn> BackAttackTarget;
@@ -190,7 +195,6 @@ private:
 	bool CanAttackBlocking() const;
 	bool CanParrying() const;
 	bool CanDetectForBackAttack() const;
-	bool CanBackAttack() const;
 
 private:
 	void Move(const FInputActionValue& Value);
@@ -245,6 +249,7 @@ private:
 // 급습 공격
 private:
 	bool DetectForBackAttackTarget(FHitResult& OutResult);
+	void BackAttackMotionWarp();
 
 // Input 변경
 private:

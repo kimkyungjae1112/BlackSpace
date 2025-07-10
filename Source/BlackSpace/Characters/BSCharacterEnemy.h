@@ -94,6 +94,4 @@ protected:
 	void OnChangedAttribute(const EAttributeType& AttributeType, float InRatio);
 	void SetupAttribute();
 
-protected:
-	void BackAttackedEnd(UAnimMontage* Target, bool bInterrupted);
 };
