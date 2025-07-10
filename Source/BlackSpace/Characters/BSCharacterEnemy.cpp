@@ -11,9 +11,9 @@
 #include "Animation/AnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Perception/AISenseConfig_Damage.h"
-#include "AIController.h"
 #include "BrainComponent.h"
 
+#include "AI/Controller/BSEnemyAIController.h"
 #include "Components/BSStateComponent.h"
 #include "Components/BSAttributeComponent.h"
 #include "Components/BSCombatComponent.h"
@@ -111,6 +111,13 @@ float ABSCharacterEnemy::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 	return ActualDamage;
 }
 
+void ABSCharacterEnemy::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	GetWorld()->GetTimerManager().ClearTimer(ParriedDelayTimerHandle);
+	GetWorld()->GetTimerManager().ClearTimer(StunnedDelayTimerHandle);
+	Super::EndPlay(EndPlayReason);
+}
+
 void ABSCharacterEnemy::ActivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType)
 {
 	if (CombatComp)
@@ -206,6 +213,7 @@ void ABSCharacterEnemy::ToggleHealthBarVisibility(bool bVisibility) const
 void ABSCharacterEnemy::OnDeath()
 {
 	check(StateComp);
+	check(CombatComp);
 
 	if (AAIController* AIController = Cast<AAIController>(GetController()))
 	{
@@ -228,6 +236,29 @@ void ABSCharacterEnemy::OnDeath()
 		GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
 		GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	}
+
+	if (ABSWeapon* Weapon = CombatComp->GetMainWeapon())
+	{
+		Weapon->Drop();
+	}
+
+	SetDeathState();
+}
+
+void ABSCharacterEnemy::SetDeathState()
+{
+	if (ABSEnemyAIController* AIController = Cast<ABSEnemyAIController>(GetController()))
+	{
+		AIController->StopUpdateTarget();
+	}
+
+	ToggleHealthBarVisibility(false);
+
+	FTimerHandle DeathTimer;
+	GetWorld()->GetTimerManager().SetTimer(DeathTimer, [this]()
+		{
+			Destroy();
+		}, 10.f, false);
 }
 
 void ABSCharacterEnemy::ImpactEffect(const FVector& Location)
@@ -246,12 +277,30 @@ void ABSCharacterEnemy::ImpactEffect(const FVector& Location)
 void ABSCharacterEnemy::HitReaction(const AActor* Attacker)
 {
 	check(CombatComp);
+	check(StateComp);
+
+	float StunnedTime = 0.f;
+	if (StunnedRate >= FMath::RandRange(1, 100))
+	{
+		StateComp->SetState(BSGameplayTag::Character_State_Stunned);
+		StunnedTime = FMath::RandRange(0.5f, 1.5f);
+	}
 
 	if (ABSWeapon* MainWeapon = CombatComp->GetMainWeapon())
 	{
 		if (UAnimMontage* HitReactAnimMontage = MainWeapon->GetHitReactMontage(Attacker))
 		{
-			PlayAnimMontage(HitReactAnimMontage);
+			const float DelaySeconds = PlayAnimMontage(HitReactAnimMontage) + StunnedTime;
+
+			FTimerDelegate TimerDelegate;
+			TimerDelegate.BindLambda([this]()
+				{
+					if (StateComp->IsCurrentStateEqualToIt(BSGameplayTag::Character_State_Stunned))
+					{
+						StateComp->ClearState();
+					}
+				});
+			GetWorld()->GetTimerManager().SetTimer(StunnedDelayTimerHandle, TimerDelegate, DelaySeconds, false);
 		}
 	}
 }

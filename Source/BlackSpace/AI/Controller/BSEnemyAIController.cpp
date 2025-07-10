@@ -20,6 +20,12 @@ bool ABSEnemyAIController::IsDetectedPlayer() const
 	return (Blackboard->GetValueAsObject(TEXT("Target")) != nullptr) ? true : false;
 }
 
+void ABSEnemyAIController::StopUpdateTarget()
+{
+	GetWorld()->GetTimerManager().ClearTimer(PerceptionTimerHandle);
+	SetTarget(nullptr);
+}
+
 void ABSEnemyAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
@@ -33,11 +39,9 @@ void ABSEnemyAIController::OnPossess(APawn* InPawn)
 
 void ABSEnemyAIController::OnUnPossess()
 {
-	Super::OnUnPossess();
-
 	ControlledEnemy = nullptr;
-
-	GetWorld()->GetTimerManager().ClearTimer(PerceptionTimerHandle);
+	StopUpdateTarget();
+	Super::OnUnPossess();
 }
 
 void ABSEnemyAIController::UpdateTarget() const

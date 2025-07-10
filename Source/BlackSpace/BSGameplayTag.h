@@ -16,6 +16,7 @@ namespace BSGameplayTag
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_State_Parrying);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_State_Parried);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_State_BackAttacked);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_State_Stunned);
 	
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Action_Equip);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Action_Unequip);

@@ -27,7 +27,11 @@ EBTNodeResult::Type UBTTask_PerformAttack::ExecuteTask(UBehaviorTreeComponent& O
 
 				if (UBSStateComponent* StateComp = AIPawn->GetComponentByClass<UBSStateComponent>())
 				{
-					if (StateComp->IsCurrentStateEqualToIt(BSGameplayTag::Character_State_Parried) == false)
+					FGameplayTagContainer CheckTags;
+					CheckTags.AddTag(BSGameplayTag::Character_State_Parried);
+					CheckTags.AddTag(BSGameplayTag::Character_State_Stunned);
+
+					if (StateComp->IsCurrentStateEqualToAny(CheckTags) == false)
 					{
 						StateComp->ClearState();
 					}

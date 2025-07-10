@@ -73,6 +73,8 @@ public:
 	float GetStaminaCost(const FGameplayTag& InAttackType) const;
 	float GetAttackDamage() const;
 
+	void Drop();
+
 public:
 	void ActivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType);
 	void DeactivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType);

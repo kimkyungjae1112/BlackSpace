@@ -35,6 +35,8 @@ public:
 public:
 	virtual bool IsDetectedPlayer() const override;
 
+	void StopUpdateTarget();
+
 protected:
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnUnPossess() override;
