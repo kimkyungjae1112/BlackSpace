@@ -19,6 +19,7 @@
 #include "Components/BSCombatComponent.h"
 #include "Components/BSRotationComponent.h"
 #include "Equipments/BSWeapon.h"
+#include "Items/BSPickupItem.h"
 #include "UI/BSStatBarWidget.h"
 #include "BSDefine.h"
 #include "BSGameplayTag.h"
@@ -226,6 +227,7 @@ void ABSCharacterEnemy::OnDeath()
 
 		GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
 		GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+		GetMesh()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
 		GetMesh()->SetSimulatePhysics(true);
 	}
 	else
@@ -235,11 +237,16 @@ void ABSCharacterEnemy::OnDeath()
 		// 메쉬의 콜리전을 바꿔주지 않으면 1대가 남아있던데 왜 그런지 모르겠음;
 		GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
 		GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+		GetMesh()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
 	}
 
 	if (ABSWeapon* Weapon = CombatComp->GetMainWeapon())
 	{
-		Weapon->Drop();
+		ABSPickupItem* PickupItem = GetWorld()->SpawnActorDeferred<ABSPickupItem>(ABSPickupItem::StaticClass(), GetActorTransform(), nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
+		PickupItem->SetEquipmentClass(Weapon->GetClass());
+		PickupItem->FinishSpawning(GetMesh()->GetSocketTransform(TEXT("hand_rSocket")));
+		
+		Weapon->Destroy();
 	}
 
 	SetDeathState();
