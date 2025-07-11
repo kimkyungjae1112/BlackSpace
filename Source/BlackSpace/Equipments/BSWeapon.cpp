@@ -136,6 +136,14 @@ float ABSWeapon::GetAttackDamage() const
 	return BaseDamage;
 }
 
+void ABSWeapon::Drop()
+{
+	DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	MeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	MeshComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	MeshComp->SetSimulatePhysics(true);
+}
+
 void ABSWeapon::ActivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType)
 {
 	switch (WeaponCollisionType)

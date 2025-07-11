@@ -58,6 +58,10 @@ protected:
 
 protected:
 	FTimerHandle ParriedDelayTimerHandle;
+	FTimerHandle StunnedDelayTimerHandle;
+
+	UPROPERTY(EditAnywhere, Category = "Enemy | Set Value")
+	int32 StunnedRate = 0;
 
 public:
 	ABSCharacterEnemy();
@@ -71,6 +75,7 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
 	/* IBSCombatInterface Implement */
@@ -88,6 +93,7 @@ public:
 
 protected:
 	virtual void OnDeath() override;
+	void SetDeathState();
 	virtual void ImpactEffect(const FVector& Location) override;
 	virtual void HitReaction(const AActor* Attacker) override;
 
