@@ -44,4 +44,5 @@ enum class EAIBehavior : uint8
 	MeleeAttack,
 	Approach,
 	Stunned,
+	Strafe,
 };

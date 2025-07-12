@@ -33,6 +33,6 @@ protected:
 
 protected:
 	void SetBehaviorKey(UBlackboardComponent* BlackboardComp, const EAIBehavior& Behavior) const;
-	void UpdateBehavior(UBlackboardComponent* BlackboardComp, ABSCharacterEnemy* ControlledEnemy) const;
+	virtual void UpdateBehavior(UBlackboardComponent* BlackboardComp, ABSCharacterEnemy* ControlledEnemy) const;
 
 };

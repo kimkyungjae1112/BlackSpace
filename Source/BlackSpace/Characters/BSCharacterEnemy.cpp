@@ -206,6 +206,11 @@ void ABSCharacterEnemy::BackAttacked(UAnimMontage* BackAttackReactionMontage)
 	AttributeComp->TakeDamageAmount(9999.f);
 }
 
+void ABSCharacterEnemy::SeesTarget(AActor* InTargetActor)
+{
+	// AIController 에서 호출하기 위한 가상함수
+}
+
 void ABSCharacterEnemy::ToggleHealthBarVisibility(bool bVisibility) const
 {
 	HealthBarWidgetComp->SetVisibility(bVisibility);

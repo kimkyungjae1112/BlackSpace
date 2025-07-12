@@ -89,6 +89,7 @@ public:
 	virtual void BackAttacked(UAnimMontage* BackAttackReactionMontage) override;
 
 public:
+	virtual void SeesTarget(AActor* InTargetActor);
 	void ToggleHealthBarVisibility(bool bVisibility) const;
 
 protected:

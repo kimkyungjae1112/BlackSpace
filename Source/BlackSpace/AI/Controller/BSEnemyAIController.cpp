@@ -57,6 +57,7 @@ void ABSEnemyAIController::UpdateTarget() const
 		{
 			SetTarget(PlayerCharacter);
 			ControlledEnemy->ToggleHealthBarVisibility(true);
+			ControlledEnemy->SeesTarget(PlayerCharacter);
 		}
 		else
 		{
