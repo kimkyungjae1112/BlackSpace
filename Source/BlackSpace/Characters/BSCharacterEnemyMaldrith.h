@@ -17,12 +17,22 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Enemy | Name")
 	FText BossName;
 
+// UI
 protected:
 	UPROPERTY(EditAnywhere, Category = "Enemy | UI")
 	TSubclassOf<UBSBossHealthBarWidget> BossHealthBarWidgetClass;
 
 	UPROPERTY(VisibleAnywhere, Category = "Enemy | UI")
 	TObjectPtr<UBSBossHealthBarWidget> BossHealthBarWidget;
+
+protected:
+	UPROPERTY(EditAnywhere, Category = "Enemy | Sound")
+	TObjectPtr<USoundWave> MaldrithMusicAsset;
+
+	UPROPERTY(EditAnywhere, Category = "Enemy | Sound")
+	TObjectPtr<UAudioComponent> MaldrithMusicComp;
+
+	bool bStartedBossMusic = false;
 
 public:
 	ABSCharacterEnemyMaldrith();

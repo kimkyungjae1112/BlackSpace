@@ -185,7 +185,7 @@ protected:
 	virtual void OnDeath() override;
 	virtual void ImpactEffect(const FVector& Location) override;
 	void BlockImpactEffect(const FVector& Location);
-	virtual void HitReaction(const AActor* Attacker) override;
+	virtual void HitReaction(const AActor* Attacker, const EDamageType& DamageType) override;
 
 private:
 	bool IsMoving() const;

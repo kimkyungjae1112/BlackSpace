@@ -3,6 +3,8 @@
 
 #include "Characters/BSCharacterEnemyMaldrith.h"
 #include "Components/WidgetComponent.h"
+#include "Components/AudioComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 #include "UI/BSBossHealthBarWidget.h"
 
@@ -24,6 +26,16 @@ void ABSCharacterEnemyMaldrith::SeesTarget(AActor* InTargetActor)
 		if (BossHealthBarWidget)
 		{
 			BossHealthBarWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		}
+	}
+
+	if (MaldrithMusicAsset)
+	{
+		if (!bStartedBossMusic)
+		{
+			bStartedBossMusic = true;
+			MaldrithMusicComp = UGameplayStatics::SpawnSound2D(this, MaldrithMusicAsset);
+			MaldrithMusicComp->FadeIn(1.f);
 		}
 	}
 }
@@ -56,5 +68,10 @@ void ABSCharacterEnemyMaldrith::OnDeath()
 	if (BossHealthBarWidget)
 	{
 		BossHealthBarWidget->SetVisibility(ESlateVisibility::Hidden);
+	}
+
+	if (IsValid(MaldrithMusicComp))
+	{
+		MaldrithMusicComp->FadeOut(2.f, 0);
 	}
 }
