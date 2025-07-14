@@ -43,6 +43,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Enemy | Component")
 	TObjectPtr<UWidgetComponent> BackAttackWidgetComp;
 
+	UPROPERTY(VisibleAnywhere, Category = "Enemy | Component")
+	TObjectPtr<UWidgetComponent> PostureWidgetComp;
+
 // AI
 protected:
 	UPROPERTY(EditAnywhere, Category = "Enemy | AI")
@@ -87,11 +90,15 @@ public:
 	/* IBSEnemyInterface Implement */
 	virtual void ToggleBackAttackWidgetVisibility(const bool bShouldBackAttack) override;
 	virtual void BackAttacked(UAnimMontage* BackAttackReactionMontage) override;
+	virtual bool IsEnabledPostureAttack() const override;
+	virtual void PostureAttacked(UAnimMontage* PostureAttackReactionMontage) override;
+	virtual void ApplyVitalAttack(const float ActualDamage) const override;
 
 public:
 	virtual void SeesTarget(AActor* InTargetActor);
 	void ToggleHealthBarVisibility(bool bVisibility) const;
 
+// 죽음 및 피격 관련
 protected:
 	virtual void OnDeath() override;
 	void SetDeathState();
@@ -100,5 +107,7 @@ protected:
 
 	void OnChangedAttribute(const EAttributeType& AttributeType, float InRatio);
 	void SetupAttribute();
-
+	
+	void OnPosture();
+	void MaxPostureReaction();
 };

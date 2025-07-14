@@ -41,6 +41,7 @@ ABSCharacterEnemy::ABSCharacterEnemy()
 	AttributeComp = CreateDefaultSubobject<UBSAttributeComponent>(TEXT("Attribute Component"));
 	AttributeComp->OnChangedAttribute.AddUObject(this, &ThisClass::OnChangedAttribute);
 	AttributeComp->OnDeath.AddUObject(this, &ThisClass::OnDeath);
+	AttributeComp->OnMaxPosture.AddUObject(this, &ThisClass::OnPosture);
 
 	CombatComp = CreateDefaultSubobject<UBSCombatComponent>(TEXT("Combat Component"));
 
@@ -50,7 +51,7 @@ ABSCharacterEnemy::ABSCharacterEnemy()
 	HealthBarWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("Widget Component"));
 	HealthBarWidgetComp->SetupAttachment(GetRootComponent());
 	HealthBarWidgetComp->SetRelativeLocation(FVector(0.f, 0.f, 100.f));
-	HealthBarWidgetComp->SetDrawSize(FVector2D(100.f, 5.f));
+	HealthBarWidgetComp->SetDrawSize(FVector2D(100.f, 10.f));
 	HealthBarWidgetComp->SetWidgetSpace(EWidgetSpace::Screen);
 	HealthBarWidgetComp->SetVisibility(false);
 
@@ -59,6 +60,13 @@ ABSCharacterEnemy::ABSCharacterEnemy()
 	BackAttackWidgetComp->SetDrawSize(FVector2D(30.f, 30.f));
 	BackAttackWidgetComp->SetWidgetSpace(EWidgetSpace::Screen);
 	BackAttackWidgetComp->SetVisibility(false);
+
+	PostureWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("Posture Widget Component"));
+	PostureWidgetComp->SetupAttachment(GetRootComponent());
+	PostureWidgetComp->SetRelativeLocation(FVector(0.f, 0.f, 90.f));
+	PostureWidgetComp->SetDrawSize(FVector2D(100.f, 5.f));
+	PostureWidgetComp->SetWidgetSpace(EWidgetSpace::Screen);
+	PostureWidgetComp->SetVisibility(false);
 }
 
 void ABSCharacterEnemy::BeginPlay()
@@ -90,6 +98,7 @@ float ABSCharacterEnemy::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 	if (AttributeComp)
 	{
 		AttributeComp->TakeDamageAmount(ActualDamage);
+		AttributeComp->TogglePostureRegen(false);
 	}
 
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
@@ -151,6 +160,8 @@ void ABSCharacterEnemy::PerformAttack(const FGameplayTag& AttackTypeTag, FOnMont
 	check(CombatComp);
 	check(AttributeComp);
 
+	if (StateComp->IsCurrentStateEqualToIt(BSGameplayTag::Character_State_MaxPosture)) return;
+
 	if (const ABSWeapon* Weapon = CombatComp->GetMainWeapon())
 	{
 		StateComp->SetState(BSGameplayTag::Character_State_Attacking);
@@ -177,6 +188,8 @@ void ABSCharacterEnemy::Parried()
 	check(StateComp);
 	check(CombatComp);
 
+	if (StateComp->IsCurrentStateEqualToIt(BSGameplayTag::Character_State_MaxPosture)) return;
+
 	StopAnimMontage();
 	StateComp->SetState(BSGameplayTag::Character_State_Parried);
 
@@ -188,7 +201,10 @@ void ABSCharacterEnemy::Parried()
 		FTimerDelegate TimerDelegate;
 		TimerDelegate.BindLambda([this]()
 			{
-				if (StateComp->IsCurrentStateEqualToIt(BSGameplayTag::Character_State_Death) == false)
+				FGameplayTagContainer CheckTags;
+				CheckTags.AddTag(BSGameplayTag::Character_State_Death);
+				CheckTags.AddTag(BSGameplayTag::Character_State_MaxPosture);
+				if (StateComp->IsCurrentStateEqualToAny(CheckTags) == false)
 				{
 					StateComp->ClearState();
 				}
@@ -213,7 +229,31 @@ void ABSCharacterEnemy::BackAttacked(UAnimMontage* BackAttackReactionMontage)
 
 	PlayAnimMontage(BackAttackReactionMontage);
 
-	AttributeComp->TakeDamageAmount(9999.f);
+	// ApplyVitalAttack() 을 통해 대미지 전달
+}
+
+bool ABSCharacterEnemy::IsEnabledPostureAttack() const
+{
+	check(StateComp);
+
+	return StateComp->IsCurrentStateEqualToIt(BSGameplayTag::Character_State_MaxPosture);
+}
+
+void ABSCharacterEnemy::PostureAttacked(UAnimMontage* PostureAttackReactionMontage)
+{
+	check(AttributeComp);
+
+	StopAnimMontage();
+
+	PlayAnimMontage(PostureAttackReactionMontage);
+
+	// ApplyVitalAttack() 을 통해 대미지 전달
+}
+
+void ABSCharacterEnemy::ApplyVitalAttack(const float ActualDamage) const
+{
+	check(AttributeComp);
+	AttributeComp->TakeDamageAmount(ActualDamage);
 }
 
 void ABSCharacterEnemy::SeesTarget(AActor* InTargetActor)
@@ -224,6 +264,7 @@ void ABSCharacterEnemy::SeesTarget(AActor* InTargetActor)
 void ABSCharacterEnemy::ToggleHealthBarVisibility(bool bVisibility) const
 {
 	HealthBarWidgetComp->SetVisibility(bVisibility);
+	PostureWidgetComp->SetVisibility(bVisibility);
 }
 
 void ABSCharacterEnemy::OnDeath()
@@ -301,6 +342,8 @@ void ABSCharacterEnemy::HitReaction(const AActor* Attacker, const EDamageType& D
 	check(CombatComp);
 	check(StateComp);
 
+	if (StateComp->IsCurrentStateEqualToIt(BSGameplayTag::Character_State_MaxPosture)) return;
+
 	float StunnedTime = 0.f;
 	if (StunnedRate >= FMath::RandRange(1, 100))
 	{
@@ -317,7 +360,10 @@ void ABSCharacterEnemy::HitReaction(const AActor* Attacker, const EDamageType& D
 			FTimerDelegate TimerDelegate;
 			TimerDelegate.BindLambda([this]()
 				{
-					if (StateComp->IsCurrentStateEqualToIt(BSGameplayTag::Character_State_Stunned))
+					FGameplayTagContainer CheckTags;
+					CheckTags.AddTag(BSGameplayTag::Character_State_Death);
+					CheckTags.AddTag(BSGameplayTag::Character_State_MaxPosture);
+					if (StateComp->IsCurrentStateEqualToAny(CheckTags) == false)
 					{
 						StateComp->ClearState();
 					}
@@ -329,12 +375,20 @@ void ABSCharacterEnemy::HitReaction(const AActor* Attacker, const EDamageType& D
 
 void ABSCharacterEnemy::OnChangedAttribute(const EAttributeType& AttributeType, float InRatio)
 {
-	if (AttributeType == EAttributeType::Health)
+	switch (AttributeType)
 	{
+	case EAttributeType::Health:
 		if (UBSStatBarWidget* StatBarWidget = Cast<UBSStatBarWidget>(HealthBarWidgetComp->GetWidget()))
 		{
 			StatBarWidget->SetStatBarRatio(InRatio);
 		}
+		break;
+	case EAttributeType::Posture:
+		if (UBSStatBarWidget* StatBarWidget = Cast<UBSStatBarWidget>(PostureWidgetComp->GetWidget()))
+		{
+			StatBarWidget->SetStatBarRatio(InRatio);
+		}
+		break;
 	}
 }
 
@@ -343,7 +397,32 @@ void ABSCharacterEnemy::SetupAttribute()
 	if (AttributeComp)
 	{
 		AttributeComp->BroadcastAttributeChanged(EAttributeType::Health);
+		AttributeComp->BroadcastAttributeChanged(EAttributeType::Posture);
 	}
+}
+
+void ABSCharacterEnemy::OnPosture()
+{
+	check(CombatComp);
+	check(StateComp);
+
+	StateComp->SetState(BSGameplayTag::Character_State_MaxPosture);
+
+	if (ABSWeapon* Weapon = CombatComp->GetMainWeapon())
+	{
+		if (UAnimMontage* Montage = Weapon->GetMontageForTag(BSGameplayTag::Character_State_MaxPosture))
+		{
+			PlayAnimMontage(Montage);
+
+			UE_LOG(LogTemp, Display, TEXT("Max Posture"));
+			// 급소 공격을 할 수 있는 어떤 표시..
+		}
+	}
+}
+
+void ABSCharacterEnemy::MaxPostureReaction()
+{
+
 }
 
 

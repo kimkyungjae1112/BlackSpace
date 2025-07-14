@@ -8,7 +8,8 @@ UENUM(BlueprintType)
 enum class EAttributeType : uint8
 {
 	Stamina,
-	Health
+	Health,
+	Posture
 };
 
 UENUM(BlueprintType)

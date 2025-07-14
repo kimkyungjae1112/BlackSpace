@@ -19,4 +19,9 @@ class BLACKSPACE_API IBSEnemyInterface
 public:
 	virtual void ToggleBackAttackWidgetVisibility(const bool bShouldBackAttack) = 0;
 	virtual void BackAttacked(UAnimMontage* BackAttackReactionMontage) = 0;
+
+	virtual bool IsEnabledPostureAttack() const = 0;
+	virtual void PostureAttacked(UAnimMontage* PostureAttackReactionMontage) = 0;
+
+	virtual void ApplyVitalAttack(const float ActualDamage) const = 0;
 };

@@ -7,6 +7,7 @@
 #include "KismetAnimationLibrary.h"
 
 #include "Components/BSStateComponent.h"
+#include "Components/BSAttributeComponent.h"
 
 void UBSAnimInstance::NativeInitializeAnimation()
 {
@@ -52,6 +53,19 @@ void UBSAnimInstance::AnimNotify_ResetState()
 	if (UBSStateComponent* StateComp = GetOwningActor()->GetComponentByClass<UBSStateComponent>())
 	{
 		StateComp->ClearState();
+	}
+}
+
+void UBSAnimInstance::AnimNotify_TogglePosture()
+{
+	if (UBSAttributeComponent* AttributeComp = GetOwningActor()->GetComponentByClass<UBSAttributeComponent>())
+	{
+		AttributeComp->TogglePostureRegen(true);
+	}
+
+	if (UBSStateComponent* StateComp = GetOwningActor()->GetComponentByClass<UBSStateComponent>())
+	{
+		StateComp->SetState(FGameplayTag::EmptyTag);
 	}
 }
 
