@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTDecorator.h"
-#include "BTDecorator_SkillChance.generated.h"
+#include "BTDecorator_Chance.generated.h"
 
 UCLASS()
-class BLACKSPACE_API UBTDecorator_SkillChance : public UBTDecorator
+class BLACKSPACE_API UBTDecorator_Chance : public UBTDecorator
 {
 	GENERATED_BODY()
 	

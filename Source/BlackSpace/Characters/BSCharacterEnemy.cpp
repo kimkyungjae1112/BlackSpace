@@ -106,7 +106,17 @@ float ABSCharacterEnemy::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 
 		ImpactEffect(ImpactPoint);
 
-		HitReaction(EventInstigator->GetPawn());
+		HitReaction(EventInstigator->GetPawn(), EDamageType::HitBack);
+	}
+	else if (DamageEvent.IsOfType(FRadialDamageEvent::ClassID))
+	{
+		const FRadialDamageEvent* RadialDamageEvent = static_cast<const FRadialDamageEvent*>(&DamageEvent);
+
+		const FVector HitLocation = RadialDamageEvent->Origin;
+
+		ImpactEffect(HitLocation);
+
+		HitReaction(EventInstigator->GetPawn(), EDamageType::KnockBack);
 	}
 
 	return ActualDamage;
@@ -206,6 +216,11 @@ void ABSCharacterEnemy::BackAttacked(UAnimMontage* BackAttackReactionMontage)
 	AttributeComp->TakeDamageAmount(9999.f);
 }
 
+void ABSCharacterEnemy::SeesTarget(AActor* InTargetActor)
+{
+	// AIController 에서 호출하기 위한 가상함수
+}
+
 void ABSCharacterEnemy::ToggleHealthBarVisibility(bool bVisibility) const
 {
 	HealthBarWidgetComp->SetVisibility(bVisibility);
@@ -281,7 +296,7 @@ void ABSCharacterEnemy::ImpactEffect(const FVector& Location)
 	}
 }
 
-void ABSCharacterEnemy::HitReaction(const AActor* Attacker)
+void ABSCharacterEnemy::HitReaction(const AActor* Attacker, const EDamageType& DamageType)
 {
 	check(CombatComp);
 	check(StateComp);

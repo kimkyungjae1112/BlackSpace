@@ -26,7 +26,8 @@ enum class EWeaponType : uint8
 	Uncombat,
 	Sword,
 	Polearm,
-	Bow
+	Bow,
+	Blunt
 };
 
 UENUM(BlueprintType)
@@ -44,4 +45,12 @@ enum class EAIBehavior : uint8
 	MeleeAttack,
 	Approach,
 	Stunned,
+	Strafe,
+};
+
+UENUM(BlueprintType)
+enum class EDamageType : uint8
+{
+	HitBack,
+	KnockBack,
 };

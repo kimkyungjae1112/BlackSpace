@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interface/BSCombatInterface.h"
+#include "BSDefine.h"
 #include "BSCharacterBase.generated.h"
 
 class USoundCue;
@@ -46,5 +47,5 @@ public:
 protected:
 	virtual void OnDeath() {};
 	virtual void ImpactEffect(const FVector& Location) {};
-	virtual void HitReaction(const AActor* Attacker) {};
+	virtual void HitReaction(const AActor* Attacker, const EDamageType& DamageType) {};
 };

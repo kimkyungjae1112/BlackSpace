@@ -292,7 +292,17 @@ float ABSCharacterPlayer::TakeDamage(float DamageAmount, FDamageEvent const& Dam
 
 		ImpactEffect(ImpactPoint);
 
-		HitReaction(EventInstigator->GetPawn());
+		HitReaction(EventInstigator->GetPawn(), EDamageType::HitBack);
+	}
+	else if (DamageEvent.IsOfType(FRadialDamageEvent::ClassID))
+	{
+		const FRadialDamageEvent* RadialDamageEvent = static_cast<const FRadialDamageEvent*>(&DamageEvent);
+
+		const FVector HitLocation = RadialDamageEvent->Origin;
+
+		ImpactEffect(HitLocation);
+
+		HitReaction(EventInstigator->GetPawn(), EDamageType::KnockBack);
 	}
 
 	return ActualDamage;
@@ -352,7 +362,7 @@ void ABSCharacterPlayer::BlockImpactEffect(const FVector& Location)
 	}
 }
 
-void ABSCharacterPlayer::HitReaction(const AActor* Attacker)
+void ABSCharacterPlayer::HitReaction(const AActor* Attacker, const EDamageType& DamageType)
 {
 	check(AttributeComp);
 	check(CombatComp);
@@ -370,9 +380,19 @@ void ABSCharacterPlayer::HitReaction(const AActor* Attacker)
 		}
 		else
 		{
-			if (UAnimMontage* HitReactAnimMontage = MainWeapon->GetHitReactMontage(Attacker))
+			switch (DamageType)
 			{
-				PlayAnimMontage(HitReactAnimMontage);
+			case EDamageType::HitBack:
+				if (UAnimMontage* HitReactAnimMontage = MainWeapon->GetHitReactMontage(Attacker))
+				{
+					PlayAnimMontage(HitReactAnimMontage);
+				}
+				break;
+			case EDamageType::KnockBack:
+				if (UAnimMontage* HitReactAnimMontage = MainWeapon->GetMontageForTag(BSGameplayTag::Character_Action_KnockBackHit))
+				{
+					PlayAnimMontage(HitReactAnimMontage);
+				}
 			}
 		}
 	}

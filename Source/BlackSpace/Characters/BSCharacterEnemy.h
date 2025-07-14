@@ -89,13 +89,14 @@ public:
 	virtual void BackAttacked(UAnimMontage* BackAttackReactionMontage) override;
 
 public:
+	virtual void SeesTarget(AActor* InTargetActor);
 	void ToggleHealthBarVisibility(bool bVisibility) const;
 
 protected:
 	virtual void OnDeath() override;
 	void SetDeathState();
 	virtual void ImpactEffect(const FVector& Location) override;
-	virtual void HitReaction(const AActor* Attacker) override;
+	virtual void HitReaction(const AActor* Attacker, const EDamageType& DamageType) override;
 
 	void OnChangedAttribute(const EAttributeType& AttributeType, float InRatio);
 	void SetupAttribute();
