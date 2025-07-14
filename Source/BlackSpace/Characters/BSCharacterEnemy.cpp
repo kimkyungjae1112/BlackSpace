@@ -106,7 +106,17 @@ float ABSCharacterEnemy::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 
 		ImpactEffect(ImpactPoint);
 
-		HitReaction(EventInstigator->GetPawn());
+		HitReaction(EventInstigator->GetPawn(), EDamageType::HitBack);
+	}
+	else if (DamageEvent.IsOfType(FRadialDamageEvent::ClassID))
+	{
+		const FRadialDamageEvent* RadialDamageEvent = static_cast<const FRadialDamageEvent*>(&DamageEvent);
+
+		const FVector HitLocation = RadialDamageEvent->Origin;
+
+		ImpactEffect(HitLocation);
+
+		HitReaction(EventInstigator->GetPawn(), EDamageType::KnockBack);
 	}
 
 	return ActualDamage;
@@ -286,7 +296,7 @@ void ABSCharacterEnemy::ImpactEffect(const FVector& Location)
 	}
 }
 
-void ABSCharacterEnemy::HitReaction(const AActor* Attacker)
+void ABSCharacterEnemy::HitReaction(const AActor* Attacker, const EDamageType& DamageType)
 {
 	check(CombatComp);
 	check(StateComp);

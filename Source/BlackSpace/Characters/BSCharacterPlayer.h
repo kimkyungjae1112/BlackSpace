@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "Characters/BSCharacterBase.h"
 #include "GameplayTagContainer.h"
-#include "BSDefine.h"
 #include "Interface/BSComboWindowInterface.h"
 #include "Interface/BSBowFireInterface.h"
 #include "BSCharacterPlayer.generated.h"
