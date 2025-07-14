@@ -8,6 +8,8 @@
 #include "BSPlayerHUDWidget.generated.h"
 
 class UBSStatBarWidget;
+class UBSPlayerStatusWeaponWidget;
+struct FInventorySlot;
 
 UCLASS()
 class BLACKSPACE_API UBSPlayerHUDWidget : public UUserWidget
@@ -21,6 +23,12 @@ protected:
 	UPROPERTY(meta = (BindWidget), BlueprintReadWrite)
 	TObjectPtr<UBSStatBarWidget> StaminaBarWidget;
 
+	UPROPERTY(meta = (BindWidget), BlueprintReadWrite)
+	TObjectPtr<UBSPlayerStatusWeaponWidget> MainWeaponWidget;
+
+	UPROPERTY(meta = (BindWidget), BlueprintReadWrite)
+	TObjectPtr<UBSPlayerStatusWeaponWidget> SecondaryWeaponWidget;
+
 public:
 	UBSPlayerHUDWidget(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
@@ -30,4 +38,9 @@ protected:
 
 public:
 	void SetStatBarRatio(const EAttributeType& AttributeType, float InRatio);
+
+protected:
+	void SetMainWeaponState(const FInventorySlot& MainWeaponInfo);
+	void SetSecondaryWeaponState(const FInventorySlot& SecondaryWeaponInfo);
+
 };
