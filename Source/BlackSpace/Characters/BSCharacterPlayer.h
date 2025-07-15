@@ -125,6 +125,10 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Stat")
 	bool bBackAttack = false;
 
+	// 상대방 체간 급소 공격을 할 수 있는지 검사하는 플래그
+	UPROPERTY(EditAnywhere, Category = "Stat")
+	bool bPostureAttack = false;
+
 // Combo
 protected:
 	bool bComboSequenceRunning = false;
@@ -149,10 +153,12 @@ protected:
 // BackAttack
 protected:
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<APawn> BackAttackTarget;
+	TObjectPtr<APawn> VitalAttackTarget;
 
 public:
 	ABSCharacterPlayer();
+
+	FORCEINLINE APawn* GetVitalAttackTarget() const { return VitalAttackTarget; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -245,10 +251,11 @@ private:
 	void ToggleCameraViewAdjust();
 	void ToggleAimingFlag(bool InIsAiming);
 
-// 급습 공격
+// 급소 공격
 private:
 	bool DetectForBackAttackTarget(FHitResult& OutResult);
 	void BackAttackMotionWarp();
+	void PostureAttackMotionWarp();
 
 // Input 변경
 private:

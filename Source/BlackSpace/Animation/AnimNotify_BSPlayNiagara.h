@@ -4,22 +4,21 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotify.h"
-#include "AnimNotify_BSBackAttackEffect.generated.h"
+#include "AnimNotify_BSPlayNiagara.generated.h"
 
 class UNiagaraSystem;
-class USoundCue;
 
-UCLASS(meta=(DisplayName = "Back Attack Effect"))
-class BLACKSPACE_API UAnimNotify_BSBackAttackEffect : public UAnimNotify
+UCLASS(meta = (DisplayName="BS Play Niagara"))
+class BLACKSPACE_API UAnimNotify_BSPlayNiagara : public UAnimNotify
 {
 	GENERATED_BODY()
-
+	
 protected:
-	UPROPERTY(EditAnywhere, Category = "Effect")
+	UPROPERTY(EditAnywhere)
 	TObjectPtr<UNiagaraSystem> HitEffect;
 
-	UPROPERTY(EditAnywhere, Category = "Effect")
-	TObjectPtr<USoundCue> HitSound;
+	UPROPERTY(EditAnywhere)
+	FName SocketName;
 
 public:
 	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;

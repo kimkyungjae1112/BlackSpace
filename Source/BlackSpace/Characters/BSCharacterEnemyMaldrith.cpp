@@ -49,6 +49,11 @@ void ABSCharacterEnemyMaldrith::BeginPlay()
 		HealthBarWidgetComp->DestroyComponent();
 	}
 
+	if (BackAttackWidgetComp)
+	{
+		BackAttackWidgetComp->DestroyComponent();
+	}
+
 	if (BossHealthBarWidgetClass)
 	{
 		BossHealthBarWidget = CreateWidget<UBSBossHealthBarWidget>(GetWorld(), BossHealthBarWidgetClass);

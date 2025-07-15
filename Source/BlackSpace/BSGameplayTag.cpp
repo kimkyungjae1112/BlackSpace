@@ -16,6 +16,7 @@ namespace BSGameplayTag
 	UE_DEFINE_GAMEPLAY_TAG(Character_State_Parried, "Character.State.Parried");
 	UE_DEFINE_GAMEPLAY_TAG(Character_State_BackAttacked, "Character.State.BackAttacked");
 	UE_DEFINE_GAMEPLAY_TAG(Character_State_Stunned, "Character.State.Stunned");
+	UE_DEFINE_GAMEPLAY_TAG(Character_State_MaxPosture, "Character.State.MaxPosture");
 
 	UE_DEFINE_GAMEPLAY_TAG(Character_Action_Equip, "Character.Action.Equip");
 	UE_DEFINE_GAMEPLAY_TAG(Character_Action_Unequip, "Character.Action.Unequip");
@@ -24,12 +25,14 @@ namespace BSGameplayTag
 	UE_DEFINE_GAMEPLAY_TAG(Character_Action_ParriedHit, "Character.Action.ParriedHit");
 	UE_DEFINE_GAMEPLAY_TAG(Character_Action_BackAttackHit, "Character.Action.BackAttackHit");
 	UE_DEFINE_GAMEPLAY_TAG(Character_Action_KnockBackHit, "Character.Action.KnockBackHit");
+	UE_DEFINE_GAMEPLAY_TAG(Character_Action_MaxPostureHit, "Character.Action.MaxPostureHit");
 
 	UE_DEFINE_GAMEPLAY_TAG(Character_Attack_Light, "Character.Attack.Light");
 	UE_DEFINE_GAMEPLAY_TAG(Character_Attack_Heavy, "Character.Attack.Heavy");
 	UE_DEFINE_GAMEPLAY_TAG(Character_Attack_Running, "Character.Attack.Running");
 	UE_DEFINE_GAMEPLAY_TAG(Character_Attack_Special, "Character.Attack.Special");
 	UE_DEFINE_GAMEPLAY_TAG(Character_Attack_BackAttack, "Character.Attack.BackAttack");
+	UE_DEFINE_GAMEPLAY_TAG(Character_Attack_MaxPostureAttack, "Character.Attack.MaxPostureAttack");
 
 	UE_DEFINE_GAMEPLAY_TAG(Character_Attack_Fire, "Character.Attack.Fire");
 }

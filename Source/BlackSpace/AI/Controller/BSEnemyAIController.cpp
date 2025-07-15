@@ -50,7 +50,8 @@ void ABSEnemyAIController::UpdateTarget() const
 	AIPerceptionComp->GetKnownPerceivedActors(nullptr, OutActors);
 
 	ABSCharacterPlayer* PlayerCharacter = Cast<ABSCharacterPlayer>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-	
+	if (!IsValid(PlayerCharacter)) return;
+
 	if (OutActors.Contains(PlayerCharacter))
 	{
 		if (!PlayerCharacter->IsDead())

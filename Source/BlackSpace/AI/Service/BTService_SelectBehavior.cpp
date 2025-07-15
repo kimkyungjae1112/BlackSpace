@@ -50,6 +50,7 @@ void UBTService_SelectBehavior::UpdateBehavior(UBlackboardComponent* BlackboardC
 	CheckTags.AddTag(BSGameplayTag::Character_State_Parried);
 	CheckTags.AddTag(BSGameplayTag::Character_State_BackAttacked);
 	CheckTags.AddTag(BSGameplayTag::Character_State_Stunned);
+	CheckTags.AddTag(BSGameplayTag::Character_State_MaxPosture);
 
 	if (StateComp->IsCurrentStateEqualToAny(CheckTags))
 	{

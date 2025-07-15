@@ -30,6 +30,7 @@ EBTNodeResult::Type UBTTask_PerformAttack::ExecuteTask(UBehaviorTreeComponent& O
 					FGameplayTagContainer CheckTags;
 					CheckTags.AddTag(BSGameplayTag::Character_State_Parried);
 					CheckTags.AddTag(BSGameplayTag::Character_State_Stunned);
+					CheckTags.AddTag(BSGameplayTag::Character_State_MaxPosture);
 
 					if (StateComp->IsCurrentStateEqualToAny(CheckTags) == false)
 					{

@@ -9,6 +9,7 @@
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FDelegateOnChangedAttribute, const EAttributeType&, float)
 DECLARE_MULTICAST_DELEGATE(FOnDeath)
+DECLARE_MULTICAST_DELEGATE(FOnMaxPosture)
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BLACKSPACE_API UBSAttributeComponent : public UActorComponent
@@ -21,6 +22,9 @@ public:
 
 	/* 죽음을 알리는 델리게이트 */
 	FOnDeath OnDeath;
+
+	/* 체간 게이지가 모두 찬 것을 알리는 델리게이트 */
+	FOnMaxPosture OnMaxPosture;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
@@ -36,9 +40,23 @@ protected:
 	float BaseHealth = 100.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	float MaxPosture = 30.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	float BasePosture = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	float WeightPosture = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
 	float RegenStaminaRate = 2.f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	float RegenPostureRate = 1.f;
+
 	FTimerHandle StaminaRegenTimer;
+	FTimerHandle PostureRegenTimer;
+
 
 public:	
 	UBSAttributeComponent();
@@ -58,10 +76,16 @@ public:
 	FORCEINLINE float GetBaseHealth() const { return BaseHealth; }
 	FORCEINLINE float GetHealthRatio() const { return BaseHealth / MaxHealth; }
 
+	FORCEINLINE float GetMaxPosture() const { return MaxPosture; }
+	FORCEINLINE float GetBasePosture() const { return BasePosture; }
+	FORCEINLINE float GetPostureRatio() const { return BasePosture / MaxPosture; }
+
 public:
 	bool CheckHasEnoughStamina(float StaminaCost) const;
 
-	void ToggleStaminaRegen(bool bEnabled, float DelayTime = 2.f);
+	void ToggleStaminaRegen(bool bEnabled, float DelayTime = 1.5f);
+
+	void TogglePostureRegen(bool bEnabled, float DelayTime = 1.5f);
 
 	void DecreaseStamina(float StaminaCost);
 
@@ -69,6 +93,9 @@ public:
 		
 	void TakeDamageAmount(float DamageAmount);
 
+	void TakePostureAmount(float DamageAmount);
+
 private:
-	void RegenrateStaminaHandle();
+	void RegenerateStaminaHandle();
+	void RegeneratePostureHandle();
 };

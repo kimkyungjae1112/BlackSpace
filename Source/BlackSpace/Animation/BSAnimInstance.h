@@ -71,6 +71,9 @@ public:
 	UFUNCTION()
 	void AnimNotify_ResetState();
 
+	UFUNCTION()
+	void AnimNotify_TogglePosture();
+
 public:
 	/* IBSUpdateAnyTypeInterface Implement */
 	virtual void UpdateWeaponType(const EWeaponType& InWeaponType) override;

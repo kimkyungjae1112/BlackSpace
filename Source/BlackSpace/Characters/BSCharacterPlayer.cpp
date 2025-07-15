@@ -105,15 +105,15 @@ void ABSCharacterPlayer::Tick(float DeltaTime)
 
 		if (bHit)
 		{
-			BackAttackTarget = Cast<APawn>(HitResult.GetActor());
+			VitalAttackTarget = Cast<APawn>(HitResult.GetActor());
 
-			if (BackAttackTarget)
+			if (VitalAttackTarget)
 			{
-				if (IBSAIControllerInterface* AIInterface = Cast<IBSAIControllerInterface>(BackAttackTarget->GetController()))
+				if (IBSAIControllerInterface* AIInterface = Cast<IBSAIControllerInterface>(VitalAttackTarget->GetController()))
 				{
 					if (AIInterface->IsDetectedPlayer() == false)
 					{
-						if (IBSEnemyInterface* EnemyInterface = Cast<IBSEnemyInterface>(BackAttackTarget))
+						if (IBSEnemyInterface* EnemyInterface = Cast<IBSEnemyInterface>(VitalAttackTarget))
 						{
 							if (bBackAttack != bHit)
 							{
@@ -122,17 +122,30 @@ void ABSCharacterPlayer::Tick(float DeltaTime)
 							}
 						}
 					}
+
+					if (IBSEnemyInterface* EnemyInterface = Cast<IBSEnemyInterface>(VitalAttackTarget))
+					{
+						const bool bShouldPostureAttack = EnemyInterface->IsEnabledPostureAttack()
+							&& UKismetMathLibrary::InRange_FloatFloat(VitalAttackTarget->GetDotProductTo(this), -0.1f, 1.f);
+						if (bPostureAttack != bShouldPostureAttack)
+						{
+							bPostureAttack = bShouldPostureAttack;
+							EnemyInterface->TogglePostureAttackWidgetVisibility(bShouldPostureAttack);
+						}
+					}
 				}
 			}
 		}
 		else
 		{
-			if (IBSEnemyInterface* EnemyInterface = Cast<IBSEnemyInterface>(BackAttackTarget))
+			if (IBSEnemyInterface* EnemyInterface = Cast<IBSEnemyInterface>(VitalAttackTarget))
 			{
 				bBackAttack = false;
+				bPostureAttack = false;
 				EnemyInterface->ToggleBackAttackWidgetVisibility(false);
+				EnemyInterface->TogglePostureAttackWidgetVisibility(false);
 			}
-			BackAttackTarget = nullptr;
+			VitalAttackTarget = nullptr;
 		}
 	}
 }
@@ -791,6 +804,10 @@ FGameplayTag ABSCharacterPlayer::GetAttackPerform() const
 	{
 		return BSGameplayTag::Character_Attack_BackAttack;
 	}
+	else if (bPostureAttack)
+	{
+		return BSGameplayTag::Character_Attack_MaxPostureAttack;
+	}
 	return BSGameplayTag::Character_Attack_Light;
 }
 
@@ -866,13 +883,24 @@ void ABSCharacterPlayer::DoAttack(const FGameplayTag& AttackType)
 
 		if (AttackType == BSGameplayTag::Character_Attack_BackAttack)
 		{
-			if (IBSEnemyInterface* EnemyInterface = Cast<IBSEnemyInterface>(BackAttackTarget))
+			if (IBSEnemyInterface* EnemyInterface = Cast<IBSEnemyInterface>(VitalAttackTarget))
 			{
 				EnemyInterface->ToggleBackAttackWidgetVisibility(false);
 				EnemyInterface->BackAttacked(Weapon->GetMontageForTag(BSGameplayTag::Character_Action_BackAttackHit));
 				bBackAttack = false;
 				ResetCombo();
 				BackAttackMotionWarp();
+			}
+		}
+		else if (AttackType == BSGameplayTag::Character_Attack_MaxPostureAttack)
+		{
+			if (IBSEnemyInterface* EnemyInterface = Cast<IBSEnemyInterface>(VitalAttackTarget))
+			{
+				EnemyInterface->TogglePostureAttackWidgetVisibility(false);
+				EnemyInterface->PostureAttacked(Weapon->GetMontageForTag(BSGameplayTag::Character_Action_MaxPostureHit));
+				bPostureAttack = false;
+				ResetCombo();
+				PostureAttackMotionWarp();
 			}
 		}
 		PlayAnimMontage(Montage);
@@ -1092,10 +1120,19 @@ bool ABSCharacterPlayer::DetectForBackAttackTarget(FHitResult& OutResult)
 
 void ABSCharacterPlayer::BackAttackMotionWarp()
 {
-	const FVector Target = BackAttackTarget->GetActorLocation() + (BackAttackTarget->GetActorForwardVector() * -1) * 100.f;
-	const FRotator TargetRotation = BackAttackTarget->GetActorRotation();
+	const FVector Target = VitalAttackTarget->GetActorLocation() + (VitalAttackTarget->GetActorForwardVector() * -1) * 100.f;
+	const FRotator TargetRotation = VitalAttackTarget->GetActorRotation();
 	MotionWarpComp->AddOrUpdateWarpTargetFromLocationAndRotation(TEXT("BackAttackLoc"), Target, TargetRotation);
-	BackAttackTarget = nullptr;
+	VitalAttackTarget = nullptr;
+}
+
+void ABSCharacterPlayer::PostureAttackMotionWarp()
+{
+	const FVector Target = VitalAttackTarget->GetActorLocation() + VitalAttackTarget->GetActorForwardVector() * 100.f;
+	const FVector TargetDirection = VitalAttackTarget->GetActorLocation() - Target;
+	const FRotator TargetRotation = TargetDirection.Rotation();
+	MotionWarpComp->AddOrUpdateWarpTargetFromLocationAndRotation(TEXT("PostureAttackLoc"), Target, TargetRotation);
+	VitalAttackTarget = nullptr;
 }
 
 void ABSCharacterPlayer::ChagnedWeapon(const FInventorySlot&)
