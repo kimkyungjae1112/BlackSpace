@@ -125,7 +125,13 @@ void ABSCharacterPlayer::Tick(float DeltaTime)
 
 					if (IBSEnemyInterface* EnemyInterface = Cast<IBSEnemyInterface>(VitalAttackTarget))
 					{
-						bPostureAttack = EnemyInterface->IsEnabledPostureAttack();
+						const bool bShouldPostureAttack = EnemyInterface->IsEnabledPostureAttack()
+							&& UKismetMathLibrary::InRange_FloatFloat(VitalAttackTarget->GetDotProductTo(this), -0.1f, 1.f);
+						if (bPostureAttack != bShouldPostureAttack)
+						{
+							bPostureAttack = bShouldPostureAttack;
+							EnemyInterface->TogglePostureAttackWidgetVisibility(bShouldPostureAttack);
+						}
 					}
 				}
 			}
@@ -137,6 +143,7 @@ void ABSCharacterPlayer::Tick(float DeltaTime)
 				bBackAttack = false;
 				bPostureAttack = false;
 				EnemyInterface->ToggleBackAttackWidgetVisibility(false);
+				EnemyInterface->TogglePostureAttackWidgetVisibility(false);
 			}
 			VitalAttackTarget = nullptr;
 		}
@@ -889,9 +896,11 @@ void ABSCharacterPlayer::DoAttack(const FGameplayTag& AttackType)
 		{
 			if (IBSEnemyInterface* EnemyInterface = Cast<IBSEnemyInterface>(VitalAttackTarget))
 			{
+				EnemyInterface->TogglePostureAttackWidgetVisibility(false);
 				EnemyInterface->PostureAttacked(Weapon->GetMontageForTag(BSGameplayTag::Character_Action_MaxPostureHit));
 				bPostureAttack = false;
 				ResetCombo();
+				PostureAttackMotionWarp();
 			}
 		}
 		PlayAnimMontage(Montage);
@@ -1114,6 +1123,15 @@ void ABSCharacterPlayer::BackAttackMotionWarp()
 	const FVector Target = VitalAttackTarget->GetActorLocation() + (VitalAttackTarget->GetActorForwardVector() * -1) * 100.f;
 	const FRotator TargetRotation = VitalAttackTarget->GetActorRotation();
 	MotionWarpComp->AddOrUpdateWarpTargetFromLocationAndRotation(TEXT("BackAttackLoc"), Target, TargetRotation);
+	VitalAttackTarget = nullptr;
+}
+
+void ABSCharacterPlayer::PostureAttackMotionWarp()
+{
+	const FVector Target = VitalAttackTarget->GetActorLocation() + VitalAttackTarget->GetActorForwardVector() * 100.f;
+	const FVector TargetDirection = VitalAttackTarget->GetActorLocation() - Target;
+	const FRotator TargetRotation = TargetDirection.Rotation();
+	MotionWarpComp->AddOrUpdateWarpTargetFromLocationAndRotation(TEXT("PostureAttackLoc"), Target, TargetRotation);
 	VitalAttackTarget = nullptr;
 }
 

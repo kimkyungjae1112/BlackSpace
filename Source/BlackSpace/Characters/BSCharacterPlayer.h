@@ -251,10 +251,11 @@ private:
 	void ToggleCameraViewAdjust();
 	void ToggleAimingFlag(bool InIsAiming);
 
-// 급습 공격
+// 급소 공격
 private:
 	bool DetectForBackAttackTarget(FHitResult& OutResult);
 	void BackAttackMotionWarp();
+	void PostureAttackMotionWarp();
 
 // Input 변경
 private:

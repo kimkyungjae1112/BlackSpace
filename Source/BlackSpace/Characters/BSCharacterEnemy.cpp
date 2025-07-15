@@ -67,6 +67,12 @@ ABSCharacterEnemy::ABSCharacterEnemy()
 	PostureWidgetComp->SetDrawSize(FVector2D(100.f, 5.f));
 	PostureWidgetComp->SetWidgetSpace(EWidgetSpace::Screen);
 	PostureWidgetComp->SetVisibility(false);
+
+	PostureAttackWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("PostureAttack Widget Component"));
+	PostureAttackWidgetComp->SetupAttachment(GetRootComponent());
+	PostureAttackWidgetComp->SetDrawSize(FVector2D(70.f, 70.f));
+	PostureAttackWidgetComp->SetWidgetSpace(EWidgetSpace::Screen);
+	PostureAttackWidgetComp->SetVisibility(false);
 }
 
 void ABSCharacterEnemy::BeginPlay()
@@ -213,7 +219,7 @@ void ABSCharacterEnemy::Parried()
 	}
 }
 
-void ABSCharacterEnemy::ToggleBackAttackWidgetVisibility(const bool bShouldBackAttack)
+void ABSCharacterEnemy::ToggleBackAttackWidgetVisibility(const bool bShouldBackAttack) const
 {
 	BackAttackWidgetComp->SetVisibility(bShouldBackAttack);
 }
@@ -229,7 +235,7 @@ void ABSCharacterEnemy::BackAttacked(UAnimMontage* BackAttackReactionMontage)
 
 	PlayAnimMontage(BackAttackReactionMontage);
 
-	// ApplyVitalAttack() 을 통해 대미지 전달
+	AttributeComp->TakeDamageAmount(999.f);
 }
 
 bool ABSCharacterEnemy::IsEnabledPostureAttack() const
@@ -237,6 +243,11 @@ bool ABSCharacterEnemy::IsEnabledPostureAttack() const
 	check(StateComp);
 
 	return StateComp->IsCurrentStateEqualToIt(BSGameplayTag::Character_State_MaxPosture);
+}
+
+void ABSCharacterEnemy::TogglePostureAttackWidgetVisibility(const bool bShouldPostureAttack) const
+{
+	PostureAttackWidgetComp->SetVisibility(bShouldPostureAttack);
 }
 
 void ABSCharacterEnemy::PostureAttacked(UAnimMontage* PostureAttackReactionMontage)
@@ -247,13 +258,7 @@ void ABSCharacterEnemy::PostureAttacked(UAnimMontage* PostureAttackReactionMonta
 
 	PlayAnimMontage(PostureAttackReactionMontage);
 
-	// ApplyVitalAttack() 을 통해 대미지 전달
-}
-
-void ABSCharacterEnemy::ApplyVitalAttack(const float ActualDamage) const
-{
-	check(AttributeComp);
-	AttributeComp->TakeDamageAmount(ActualDamage);
+	AttributeComp->TakeDamageAmount(999.f);
 }
 
 void ABSCharacterEnemy::SeesTarget(AActor* InTargetActor)
@@ -263,8 +268,15 @@ void ABSCharacterEnemy::SeesTarget(AActor* InTargetActor)
 
 void ABSCharacterEnemy::ToggleHealthBarVisibility(bool bVisibility) const
 {
-	HealthBarWidgetComp->SetVisibility(bVisibility);
-	PostureWidgetComp->SetVisibility(bVisibility);
+	if (HealthBarWidgetComp)
+	{
+		HealthBarWidgetComp->SetVisibility(bVisibility);
+	}
+
+	if (PostureWidgetComp)
+	{
+		PostureWidgetComp->SetVisibility(bVisibility);
+	}
 }
 
 void ABSCharacterEnemy::OnDeath()
@@ -277,7 +289,11 @@ void ABSCharacterEnemy::OnDeath()
 		AIController->GetBrainComponent()->StopLogic(TEXT("Death"));
 	}
 
-	if (!StateComp->IsCurrentStateEqualToIt(BSGameplayTag::Character_State_BackAttacked))
+	FGameplayTagContainer CheckTags;
+	CheckTags.AddTag(BSGameplayTag::Character_State_BackAttacked);
+	CheckTags.AddTag(BSGameplayTag::Character_State_MaxPosture);
+
+	if (!StateComp->IsCurrentStateEqualToAny(CheckTags))
 	{
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
@@ -419,10 +435,3 @@ void ABSCharacterEnemy::OnPosture()
 		}
 	}
 }
-
-void ABSCharacterEnemy::MaxPostureReaction()
-{
-
-}
-
-

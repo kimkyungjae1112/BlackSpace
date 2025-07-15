@@ -46,6 +46,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Enemy | Component")
 	TObjectPtr<UWidgetComponent> PostureWidgetComp;
 
+	UPROPERTY(VisibleAnywhere, Category = "Enemy | Component")
+	TObjectPtr<UWidgetComponent> PostureAttackWidgetComp;
+
 // AI
 protected:
 	UPROPERTY(EditAnywhere, Category = "Enemy | AI")
@@ -88,11 +91,11 @@ public:
 	virtual void Parried() override;
 
 	/* IBSEnemyInterface Implement */
-	virtual void ToggleBackAttackWidgetVisibility(const bool bShouldBackAttack) override;
+	virtual void ToggleBackAttackWidgetVisibility(const bool bShouldBackAttack) const override;
 	virtual void BackAttacked(UAnimMontage* BackAttackReactionMontage) override;
 	virtual bool IsEnabledPostureAttack() const override;
+	virtual void TogglePostureAttackWidgetVisibility(const bool bShouldPostureAttack) const override;
 	virtual void PostureAttacked(UAnimMontage* PostureAttackReactionMontage) override;
-	virtual void ApplyVitalAttack(const float ActualDamage) const override;
 
 public:
 	virtual void SeesTarget(AActor* InTargetActor);
@@ -109,5 +112,4 @@ protected:
 	void SetupAttribute();
 	
 	void OnPosture();
-	void MaxPostureReaction();
 };
