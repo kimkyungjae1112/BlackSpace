@@ -13,6 +13,7 @@ void UBSBossHealthBarWidget::Init(UBSAttributeComponent* AttributeComp, FText Th
 	{
 		AttributeComp->OnChangedAttribute.AddUObject(this, &ThisClass::OnAttributeChanged);
 		AttributeComp->BroadcastAttributeChanged(EAttributeType::Health);
+		AttributeComp->BroadcastAttributeChanged(EAttributeType::Posture);
 	}
 
 	if (NameWidget)
@@ -27,6 +28,9 @@ void UBSBossHealthBarWidget::OnAttributeChanged(const EAttributeType& AttributeT
 	{
 	case EAttributeType::Health:
 		HealthBarWidget->SetStatBarRatio(Ratio);
+		break;
+	case EAttributeType::Posture:
+		PostureBarWidget->SetStatBarRatio(Ratio);
 		break;
 	}
 }

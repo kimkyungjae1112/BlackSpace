@@ -23,6 +23,9 @@ protected:
 	UPROPERTY(meta=(BindWidget), BlueprintReadWrite)
 	TObjectPtr<UBSStatBarWidget> HealthBarWidget;
 
+	UPROPERTY(meta = (BindWidget), BlueprintReadWrite)
+	TObjectPtr<UBSStatBarWidget> PostureBarWidget;
+
 public:
 	void Init(UBSAttributeComponent* AttributeComp, FText ThisName);
 

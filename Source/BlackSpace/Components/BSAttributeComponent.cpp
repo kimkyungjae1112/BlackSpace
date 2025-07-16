@@ -104,8 +104,6 @@ void UBSAttributeComponent::TakeDamageAmount(float DamageAmount)
 		}
 	}
 
-	TakePostureAmount(DamageAmount);
-
 	BroadcastAttributeChanged(EAttributeType::Health);
 }
 
@@ -115,7 +113,7 @@ void UBSAttributeComponent::TakePostureAmount(float DamageAmount)
 
 	BasePosture = FMath::Clamp(BasePosture + ActualPosture, 0.f, MaxPosture);
 
-	if (BasePosture >= MaxPosture - KINDA_SMALL_NUMBER)
+	if (BasePosture >= MaxPosture)
 	{
 		if (UBSStateComponent* StateComp = GetOwner()->GetComponentByClass<UBSStateComponent>())
 		{
@@ -152,7 +150,7 @@ void UBSAttributeComponent::RegeneratePostureHandle()
 {
 	BasePosture = FMath::Clamp(BasePosture - RegenPostureRate, 0.f, MaxPosture);
 
-	if (BasePosture <= 0.f - KINDA_SMALL_NUMBER)
+	if (BasePosture <= 0.f)
 	{
 		TogglePostureRegen(false);
 	}

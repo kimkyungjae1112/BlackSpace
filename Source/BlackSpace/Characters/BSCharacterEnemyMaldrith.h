@@ -40,6 +40,9 @@ public:
 public:
 	virtual void Tick(float DeltaSeconds) override;
 
+	/* IBSEnemyInterface Implement */
+	virtual void PostureAttacked(UAnimMontage* PostureAttackReactionMontage) override;
+
 public:
 	virtual void SeesTarget(AActor* InTargetActor) override;
 

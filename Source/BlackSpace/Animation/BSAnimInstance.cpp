@@ -58,13 +58,9 @@ void UBSAnimInstance::AnimNotify_ResetState()
 
 void UBSAnimInstance::AnimNotify_TogglePosture()
 {
-	if (UBSAttributeComponent* AttributeComp = GetOwningActor()->GetComponentByClass<UBSAttributeComponent>())
-	{
-		AttributeComp->TogglePostureRegen(true);
-	}
-
 	if (UBSStateComponent* StateComp = GetOwningActor()->GetComponentByClass<UBSStateComponent>())
 	{
+		StateComp->ToggleMovementInput(true);
 		StateComp->SetState(FGameplayTag::EmptyTag);
 	}
 }
