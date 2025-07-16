@@ -92,3 +92,7 @@ void ABSCharacterEnemyMaldrith::OnDeath()
 		MaldrithMusicComp->FadeOut(2.f, 0);
 	}
 }
+
+void ABSCharacterEnemyMaldrith::HitReaction(const AActor* Attacker, const EDamageType& DamageType)
+{
+}

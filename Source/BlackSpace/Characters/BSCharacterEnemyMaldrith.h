@@ -49,5 +49,8 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+// 죽음 및 피격 관련
+protected:
 	virtual void OnDeath() override;
+	virtual void HitReaction(const AActor* Attacker, const EDamageType& DamageType) override;
 };
