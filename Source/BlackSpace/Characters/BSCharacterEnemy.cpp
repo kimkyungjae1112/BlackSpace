@@ -101,10 +101,15 @@ float ABSCharacterEnemy::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 {
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	if (AttributeComp)
+	check(AttributeComp);
+
+	AttributeComp->TakeDamageAmount(ActualDamage);
+
+	if (!IsEnabledPostureAttack())
 	{
-		AttributeComp->TakeDamageAmount(ActualDamage);
+		AttributeComp->TakePostureAmount(ActualDamage);
 		AttributeComp->TogglePostureRegen(false);
+		AttributeComp->TogglePostureRegen(true, 2.f);
 	}
 
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
@@ -128,6 +133,9 @@ float ABSCharacterEnemy::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 		const FRadialDamageEvent* RadialDamageEvent = static_cast<const FRadialDamageEvent*>(&DamageEvent);
 
 		const FVector HitLocation = RadialDamageEvent->Origin;
+
+		// AI가 데미지를 인식할 수 있도록 알려줌.
+		UAISense_Damage::ReportDamageEvent(GetWorld(), this, EventInstigator->GetPawn(), ActualDamage, HitLocation, HitLocation);
 
 		ImpactEffect(HitLocation);
 
@@ -258,7 +266,8 @@ void ABSCharacterEnemy::PostureAttacked(UAnimMontage* PostureAttackReactionMonta
 
 	PlayAnimMontage(PostureAttackReactionMontage);
 
-	AttributeComp->TakeDamageAmount(999.f);
+	AttributeComp->TakeDamageAmount(150.f);
+	AttributeComp->TogglePostureRegen(true);
 }
 
 void ABSCharacterEnemy::SeesTarget(AActor* InTargetActor)
@@ -317,7 +326,7 @@ void ABSCharacterEnemy::OnDeath()
 		ABSPickupItem* PickupItem = GetWorld()->SpawnActorDeferred<ABSPickupItem>(ABSPickupItem::StaticClass(), GetActorTransform(), nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
 		PickupItem->SetEquipmentClass(Weapon->GetClass());
 		PickupItem->FinishSpawning(GetMesh()->GetSocketTransform(TEXT("hand_rSocket")));
-		
+
 		Weapon->Destroy();
 	}
 
@@ -394,15 +403,21 @@ void ABSCharacterEnemy::OnChangedAttribute(const EAttributeType& AttributeType, 
 	switch (AttributeType)
 	{
 	case EAttributeType::Health:
-		if (UBSStatBarWidget* StatBarWidget = Cast<UBSStatBarWidget>(HealthBarWidgetComp->GetWidget()))
+		if (HealthBarWidgetComp)
 		{
-			StatBarWidget->SetStatBarRatio(InRatio);
+			if (UBSStatBarWidget* StatBarWidget = Cast<UBSStatBarWidget>(HealthBarWidgetComp->GetWidget()))
+			{
+				StatBarWidget->SetStatBarRatio(InRatio);
+			}
 		}
 		break;
 	case EAttributeType::Posture:
-		if (UBSStatBarWidget* StatBarWidget = Cast<UBSStatBarWidget>(PostureWidgetComp->GetWidget()))
+		if (PostureWidgetComp)
 		{
-			StatBarWidget->SetStatBarRatio(InRatio);
+			if (UBSStatBarWidget* StatBarWidget = Cast<UBSStatBarWidget>(PostureWidgetComp->GetWidget()))
+			{
+				StatBarWidget->SetStatBarRatio(InRatio);
+			}
 		}
 		break;
 	}

@@ -6,6 +6,8 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Characters/BSCharacterEnemyMaldrith.h"
 #include "Components/BSAttributeComponent.h"
+#include "Components/BSStateComponent.h"
+#include "BSGameplayTag.h"
 
 void UBTService_SelectBehaviorMaldrith::UpdateBehavior(UBlackboardComponent* BlackboardComp, ABSCharacterEnemy* ControlledEnemy) const
 {
@@ -13,32 +15,47 @@ void UBTService_SelectBehaviorMaldrith::UpdateBehavior(UBlackboardComponent* Bla
 	check(ControlledEnemy);
 
 	AActor* Target = Cast<AActor>(BlackboardComp->GetValueAsObject(TargetKey.SelectedKeyName));
+	
+	UBSStateComponent* StateComp = ControlledEnemy->GetComponentByClass<UBSStateComponent>();
+	check(StateComp);
 
-	if (IsValid(Target))
+	FGameplayTagContainer CheckTags;
+	CheckTags.AddTag(BSGameplayTag::Character_State_Parried);
+	CheckTags.AddTag(BSGameplayTag::Character_State_Stunned);
+	CheckTags.AddTag(BSGameplayTag::Character_State_MaxPosture);
+
+	if (StateComp->IsCurrentStateEqualToAny(CheckTags))
 	{
-		if (UBSAttributeComponent* AttributeComp = ControlledEnemy->GetComponentByClass<UBSAttributeComponent>())
-		{
-			if (AttributeComp->GetBaseStamina() <= StaminaCheckValue)
-			{
-				SetBehaviorKey(BlackboardComp, EAIBehavior::Strafe);
-			}
-			else
-			{
-				const float Distance = Target->GetDistanceTo(ControlledEnemy);
-
-				if (Distance < AttackRangeDistance)
-				{
-					SetBehaviorKey(BlackboardComp, EAIBehavior::MeleeAttack);
-				}
-				else
-				{
-					SetBehaviorKey(BlackboardComp, EAIBehavior::Approach);
-				}
-			}
-		}
+		SetBehaviorKey(BlackboardComp, EAIBehavior::Stunned);
 	}
 	else
 	{
-		SetBehaviorKey(BlackboardComp, EAIBehavior::Idle);
+		if (IsValid(Target))
+		{
+			if (UBSAttributeComponent* AttributeComp = ControlledEnemy->GetComponentByClass<UBSAttributeComponent>())
+			{
+				if (AttributeComp->GetBaseStamina() <= StaminaCheckValue)
+				{
+					SetBehaviorKey(BlackboardComp, EAIBehavior::Strafe);
+				}
+				else
+				{
+					const float Distance = Target->GetDistanceTo(ControlledEnemy);
+
+					if (Distance < AttackRangeDistance)
+					{
+						SetBehaviorKey(BlackboardComp, EAIBehavior::MeleeAttack);
+					}
+					else
+					{
+						SetBehaviorKey(BlackboardComp, EAIBehavior::Approach);
+					}
+				}
+			}
+		}
+		else
+		{
+			SetBehaviorKey(BlackboardComp, EAIBehavior::Idle);
+		}
 	}
 }

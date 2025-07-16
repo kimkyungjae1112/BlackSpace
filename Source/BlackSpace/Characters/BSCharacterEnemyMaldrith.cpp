@@ -19,6 +19,13 @@ void ABSCharacterEnemyMaldrith::Tick(float DeltaSeconds)
 
 }
 
+void ABSCharacterEnemyMaldrith::PostureAttacked(UAnimMontage* PostureAttackReactionMontage)
+{
+	Super::PostureAttacked(PostureAttackReactionMontage);
+
+	PlayAnimMontage(PostureAttackReactionMontage);
+}
+
 void ABSCharacterEnemyMaldrith::SeesTarget(AActor* InTargetActor)
 {
 	if (IsValid(InTargetActor))
@@ -52,6 +59,11 @@ void ABSCharacterEnemyMaldrith::BeginPlay()
 	if (BackAttackWidgetComp)
 	{
 		BackAttackWidgetComp->DestroyComponent();
+	}
+
+	if (PostureWidgetComp)
+	{
+		PostureWidgetComp->DestroyComponent();
 	}
 
 	if (BossHealthBarWidgetClass)
