@@ -28,4 +28,6 @@ public:
 	virtual void PerformAttack(const FGameplayTag& AttackTypeTag, FOnMontageEnded& MontageEndedDelegate) {}
 
 	virtual void Parried() {}
+
+	virtual void EnemyBlocking() {}
 };

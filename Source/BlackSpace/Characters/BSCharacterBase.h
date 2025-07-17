@@ -8,6 +8,8 @@
 #include "BSDefine.h"
 #include "BSCharacterBase.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FDelegateOnAttackStart)
+
 class USoundCue;
 
 UCLASS()
@@ -16,6 +18,10 @@ class BLACKSPACE_API ABSCharacterBase
 	, public IBSCombatInterface
 {
 	GENERATED_BODY()
+
+public:
+	/* 플레이어의 공격 시작을 알리는 델리게이트 */
+	static FDelegateOnAttackStart OnAttackStart;
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Effect")
