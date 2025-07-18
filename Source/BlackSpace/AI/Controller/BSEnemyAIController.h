@@ -35,6 +35,7 @@ public:
 public:
 	virtual bool IsDetectedPlayer() const override;
 
+	float ToTargetDist() const;
 	void StopUpdateTarget();
 
 protected:

@@ -20,6 +20,17 @@ bool ABSEnemyAIController::IsDetectedPlayer() const
 	return (Blackboard->GetValueAsObject(TEXT("Target")) != nullptr) ? true : false;
 }
 
+float ABSEnemyAIController::ToTargetDist() const
+{
+	AActor* Target = Cast<AActor>(Blackboard->GetValueAsObject(TEXT("Target")));
+	if (IsValid(Target))
+	{
+		return GetPawn()->GetDistanceTo(Target);
+	}
+
+	return -1.f;
+}
+
 void ABSEnemyAIController::StopUpdateTarget()
 {
 	GetWorld()->GetTimerManager().ClearTimer(PerceptionTimerHandle);

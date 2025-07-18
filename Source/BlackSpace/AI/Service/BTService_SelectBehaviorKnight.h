@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "AI/Service/BTService_SelectBehavior.h"
-#include "BTService_SelectBehaviorMaldrith.generated.h"
+#include "BTService_SelectBehaviorKnight.generated.h"
 
 UCLASS()
-class BLACKSPACE_API UBTService_SelectBehaviorMaldrith : public UBTService_SelectBehavior
+class BLACKSPACE_API UBTService_SelectBehaviorKnight : public UBTService_SelectBehavior
 {
 	GENERATED_BODY()
 	

@@ -404,6 +404,9 @@ void ABSCharacterPlayer::HitReaction(const AActor* Attacker, const EDamageType& 
 			case EDamageType::KnockBack:
 				if (UAnimMontage* HitReactAnimMontage = MainWeapon->GetMontageForTag(BSGameplayTag::Character_Action_KnockBackHit))
 				{
+					const FRotator Rotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), Attacker->GetActorLocation());
+					SetActorRotation(Rotation);
+
 					PlayAnimMontage(HitReactAnimMontage);
 				}
 			}
@@ -731,7 +734,6 @@ void ABSCharacterPlayer::SpecialAttack()
 void ABSCharacterPlayer::Blocking()
 {
 	check(CombatComp);
-	check(StateComp);
 
 	if (CanBlockingStance())
 	{
@@ -741,9 +743,9 @@ void ABSCharacterPlayer::Blocking()
 		{
 			AnimInterface->UpdateBlcokingState(true);
 
-			GetWorld()->GetTimerManager().SetTimer(ParryStartTimer, this, &ThisClass::Parry, 1.f, false, 0.2f);
+			GetWorld()->GetTimerManager().SetTimer(ParryStartTimer, this, &ThisClass::Parry, 1.f, false, 0.1f);
 
-			GetWorld()->GetTimerManager().SetTimer(ParryEndTimer, this, &ThisClass::ParryEnd, 1.f, false, 0.8f);
+			GetWorld()->GetTimerManager().SetTimer(ParryEndTimer, this, &ThisClass::ParryEnd, 1.f, false, 0.5f);
 		}
 	}
 }

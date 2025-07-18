@@ -103,9 +103,18 @@ float ABSCharacterEnemy::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 
 	check(AttributeComp);
 
+	// 대치 중인가
+	const bool bFacing = UKismetMathLibrary::InRange_FloatFloat(GetDotProductTo(EventInstigator->GetPawn()), -0.1f, 1.f);
+
+	if (IsBlockingState() && bFacing)
+	{
+		ImpactEffect(GetActorLocation());
+		return 0.f;
+	}
+
 	AttributeComp->TakeDamageAmount(ActualDamage);
 
-	if (!IsEnabledPostureAttack())
+	if (!IsEnabledPostureAttack() && !IsBlockingState())
 	{
 		AttributeComp->TakePostureAmount(ActualDamage);
 		AttributeComp->TogglePostureRegen(false);
@@ -204,8 +213,8 @@ void ABSCharacterEnemy::Parried()
 
 	if (StateComp->IsCurrentStateEqualToIt(BSGameplayTag::Character_State_MaxPosture)) return;
 
-	StopAnimMontage();
 	StateComp->SetState(BSGameplayTag::Character_State_Parried);
+	StopAnimMontage();
 
 	if (const ABSWeapon* MainWeapon = CombatComp->GetMainWeapon())
 	{
@@ -227,9 +236,20 @@ void ABSCharacterEnemy::Parried()
 	}
 }
 
+void ABSCharacterEnemy::EnemyBlocking()
+{
+}
+
+void ABSCharacterEnemy::EnemyDodge()
+{
+}
+
 void ABSCharacterEnemy::ToggleBackAttackWidgetVisibility(const bool bShouldBackAttack) const
 {
-	BackAttackWidgetComp->SetVisibility(bShouldBackAttack);
+	if (BackAttackWidgetComp)
+	{
+		BackAttackWidgetComp->SetVisibility(bShouldBackAttack);
+	}
 }
 
 void ABSCharacterEnemy::BackAttacked(UAnimMontage* BackAttackReactionMontage)
@@ -255,7 +275,10 @@ bool ABSCharacterEnemy::IsEnabledPostureAttack() const
 
 void ABSCharacterEnemy::TogglePostureAttackWidgetVisibility(const bool bShouldPostureAttack) const
 {
-	PostureAttackWidgetComp->SetVisibility(bShouldPostureAttack);
+	if (PostureAttackWidgetComp)
+	{
+		PostureAttackWidgetComp->SetVisibility(bShouldPostureAttack);
+	}
 }
 
 void ABSCharacterEnemy::PostureAttacked(UAnimMontage* PostureAttackReactionMontage)
@@ -351,14 +374,34 @@ void ABSCharacterEnemy::SetDeathState()
 
 void ABSCharacterEnemy::ImpactEffect(const FVector& Location)
 {
-	if (ImpactSound)
+	if (IsBlockingState())
 	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, Location);
+		BlockImpactEffect(Location);
+	}
+	else
+	{
+		if (ImpactSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, Location);
+		}
+
+		if (ImpactParticle)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, Location);
+		}
+	}
+}
+
+void ABSCharacterEnemy::BlockImpactEffect(const FVector& Location)
+{
+	if (BlockingImpactSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), BlockingImpactSound, Location);
 	}
 
-	if (ImpactParticle)
+	if (BlockingImpactParticle)
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, Location);
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BlockingImpactParticle, Location);
 	}
 }
 
@@ -449,4 +492,13 @@ void ABSCharacterEnemy::OnPosture()
 			// 급소 공격을 할 수 있는 어떤 표시..
 		}
 	}
+}
+
+bool ABSCharacterEnemy::IsBlockingState() const
+{
+	if (StateComp)
+	{
+		return StateComp->IsCurrentStateEqualToIt(BSGameplayTag::Character_State_Blocking) && bEnabledBlocking;
+	}
+	return false;
 }

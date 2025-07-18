@@ -69,6 +69,10 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Enemy | Set Value")
 	int32 StunnedRate = 0;
 
+protected:
+	UPROPERTY(VisibleAnywhere, Category = "Enemy | Set Value")
+	bool bEnabledBlocking = false;
+
 public:
 	ABSCharacterEnemy();
 
@@ -89,6 +93,8 @@ public:
 	virtual void DeactivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType) override;
 	virtual void PerformAttack(const FGameplayTag& AttackTypeTag, FOnMontageEnded& MontageEndedDelegate) override;
 	virtual void Parried() override;
+	virtual void EnemyBlocking() override;
+	virtual void EnemyDodge() override;
 
 	/* IBSEnemyInterface Implement */
 	virtual void ToggleBackAttackWidgetVisibility(const bool bShouldBackAttack) const override;
@@ -106,10 +112,16 @@ protected:
 	virtual void OnDeath() override;
 	void SetDeathState();
 	virtual void ImpactEffect(const FVector& Location) override;
+	void BlockImpactEffect(const FVector& Location);
+	
 	virtual void HitReaction(const AActor* Attacker, const EDamageType& DamageType) override;
 	
 	void OnChangedAttribute(const EAttributeType& AttributeType, float InRatio);
 	void SetupAttribute();
 	
 	void OnPosture();
+
+// 방어
+protected:
+	bool IsBlockingState() const;
 };

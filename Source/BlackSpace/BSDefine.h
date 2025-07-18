@@ -47,6 +47,7 @@ enum class EAIBehavior : uint8
 	Approach,
 	Stunned,
 	Strafe,
+	Blocking,
 };
 
 UENUM(BlueprintType)

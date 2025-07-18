@@ -3,6 +3,7 @@
 
 #include "Characters/BSCharacterBase.h"
 
+FDelegateOnAttackStart ABSCharacterBase::OnAttackStart;
 
 ABSCharacterBase::ABSCharacterBase()
 {
