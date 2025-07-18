@@ -36,7 +36,10 @@ protected:
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Enemy | Set Value")
-	int32 BlockingRate = 15;
+	int32 BlockingRate = 30;
+
+	UPROPERTY(EditAnywhere, Category = "Enemy | Set Value")
+	int32 ParryingAttackRate = 30;
 
 	FTimerHandle BlockingDelayTimerHandle;
 
@@ -50,6 +53,7 @@ public:
 
 	/* IBSCombatInterface Implement */
 	virtual void EnemyBlocking() override;
+	virtual void EnemyDodge() override;
 
 	/* IBSEnemyInterface Implement */
 	virtual void PostureAttacked(UAnimMontage* PostureAttackReactionMontage) override;
@@ -65,6 +69,10 @@ protected:
 	virtual void OnDeath() override;
 	virtual void HitReaction(const AActor* Attacker, const EDamageType& DamageType) override;
 
+// 방어
 protected:
 	bool CanBlocking() const;
+
+	UFUNCTION()
+	void BlockingEnableAction();
 };

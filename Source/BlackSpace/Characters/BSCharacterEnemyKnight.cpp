@@ -5,13 +5,16 @@
 #include "Components/WidgetComponent.h"
 #include "Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Animation/AnimInstance.h"
 
 #include "UI/BSBossHealthBarWidget.h"
 #include "Interface/BSUpdateAnyTypeInterface.h"
 #include "Components/BSStateComponent.h"
 #include "Components/BSAttributeComponent.h"
+#include "Components/BSCombatComponent.h"
 #include "AI/Controller/BSEnemyAIController.h"
+#include "Equipments/BSWeapon.h"
 
 ABSCharacterEnemyKnight::ABSCharacterEnemyKnight()
 {
@@ -27,6 +30,23 @@ float ABSCharacterEnemyKnight::TakeDamage(float DamageAmount, FDamageEvent const
 {
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
+	// 대치 중인가
+	const bool bFacing = UKismetMathLibrary::InRange_FloatFloat(GetDotProductTo(EventInstigator->GetPawn()), -0.1f, 1.f);
+
+	if (IsBlockingState() && bFacing)
+	{
+		if (ParryingAttackRate >= FMath::RandRange(1, 100))
+		{
+			if (ABSWeapon* Weapon = CombatComp->GetMainWeapon())
+			{
+				if (UAnimMontage* Montage = Weapon->GetMontageForTag(BSGameplayTag::Character_Attack_Special))
+				{
+					PlayAnimMontage(Montage);
+				}
+			}
+		}
+	}
+
 	return 0.0f;
 }
 
@@ -40,7 +60,7 @@ void ABSCharacterEnemyKnight::EnemyBlocking()
 {
 	if (ABSEnemyAIController* AIController = Cast<ABSEnemyAIController>(GetController()))
 	{
-		if (CanBlocking() && BlockingRate >= FMath::RandRange(1, 100))
+		if (CanBlocking() && BlockingRate >= FMath::RandRange(1, 100) && AIController->ToTargetDist() <= 300.f)
 		{
 			StateComp->SetState(BSGameplayTag::Character_State_Blocking);
 			
@@ -50,26 +70,20 @@ void ABSCharacterEnemyKnight::EnemyBlocking()
 				bEnabledBlocking = true;
 			}
 
-			FTimerDelegate TimerDelegate;
-			TimerDelegate.BindLambda([this]()
-				{
-					FGameplayTagContainer CheckTags;
-					CheckTags.AddTag(BSGameplayTag::Character_State_Death);
-					CheckTags.AddTag(BSGameplayTag::Character_State_MaxPosture);
-					if (StateComp->IsCurrentStateEqualToAny(CheckTags) == false)
-					{
-						StateComp->ClearState();
+			FLatentActionInfo LatentAction;
+			LatentAction.CallbackTarget = this;
+			LatentAction.ExecutionFunction = "BlockingEnableAction";
+			LatentAction.Linkage = 0;
+			LatentAction.UUID = 0;
 
-						if (IBSUpdateAnyTypeInterface* AnimInterface = Cast<IBSUpdateAnyTypeInterface>(GetMesh()->GetAnimInstance()))
-						{
-							AnimInterface->UpdateBlcokingState(false);
-							bEnabledBlocking = false;
-						}
-					}
-				});
-			GetWorld()->GetTimerManager().SetTimer(BlockingDelayTimerHandle, TimerDelegate, 2.f, false);
+			UKismetSystemLibrary::RetriggerableDelay(GetWorld(), 2.f, LatentAction);
 		}
 	}
+}
+
+void ABSCharacterEnemyKnight::EnemyDodge()
+{
+
 }
 
 void ABSCharacterEnemyKnight::PostureAttacked(UAnimMontage* PostureAttackReactionMontage)
@@ -164,5 +178,25 @@ bool ABSCharacterEnemyKnight::CanBlocking() const
 	CheckTags.AddTag(BSGameplayTag::Character_State_Parried);
 
 	return StateComp->IsCurrentStateEqualToAny(CheckTags) == false;
+}
+
+void ABSCharacterEnemyKnight::BlockingEnableAction()
+{
+	check(StateComp);
+
+	UE_LOG(LogTemp, Display, TEXT("방어 그만"));
+	FGameplayTagContainer CheckTags;
+	CheckTags.AddTag(BSGameplayTag::Character_State_Death);
+	CheckTags.AddTag(BSGameplayTag::Character_State_MaxPosture);
+	if (StateComp->IsCurrentStateEqualToAny(CheckTags) == false)
+	{
+		StateComp->ClearState();
+
+		if (IBSUpdateAnyTypeInterface* AnimInterface = Cast<IBSUpdateAnyTypeInterface>(GetMesh()->GetAnimInstance()))
+		{
+			AnimInterface->UpdateBlcokingState(false);
+			bEnabledBlocking = false;
+		}
+	}
 }
 

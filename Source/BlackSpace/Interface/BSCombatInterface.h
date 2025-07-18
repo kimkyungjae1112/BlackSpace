@@ -30,4 +30,6 @@ public:
 	virtual void Parried() {}
 
 	virtual void EnemyBlocking() {}
+
+	virtual void EnemyDodge() {}
 };

@@ -240,6 +240,10 @@ void ABSCharacterEnemy::EnemyBlocking()
 {
 }
 
+void ABSCharacterEnemy::EnemyDodge()
+{
+}
+
 void ABSCharacterEnemy::ToggleBackAttackWidgetVisibility(const bool bShouldBackAttack) const
 {
 	if (BackAttackWidgetComp)

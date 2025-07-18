@@ -94,6 +94,7 @@ public:
 	virtual void PerformAttack(const FGameplayTag& AttackTypeTag, FOnMontageEnded& MontageEndedDelegate) override;
 	virtual void Parried() override;
 	virtual void EnemyBlocking() override;
+	virtual void EnemyDodge() override;
 
 	/* IBSEnemyInterface Implement */
 	virtual void ToggleBackAttackWidgetVisibility(const bool bShouldBackAttack) const override;
