@@ -404,6 +404,9 @@ void ABSCharacterPlayer::HitReaction(const AActor* Attacker, const EDamageType& 
 			case EDamageType::KnockBack:
 				if (UAnimMontage* HitReactAnimMontage = MainWeapon->GetMontageForTag(BSGameplayTag::Character_Action_KnockBackHit))
 				{
+					const FRotator Rotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), Attacker->GetActorLocation());
+					SetActorRotation(Rotation);
+
 					PlayAnimMontage(HitReactAnimMontage);
 				}
 			}
