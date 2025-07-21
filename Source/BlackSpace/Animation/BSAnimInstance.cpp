@@ -60,8 +60,14 @@ void UBSAnimInstance::AnimNotify_TogglePosture()
 {
 	if (UBSStateComponent* StateComp = GetOwningActor()->GetComponentByClass<UBSStateComponent>())
 	{
-		StateComp->ToggleMovementInput(true);
-		StateComp->SetState(FGameplayTag::EmptyTag);
+		FGameplayTagContainer CheckTags;
+		CheckTags.AddTag(BSGameplayTag::Character_State_Stunned);
+		CheckTags.AddTag(BSGameplayTag::Character_State_Death);
+		if (StateComp->IsCurrentStateEqualToAny(CheckTags) == false)
+		{
+			StateComp->ToggleMovementInput(true);
+			StateComp->SetState(FGameplayTag::EmptyTag);
+		}
 	}
 }
 

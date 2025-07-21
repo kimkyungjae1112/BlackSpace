@@ -4,12 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "Characters/BSCharacterEnemy.h"
+#include "Interface/BSSecondPhaseMatInterface.h"
 #include "BSCharacterEnemyKnight.generated.h"
 
 class UBSBossHealthBarWidget;
+class ABSWeapon;
 
 UCLASS()
-class BLACKSPACE_API ABSCharacterEnemyKnight : public ABSCharacterEnemy
+class BLACKSPACE_API ABSCharacterEnemyKnight 
+	: public ABSCharacterEnemy
+	, public IBSSecondPhaseMatInterface
 {
 	GENERATED_BODY()
 	
@@ -25,6 +29,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Enemy | UI")
 	TObjectPtr<UBSBossHealthBarWidget> BossHealthBarWidget;
 
+// Sound
 protected:
 	UPROPERTY(EditAnywhere, Category = "Enemy | Sound")
 	TObjectPtr<USoundWave> KnightMusicAsset;
@@ -34,6 +39,11 @@ protected:
 
 	bool bStartedBossMusic = false;
 
+// Weapon
+protected:
+	UPROPERTY(EditAnywhere, Category = "Enemy | Weapon")
+	TSubclassOf<ABSWeapon> GreateSwordWeaponClass;
+
 protected:
 	UPROPERTY(EditAnywhere, Category = "Enemy | Set Value")
 	int32 BlockingRate = 30;
@@ -41,8 +51,15 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Enemy | Set Value")
 	int32 ParryingAttackRate = 30;
 
+	UPROPERTY(VisibleAnywhere, Category = "Enemy | Set Value")
+	bool bIsActiveSecondPhase = false;
+
 	FTimerHandle BlockingDelayTimerHandle;
 
+protected:
+	UPROPERTY(EditAnywhere, Category = "Enemy | Montage")
+	TObjectPtr<UAnimMontage> SecondPhaseMontage;
+	
 public:
 	ABSCharacterEnemyKnight();
 
@@ -57,6 +74,9 @@ public:
 
 	/* IBSEnemyInterface Implement */
 	virtual void PostureAttacked(UAnimMontage* PostureAttackReactionMontage) override;
+
+	/* IBSSecondePhaseInterface Implement */
+	virtual void LoadBodyMeshMaterial() const override;
 
 public:
 	virtual void SeesTarget(AActor* InTargetActor) override;
@@ -75,4 +95,8 @@ protected:
 
 	UFUNCTION()
 	void BlockingEnableAction();
+
+// 무기 교체
+protected:
+	void ChangeWeapon();
 };
