@@ -34,7 +34,7 @@ float ABSCharacterEnemyKnight::TakeDamage(float DamageAmount, FDamageEvent const
 	{
 		if (Anim->Montage_IsPlaying(SecondPhaseMontage))
 		{
-			ActualDamage /= 5.f;
+			ActualDamage /= 7.f;
 			AttributeComp->TakePostureAmount(ActualDamage);
 			return ActualDamage;
 		}
@@ -49,7 +49,7 @@ float ABSCharacterEnemyKnight::TakeDamage(float DamageAmount, FDamageEvent const
 
 	AttributeComp->TakeDamageAmount(ActualDamage);
 
-	if (AttributeComp->GetHealthRatio() <= 0.5f && !bIsActiveSecondPhase)
+	if (AttributeComp->GetHealthRatio() <= 0.6f && !bIsActiveSecondPhase)
 	{
 		ChangeWeapon();
 
@@ -60,6 +60,11 @@ float ABSCharacterEnemyKnight::TakeDamage(float DamageAmount, FDamageEvent const
 
 	if (!IsEnabledPostureAttack() && !IsBlockingState())
 	{
+		if (bIsActiveSecondPhase)
+		{
+			ActualDamage /= 0.7f;
+		}
+
 		AttributeComp->TakePostureAmount(ActualDamage);
 		AttributeComp->TogglePostureRegen(false);
 		AttributeComp->TogglePostureRegen(true, 2.f);
@@ -71,7 +76,7 @@ float ABSCharacterEnemyKnight::TakeDamage(float DamageAmount, FDamageEvent const
 		{
 			if (ABSWeapon* Weapon = CombatComp->GetMainWeapon())
 			{
-				if (UAnimMontage* Montage = Weapon->GetMontageForTag(BSGameplayTag::Character_Attack_Special))
+				if (UAnimMontage* Montage = Weapon->GetMontageForTag(BSGameplayTag::Character_Attack_ParryingAttack))
 				{
 					PlayAnimMontage(Montage);
 				}
