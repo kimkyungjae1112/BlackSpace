@@ -30,8 +30,45 @@ float ABSCharacterEnemyKnight::TakeDamage(float DamageAmount, FDamageEvent const
 {
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
+	if (UAnimInstance* Anim = GetMesh()->GetAnimInstance())
+	{
+		if (Anim->Montage_IsPlaying(SecondPhaseMontage))
+		{
+			ActualDamage /= 7.f;
+			AttributeComp->TakePostureAmount(ActualDamage);
+			return ActualDamage;
+		}
+	}
+
+	check(StateComp);
+	check(AttributeComp);
+	check(CombatComp);
+
 	// 대치 중인가
 	const bool bFacing = UKismetMathLibrary::InRange_FloatFloat(GetDotProductTo(EventInstigator->GetPawn()), -0.1f, 1.f);
+
+	AttributeComp->TakeDamageAmount(ActualDamage);
+
+	if (AttributeComp->GetHealthRatio() <= 0.6f && !bIsActiveSecondPhase)
+	{
+		ChangeWeapon();
+
+		bIsActiveSecondPhase = true;
+		StateComp->SetState(BSGameplayTag::Character_State_Stunned);
+		PlayAnimMontage(SecondPhaseMontage);
+	}
+
+	if (!IsEnabledPostureAttack() && !IsBlockingState())
+	{
+		if (bIsActiveSecondPhase)
+		{
+			ActualDamage /= 0.7f;
+		}
+
+		AttributeComp->TakePostureAmount(ActualDamage);
+		AttributeComp->TogglePostureRegen(false);
+		AttributeComp->TogglePostureRegen(true, 2.f);
+	}
 
 	if (IsBlockingState() && bFacing)
 	{
@@ -39,7 +76,7 @@ float ABSCharacterEnemyKnight::TakeDamage(float DamageAmount, FDamageEvent const
 		{
 			if (ABSWeapon* Weapon = CombatComp->GetMainWeapon())
 			{
-				if (UAnimMontage* Montage = Weapon->GetMontageForTag(BSGameplayTag::Character_Attack_Special))
+				if (UAnimMontage* Montage = Weapon->GetMontageForTag(BSGameplayTag::Character_Attack_ParryingAttack))
 				{
 					PlayAnimMontage(Montage);
 				}
@@ -91,6 +128,41 @@ void ABSCharacterEnemyKnight::PostureAttacked(UAnimMontage* PostureAttackReactio
 	Super::PostureAttacked(PostureAttackReactionMontage);
 
 	PlayAnimMontage(PostureAttackReactionMontage);
+}
+
+void ABSCharacterEnemyKnight::LoadBodyMeshMaterial() const
+{
+	UMaterialInterface* ArmMat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Script/Engine.MaterialInstanceConstant'/Game/_Assets/DF_DRAGON_KNIGHT/MATERIALS/INSTANCES/Fire/MI_DK_Arms_fire.MI_DK_Arms_fire'"));
+	UMaterialInterface* BodyMat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Script/Engine.MaterialInstanceConstant'/Game/_Assets/DF_DRAGON_KNIGHT/MATERIALS/INSTANCES/Fire/MI_DK_Body_Fire.MI_DK_Body_Fire'"));
+	UMaterialInterface* ClothMat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Script/Engine.MaterialInstanceConstant'/Game/_Assets/DF_DRAGON_KNIGHT/MATERIALS/INSTANCES/Fire/MI_DK_Cloth_Fire.MI_DK_Cloth_Fire'"));
+	UMaterialInterface* SwordMat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Script/Engine.MaterialInstanceConstant'/Game/_Assets/DF_DRAGON_KNIGHT/MATERIALS/INSTANCES/Fire/MI_DK_Sword_Fire.MI_DK_Sword_Fire'"));
+
+	if (GetMesh())
+	{
+		if (ArmMat)
+		{
+			GetMesh()->SetMaterial(0, ArmMat);
+		}
+
+		if (BodyMat)
+		{
+			GetMesh()->SetMaterial(1, BodyMat);
+		}
+
+		if (ClothMat)
+		{
+			GetMesh()->SetMaterial(3, ClothMat);
+			GetMesh()->SetMaterial(4, ClothMat);
+		}
+	}
+
+	if (CombatComp)
+	{
+		if (ABSWeapon* Weapon = CombatComp->GetMainWeapon())
+		{
+			Weapon->MeshComp->SetMaterial(0, SwordMat);
+		}
+	}
 }
 
 void ABSCharacterEnemyKnight::SeesTarget(AActor* InTargetActor)
@@ -176,6 +248,7 @@ bool ABSCharacterEnemyKnight::CanBlocking() const
 	CheckTags.AddTag(BSGameplayTag::Character_State_Hit);
 	CheckTags.AddTag(BSGameplayTag::Character_State_MaxPosture);
 	CheckTags.AddTag(BSGameplayTag::Character_State_Parried);
+	CheckTags.AddTag(BSGameplayTag::Character_State_Stunned);
 
 	return StateComp->IsCurrentStateEqualToAny(CheckTags) == false;
 }
@@ -184,10 +257,10 @@ void ABSCharacterEnemyKnight::BlockingEnableAction()
 {
 	check(StateComp);
 
-	UE_LOG(LogTemp, Display, TEXT("방어 그만"));
 	FGameplayTagContainer CheckTags;
 	CheckTags.AddTag(BSGameplayTag::Character_State_Death);
 	CheckTags.AddTag(BSGameplayTag::Character_State_MaxPosture);
+	CheckTags.AddTag(BSGameplayTag::Character_State_Stunned);
 	if (StateComp->IsCurrentStateEqualToAny(CheckTags) == false)
 	{
 		StateComp->ClearState();
@@ -200,3 +273,19 @@ void ABSCharacterEnemyKnight::BlockingEnableAction()
 	}
 }
 
+void ABSCharacterEnemyKnight::ChangeWeapon()
+{
+	CombatComp->SetUnequipMainWeapon();
+
+	if (GreateSwordWeaponClass)
+	{
+		FActorSpawnParameters Param;
+		Param.Owner = this;
+
+		ABSWeapon* GreateSword = GetWorld()->SpawnActor<ABSWeapon>(GreateSwordWeaponClass, GetActorTransform(), Param);
+		if (GreateSword)
+		{
+			GreateSword->EquipItem();
+		}
+	}
+}

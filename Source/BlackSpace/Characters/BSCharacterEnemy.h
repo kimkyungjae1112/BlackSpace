@@ -66,12 +66,15 @@ protected:
 	FTimerHandle ParriedDelayTimerHandle;
 	FTimerHandle StunnedDelayTimerHandle;
 
-	UPROPERTY(EditAnywhere, Category = "Enemy | Set Value")
-	int32 StunnedRate = 0;
-
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "Enemy | Set Value")
 	bool bEnabledBlocking = false;
+
+	UPROPERTY(EditAnywhere, Category = "Enemy | Set Value")
+	bool bTakeDamageUsage = false;
+
+	UPROPERTY(EditAnywhere, Category = "Enemy | Set Value")
+	int32 StunnedRate = 0;
 
 public:
 	ABSCharacterEnemy();

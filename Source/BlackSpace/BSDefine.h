@@ -28,7 +28,8 @@ enum class EWeaponType : uint8
 	Sword,
 	Polearm,
 	Bow,
-	Blunt
+	Blunt,
+	GreateSword,
 };
 
 UENUM(BlueprintType)

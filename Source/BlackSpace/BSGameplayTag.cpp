@@ -33,6 +33,7 @@ namespace BSGameplayTag
 	UE_DEFINE_GAMEPLAY_TAG(Character_Attack_Special, "Character.Attack.Special");
 	UE_DEFINE_GAMEPLAY_TAG(Character_Attack_BackAttack, "Character.Attack.BackAttack");
 	UE_DEFINE_GAMEPLAY_TAG(Character_Attack_MaxPostureAttack, "Character.Attack.MaxPostureAttack");
+	UE_DEFINE_GAMEPLAY_TAG(Character_Attack_ParryingAttack, "Character.Attack.ParryingAttack");
 
 	UE_DEFINE_GAMEPLAY_TAG(Character_Attack_Fire, "Character.Attack.Fire");
 }

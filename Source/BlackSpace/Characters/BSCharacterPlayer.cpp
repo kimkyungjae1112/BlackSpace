@@ -243,6 +243,26 @@ void ABSCharacterPlayer::DeactivateWeaponCollision(const EWeaponCollisionType& W
 	}
 }
 
+void ABSCharacterPlayer::GSwordSpecialAttackExecuted(UAnimMontage* Montage)
+{
+	check(StateComp);
+	check(AttributeComp);
+	
+	StateComp->SetState(BSGameplayTag::Character_State_Hit);
+	AttributeComp->TakeDamageAmount(30.f);
+
+	GSwordSpecialAttackExecutedMotionWarp();
+	PlayAnimMontage(Montage);
+}
+
+void ABSCharacterPlayer::GSwordSpecialAttackExecutedMotionWarp() const
+{
+	const FVector Start = GetActorLocation();
+	const FVector TargetLocation = Start + (GetActorForwardVector() * 250.f) + (GetActorRightVector() * 200.f);
+
+	MotionWarpComp->AddOrUpdateWarpTargetFromLocation(TEXT("Executed"), TargetLocation);
+}
+
 void ABSCharacterPlayer::AttackFinished(const float ComboResetDelay)
 {
 	check(StateComp);
@@ -283,7 +303,7 @@ float ABSCharacterPlayer::TakeDamage(float DamageAmount, FDamageEvent const& Dam
 	if (CanAttackBlocking())
 	{
 		AttributeComp->ToggleStaminaRegen(false);
-		AttributeComp->TakeDamageAmount(0.5f);
+		AttributeComp->TakeDamageAmount(ActualDamage / 0.3f);
 		StateComp->SetState(BSGameplayTag::Character_Action_BlockingHit);
 	}
 	else

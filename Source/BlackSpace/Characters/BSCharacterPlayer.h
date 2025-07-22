@@ -7,6 +7,7 @@
 #include "GameplayTagContainer.h"
 #include "Interface/BSComboWindowInterface.h"
 #include "Interface/BSBowFireInterface.h"
+#include "Interface/BSPlayerAttackedInterface.h"
 #include "BSCharacterPlayer.generated.h"
 
 
@@ -32,6 +33,7 @@ class BLACKSPACE_API ABSCharacterPlayer
 	: public ABSCharacterBase
 	, public IBSComboWindowInterface
 	, public IBSBowFireInterface
+	, public IBSPlayerAttackedInterface
 {
 	GENERATED_BODY()
 
@@ -177,8 +179,12 @@ public:
 	virtual void BowFireFinished() override;
 
 	/* IBSCombatInterface Implement */
-	virtual void ActivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType);
-	virtual void DeactivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType);
+	virtual void ActivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType) override;
+	virtual void DeactivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType) override;
+
+	/* IBSPlayerAttackedInterface Implement */
+	virtual void GSwordSpecialAttackExecuted(UAnimMontage* Montage) override;
+	void GSwordSpecialAttackExecutedMotionWarp() const;
 
 	void AttackFinished(const float ComboResetDelay);
 

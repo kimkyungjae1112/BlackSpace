@@ -112,13 +112,16 @@ float ABSCharacterEnemy::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 		return 0.f;
 	}
 
-	AttributeComp->TakeDamageAmount(ActualDamage);
-
-	if (!IsEnabledPostureAttack() && !IsBlockingState())
+	if (bTakeDamageUsage)
 	{
-		AttributeComp->TakePostureAmount(ActualDamage);
-		AttributeComp->TogglePostureRegen(false);
-		AttributeComp->TogglePostureRegen(true, 2.f);
+		AttributeComp->TakeDamageAmount(ActualDamage);
+
+		if (!IsEnabledPostureAttack() && !IsBlockingState())
+		{
+			AttributeComp->TakePostureAmount(ActualDamage);
+			AttributeComp->TogglePostureRegen(false);
+			AttributeComp->TogglePostureRegen(true, 2.f);
+		}
 	}
 
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
