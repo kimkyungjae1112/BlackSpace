@@ -302,6 +302,9 @@ void ABSCharacterEnemy::TogglePostureAttackWidgetVisibility(const bool bShouldPo
 void ABSCharacterEnemy::PostureAttacked(UAnimMontage* PostureAttackReactionMontage)
 {
 	check(AttributeComp);
+	check(StateComp);
+
+	StateComp->SetState(BSGameplayTag::Character_State_MaxPostureAttacked);
 
 	StopAnimMontage();
 
@@ -358,7 +361,7 @@ void ABSCharacterEnemy::OnDeath()
 
 	FGameplayTagContainer CheckTags;
 	CheckTags.AddTag(BSGameplayTag::Character_State_BackAttacked);
-	CheckTags.AddTag(BSGameplayTag::Character_State_MaxPosture);
+	CheckTags.AddTag(BSGameplayTag::Character_State_MaxPostureAttacked);
 
 	if (!StateComp->IsCurrentStateEqualToAny(CheckTags))
 	{
@@ -399,6 +402,8 @@ void ABSCharacterEnemy::SetDeathState()
 	}
 
 	ToggleHealthBarVisibility(false);
+	ToggleBackAttackWidgetVisibility(false);
+	TogglePostureAttackWidgetVisibility(false);
 
 	FTimerHandle DeathTimer;
 	GetWorld()->GetTimerManager().SetTimer(DeathTimer, [this]()
