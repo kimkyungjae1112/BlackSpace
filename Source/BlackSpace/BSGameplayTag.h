@@ -18,6 +18,7 @@ namespace BSGameplayTag
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_State_BackAttacked);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_State_Stunned);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_State_MaxPosture);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_State_MaxPostureAttacked);
 	
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Action_Equip);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Action_Unequip);

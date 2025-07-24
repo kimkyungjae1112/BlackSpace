@@ -17,6 +17,7 @@ namespace BSGameplayTag
 	UE_DEFINE_GAMEPLAY_TAG(Character_State_BackAttacked, "Character.State.BackAttacked");
 	UE_DEFINE_GAMEPLAY_TAG(Character_State_Stunned, "Character.State.Stunned");
 	UE_DEFINE_GAMEPLAY_TAG(Character_State_MaxPosture, "Character.State.MaxPosture");
+	UE_DEFINE_GAMEPLAY_TAG(Character_State_MaxPostureAttacked, "Character.State.MaxPostureAttacked");
 
 	UE_DEFINE_GAMEPLAY_TAG(Character_Action_Equip, "Character.Action.Equip");
 	UE_DEFINE_GAMEPLAY_TAG(Character_Action_Unequip, "Character.Action.Unequip");
