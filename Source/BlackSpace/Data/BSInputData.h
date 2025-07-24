@@ -39,6 +39,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Common | Weapon")
 	TObjectPtr<UInputAction> IA_ChangeWeapon;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Common | LockOn")
+	TObjectPtr<UInputAction> IA_LockOnTarget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Common | LockOn")
+	TObjectPtr<UInputAction> IA_LeftTarget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Common | LockOn")
+	TObjectPtr<UInputAction> IA_RightTarget;
+
 	/***********************************************/
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sword | Attack")

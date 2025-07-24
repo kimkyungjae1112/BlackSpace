@@ -23,8 +23,9 @@ class UBSInventoryComponent;
 class UBSCombatComponent;
 class UBSStateComponent;
 class UBSRotationComponent;
-class UBSPlayerStatusWidget;
 class UMotionWarpingComponent;
+class UBSTargetingComponent;
+class UBSPlayerStatusWidget;
 class ABSPlayerController;
 class ABSArrow;
 
@@ -78,6 +79,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
 	TObjectPtr<UMotionWarpingComponent> MotionWarpComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
+	TObjectPtr<UBSTargetingComponent> TargetingComp;
 
 // UI
 protected:
@@ -228,6 +232,11 @@ private:
 	void BlockingEnd();
 	void Parry();
 	void ParryEnd();
+
+	// 락온
+	void LockOnTarget();
+	void LeftTarget();
+	void RightTarget();
 
 // 콤보 공격
 private:

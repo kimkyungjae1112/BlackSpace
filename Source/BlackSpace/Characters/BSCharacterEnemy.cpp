@@ -6,6 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Components/SphereComponent.h"
 #include "Engine/DamageEvents.h"
 #include "Sound/SoundCue.h"
 #include "Animation/AnimInstance.h"
@@ -73,6 +74,20 @@ ABSCharacterEnemy::ABSCharacterEnemy()
 	PostureAttackWidgetComp->SetDrawSize(FVector2D(70.f, 70.f));
 	PostureAttackWidgetComp->SetWidgetSpace(EWidgetSpace::Screen);
 	PostureAttackWidgetComp->SetVisibility(false);
+
+	// Targeting 구체 생성및 Collision 설정.
+	TargetingSphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("Targeting Sphere Component"));
+	TargetingSphereComp->SetupAttachment(GetRootComponent());
+	TargetingSphereComp->SetCollisionObjectType(COLLISION_OBJECT_TARGETING);
+	TargetingSphereComp->SetCollisionResponseToAllChannels(ECR_Ignore);
+	TargetingSphereComp->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+
+	LockOnWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("Lock On Widget Component"));
+	LockOnWidgetComp->SetupAttachment(GetRootComponent());
+	LockOnWidgetComp->SetRelativeLocation(FVector(0.f, 0.f, 50.f));
+	LockOnWidgetComp->SetDrawSize(FVector2D(30.f, 30.f));
+	LockOnWidgetComp->SetWidgetSpace(EWidgetSpace::Screen);
+	LockOnWidgetComp->SetVisibility(false);
 }
 
 void ABSCharacterEnemy::BeginPlay()
@@ -294,6 +309,23 @@ void ABSCharacterEnemy::PostureAttacked(UAnimMontage* PostureAttackReactionMonta
 
 	AttributeComp->TakeDamageAmount(150.f);
 	AttributeComp->TogglePostureRegen(true);
+}
+
+void ABSCharacterEnemy::OnTargeted(bool bTargeted)
+{
+	if (LockOnWidgetComp)
+	{
+		LockOnWidgetComp->SetVisibility(bTargeted);
+	}
+}
+
+bool ABSCharacterEnemy::CanBeTargeted()
+{
+	check(StateComp);
+
+	FGameplayTagContainer CheckTags;
+	CheckTags.AddTag(BSGameplayTag::Character_State_Death);
+	return StateComp->IsCurrentStateEqualToAny(CheckTags) == false;
 }
 
 void ABSCharacterEnemy::SeesTarget(AActor* InTargetActor)
