@@ -6,6 +6,7 @@
 #include "Characters/BSCharacterBase.h"
 #include "BSDefine.h"
 #include "Interface/BSEnemyInterface.h"
+#include "Interface/BSTargetingInterface.h"
 #include "BSCharacterEnemy.generated.h"
 
 class UBSStateComponent;
@@ -13,6 +14,7 @@ class UBSAttributeComponent;
 class UBSCombatComponent;
 class UBSRotationComponent;
 class UWidgetComponent;
+class USphereComponent;
 class USoundCue;
 class ATargetPoint;
 class ABSWeapon;
@@ -21,6 +23,7 @@ UCLASS()
 class BLACKSPACE_API ABSCharacterEnemy
 	: public ABSCharacterBase
 	, public IBSEnemyInterface
+	, public IBSTargetingInterface
 {
 	GENERATED_BODY()
 	
@@ -48,6 +51,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "Enemy | Component")
 	TObjectPtr<UWidgetComponent> PostureAttackWidgetComp;
+
+	UPROPERTY(VisibleAnywhere, Category = "Enemy | Component")
+	TObjectPtr<USphereComponent> TargetingSphereComp;
+
+	UPROPERTY(VisibleAnywhere, Category = "Enemy | Component")
+	TObjectPtr<UWidgetComponent> LockOnWidgetComp;
 
 // AI
 protected:
@@ -105,6 +114,10 @@ public:
 	virtual bool IsEnabledPostureAttack() const override;
 	virtual void TogglePostureAttackWidgetVisibility(const bool bShouldPostureAttack) const override;
 	virtual void PostureAttacked(UAnimMontage* PostureAttackReactionMontage) override;
+
+	/* IBSTargeting Implement */
+	virtual void OnTargeted(bool bTargeted) override;
+	virtual bool CanBeTargeted() override;
 
 public:
 	virtual void SeesTarget(AActor* InTargetActor);

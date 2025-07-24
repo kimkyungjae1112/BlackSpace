@@ -27,6 +27,7 @@
 #include "Components/BSCombatComponent.h"
 #include "Components/BSStateComponent.h"
 #include "Components/BSRotationComponent.h"
+#include "Components/BSTargetingComponent.h"
 #include "UI/BSPlayerHUDWidget.h"
 #include "UI/BSPlayerStatusWidget.h"
 #include "Interface/BSInteractInterface.h"
@@ -72,6 +73,8 @@ ABSCharacterPlayer::ABSCharacterPlayer()
 	RotationComp->bOwnerIsPlayer = true;
 
 	MotionWarpComp = CreateDefaultSubobject<UMotionWarpingComponent>(TEXT("Motion Warping Component"));
+
+	TargetingComp = CreateDefaultSubobject<UBSTargetingComponent>(TEXT("Targeting Component"));
 
 	Tags.Add(TEXT("Player"));
 }
@@ -178,6 +181,9 @@ void ABSCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		EnhancedInputComponent->BindAction(InputData->IA_TogglePlayerStatus, ETriggerEvent::Started, this, &ThisClass::TogglePlayerStatus);
 		EnhancedInputComponent->BindAction(InputData->IA_Interact, ETriggerEvent::Started, this, &ThisClass::Interaction);
 		EnhancedInputComponent->BindAction(InputData->IA_ChangeWeapon, ETriggerEvent::Started, this, &ThisClass::ChangeWeapon);
+		EnhancedInputComponent->BindAction(InputData->IA_LockOnTarget, ETriggerEvent::Started, this, &ThisClass::LockOnTarget);
+		EnhancedInputComponent->BindAction(InputData->IA_LeftTarget, ETriggerEvent::Started, this, &ThisClass::LeftTarget);
+		EnhancedInputComponent->BindAction(InputData->IA_RightTarget, ETriggerEvent::Started, this, &ThisClass::RightTarget);
 
 		/* Sword & Poleram */
 		EnhancedInputComponent->BindAction(InputData->IA_SwordAttack, ETriggerEvent::Canceled, this, &ThisClass::LightAttack);
@@ -810,6 +816,21 @@ void ABSCharacterPlayer::ParryEnd()
 
 	GetWorld()->GetTimerManager().ClearTimer(ParryStartTimer);
 	GetWorld()->GetTimerManager().ClearTimer(ParryEndTimer);
+}
+
+void ABSCharacterPlayer::LockOnTarget()
+{
+	TargetingComp->ToggleLockOn();
+}
+
+void ABSCharacterPlayer::LeftTarget()
+{
+	TargetingComp->SwitchingLockedOnActor(ESwitchingDirection::Left);
+}
+
+void ABSCharacterPlayer::RightTarget()
+{
+	TargetingComp->SwitchingLockedOnActor(ESwitchingDirection::Right);
 }
 
 FGameplayTag ABSCharacterPlayer::GetAttackPerform() const
