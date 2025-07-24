@@ -59,10 +59,10 @@ public:
 	FORCEINLINE bool IsLockOn() const { return bIsLockOn; }
 
 protected:
-	/** LockOn 시킬 후보군을 찾습니다. */
+	/** LockOn 시킬 후보군을 찾는다. */
 	void FindTargets(OUT TArray<AActor*>& OutTargetingActors) const;
 
-	/** 최종 LockOn 시킬 대상을 찾아 줍니다. */
+	/** 최종 LockOn 시킬 대상을 찾아 준다. */
 	AActor* FindClosestTarget(TArray<AActor*>& InTargets, const ESwitchingDirection& InDirection = ESwitchingDirection::None) const;
 
 	/** 캐릭터가 카메라(ControlRotation)의 회전에 동기화 되도록 설정 */

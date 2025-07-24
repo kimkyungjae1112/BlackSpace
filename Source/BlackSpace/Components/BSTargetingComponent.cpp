@@ -112,6 +112,7 @@ void UBSTargetingComponent::FindTargets(OUT TArray<AActor*>& OutTargetingActors)
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(COLLISION_OBJECT_TARGETING));
 
 	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.Add(GetOwner());
 
 	const bool bHit = UKismetSystemLibrary::SphereTraceMultiForObjects(
 		GetOwner(),
@@ -159,6 +160,7 @@ AActor* UBSTargetingComponent::FindClosestTarget(TArray<AActor*>& InTargets, con
 		const FVector End = TargetActor->GetActorLocation();
 
 		TArray<AActor*> ActorsToIgnore;
+		ActorsToIgnore.Add(GetOwner());
 
 		const bool bHit = UKismetSystemLibrary::LineTraceSingle(
 			GetOwner(),
