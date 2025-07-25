@@ -9,6 +9,7 @@
 
 class UTextBlock;
 class UBorder;
+class UTexture2D;
 
 UCLASS()
 class BLACKSPACE_API UBSInventorySlotWidget : public UUserWidget
@@ -26,6 +27,9 @@ protected:
 	UPROPERTY(meta = (BindWidget), BlueprintReadWrite)
 	TObjectPtr<UBorder> ItemImage;
 
+	UPROPERTY(meta = (BindWidget), BlueprintReadWrite)
+	TObjectPtr<UBorder> ItemSlot;
+
 // Slot Info
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Slot Info")
@@ -38,6 +42,14 @@ protected:
 protected:
 	UPROPERTY(EditAnywhere, Category = "DragDrop")
 	TSubclassOf<UBSInventorySlotWidget> InventorySlotWidgetDragDrop;
+
+// Texture
+protected:
+	UPROPERTY(EditAnywhere, Category = "Texture")
+	TObjectPtr<UTexture2D> NormalTexture;
+
+	UPROPERTY(EditAnywhere, Category = "Texture")
+	TObjectPtr<UTexture2D> SelectedTexture;
 
 public:
 	UBSInventorySlotWidget(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
@@ -56,7 +68,11 @@ protected:
 	virtual void NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
 	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual void NativeOnMouseLeave(const FPointerEvent & InMouseEvent) override;
 
 private:
 	void RightClickForEquip();
+
+	void SetSlotAtIndex(int32 InIndex, const FInventorySlot& InInventorySlot) const;
 };

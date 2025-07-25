@@ -3,7 +3,7 @@
 
 #include "Components/BSInventoryComponent.h"
 
-#include "UI/BSInventoryWidget.h"
+#include "UI/BSInventoryMenuWidget.h"
 #include "Player/BSPlayerController.h"
 #include "BSInventorySlot.h"
 
@@ -11,14 +11,19 @@ UBSInventoryComponent::UBSInventoryComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 
-	InventorySlots.SetNum(16);
+	InventorySlots.SetNum(12);
 }
 
 void UBSInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	InventoryWidget = CreateWidget<UBSInventoryWidget>(GetWorld(), InventoryWidgetClass);
+	InventoryMenuWidget = CreateWidget<UBSInventoryMenuWidget>(GetWorld(), InventoryMenuWidgetClass);
+	if (InventoryMenuWidget)
+	{
+		InventoryMenuWidget->AddToViewport();
+		InventoryMenuWidget->SetVisibility(ESlateVisibility::Hidden);
+	}
 }
 
 void UBSInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -32,23 +37,14 @@ void UBSInventoryComponent::ToggleInventory()
 	ABSPlayerController* PC = Cast<ABSPlayerController>(GetWorld()->GetFirstPlayerController());
 	if (PC)
 	{
-		if (InventoryWidget)
+		if (InventoryMenuWidget->IsVisible())
 		{
-			if (InventoryWidget->IsInViewport())
-			{
-				InventoryWidget->RemoveFromParent();
-				PC->SetInputModeGameOnly();
-			}
-			else
-			{
-				InventoryWidget->AddToViewport();
-				PC->SetInputModeUIAndGame();
-			}
+			InventoryMenuWidget->SetVisibility(ESlateVisibility::Hidden);
+			PC->SetInputModeGameOnly();
 		}
 		else
 		{
-			InventoryWidget = CreateWidget<UBSInventoryWidget>(GetWorld(), InventoryWidgetClass);
-			InventoryWidget->AddToViewport();
+			InventoryMenuWidget->SetVisibility(ESlateVisibility::Visible);
 			PC->SetInputModeUIAndGame();
 		}
 	}
@@ -61,6 +57,12 @@ void UBSInventoryComponent::AddToSlot(const FInventorySlot& InventorySlot)
 		if (InventorySlots[i].Quantity == 0)
 		{
 			InventorySlots[i] = InventorySlot;
+
+			if (OnInventoryUpdated.IsBound())
+			{
+				OnInventoryUpdated.Broadcast(InventorySlots);
+			}
+
 			break;
 		}
 	}
@@ -71,6 +73,41 @@ void UBSInventoryComponent::RemoveToSlot(const int32 Index)
 	if (Index >= 0 && InventorySlots.Num() > Index)
 	{
 		InventorySlots[Index] = FInventorySlot();
+	}
+}
+
+void UBSInventoryComponent::SwapSlot(int32 IndexA, int32 IndexB)
+{
+	if (!InventorySlots.IsValidIndex(IndexA) || !InventorySlots.IsValidIndex(IndexB))
+	{
+		return;
+	}
+
+	InventorySlots.Swap(IndexA, IndexB);
+
+	if (OnInventoryUpdated.IsBound())
+	{
+		OnInventoryUpdated.Broadcast(InventorySlots);
+	}
+}
+
+void UBSInventoryComponent::SetSlotAtIndex(int32 Index, const FInventorySlot& SlotData)
+{
+	if (InventorySlots.IsValidIndex(Index))
+	{
+		InventorySlots[Index] = SlotData;
+
+		OnInventoryUpdated.Broadcast(InventorySlots);
+	}
+}
+
+void UBSInventoryComponent::SetDescriptionSlot(const FInventorySlot& InDescriptionSlot)
+{
+	DescriptionSlot = InDescriptionSlot;
+
+	if (OnMouseEnterToSlot.IsBound())
+	{
+		OnMouseEnterToSlot.Broadcast(DescriptionSlot.Name, DescriptionSlot.Description);
 	}
 }
 

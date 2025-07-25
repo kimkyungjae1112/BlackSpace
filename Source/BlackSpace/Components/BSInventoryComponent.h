@@ -4,27 +4,39 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "BSInventorySlot.h"
 #include "BSInventoryComponent.generated.h"
 
-class UBSInventoryWidget;
-struct FInventorySlot;
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnInventoryUpdated, const TArray<FInventorySlot>&)
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnMouseEnterToSlot, const FText&, const FText&)
+
+class UBSInventoryMenuWidget;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BLACKSPACE_API UBSInventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+public:
+	/* 인벤토리 내에서 아이템이 변경되었을 때 호출되는 델리게이트 */
+	FOnInventoryUpdated OnInventoryUpdated;
+
+	/* 인벤토리 슬롯 위로 마우스를 올렸을 때 호출되는 델리게이트 */
+	FOnMouseEnterToSlot OnMouseEnterToSlot;
+
 protected:
 	UPROPERTY(EditAnywhere, Category = "Inventory")
 	TArray<FInventorySlot> InventorySlots;
 
+	FInventorySlot DescriptionSlot;
+
 // UI
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
-	TSubclassOf<UBSInventoryWidget> InventoryWidgetClass;
+	TSubclassOf<UBSInventoryMenuWidget> InventoryMenuWidgetClass;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UI")
-	TObjectPtr<UBSInventoryWidget> InventoryWidget;
+	TObjectPtr<UBSInventoryMenuWidget> InventoryMenuWidget;
 
 public:	
 	UBSInventoryComponent();
@@ -38,10 +50,19 @@ public:
 public:
 	FORCEINLINE TArray<FInventorySlot> GetInventoryTiles() const { return InventorySlots; }
 
+	FORCEINLINE FInventorySlot GetDescriptionSlot() const { return DescriptionSlot; }
+	
+
 public:
 	void ToggleInventory();
 
 	void AddToSlot(const FInventorySlot& InventorySlot);
 
 	void RemoveToSlot(const int32 Index);
+
+	void SwapSlot(int32 IndexA, int32 IndexB);
+
+	void SetSlotAtIndex(int32 Index, const FInventorySlot& SlotData);
+	
+	void SetDescriptionSlot(const FInventorySlot& InDescriptionSlot);
 };

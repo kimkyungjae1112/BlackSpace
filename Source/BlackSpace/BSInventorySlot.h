@@ -18,6 +18,9 @@ public:
 	FText Name;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory | Data")
+	FText Description;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory | Data")
 	TObjectPtr<UTexture2D> Image;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory | Data")

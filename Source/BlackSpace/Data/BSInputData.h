@@ -31,10 +31,7 @@ public:
 	TObjectPtr<UInputAction> IA_Interact;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Common | UI")
-	TObjectPtr<UInputAction> IA_ToggleInventory;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Common | UI")
-	TObjectPtr<UInputAction> IA_TogglePlayerStatus;
+	TObjectPtr<UInputAction> IA_ToggleInventoryMenu;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Common | Weapon")
 	TObjectPtr<UInputAction> IA_ChangeWeapon;

@@ -8,6 +8,7 @@
 
 class UGridPanel;
 class UBSInventorySlotWidget;
+class UTextBlock;
 struct FInventorySlot;
 
 UCLASS()
@@ -23,6 +24,12 @@ protected:
 	UPROPERTY(meta = (BindWidget), BlueprintReadWrite)
 	TObjectPtr<UGridPanel> GridPanel;
 
+	UPROPERTY(meta = (BindWidget), BlueprintReadWrite)
+	TObjectPtr<UTextBlock> HoveredItemNameText;
+
+	UPROPERTY(meta = (BindWidget), BlueprintReadWrite)
+	TObjectPtr<UTextBlock> HoveredItemMoreInfo;
+
 // Tile Info
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
@@ -36,4 +43,11 @@ protected:
 
 public:
 	void SetGrid();
+
+protected:
+	virtual void NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+
+	void OnInventoryUpdated(const TArray<FInventorySlot>& InventorySlotInfo);
+	void OnMouseEnterToSlot(const FText& InName, const FText& InDescription);
 };

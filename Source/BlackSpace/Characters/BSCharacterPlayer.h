@@ -91,12 +91,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 	TObjectPtr<UBSPlayerHUDWidget> HUDWidget;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
-	TSubclassOf<UBSPlayerStatusWidget> PlayerStatusWidgetClass;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
-	TObjectPtr<UBSPlayerStatusWidget> PlayerStatusWidget;
-
 // Stat
 protected:
 	UPROPERTY(EditAnywhere, Category = "Stat")
@@ -217,8 +211,7 @@ private:
 	void Sprint();
 	void StopSprint();
 	void Rolling();
-	void ToggleInventory();
-	void TogglePlayerStatus();
+	void ToggleInventoryMenu();
 	void Interaction();
 	void ChangeWeapon();
 

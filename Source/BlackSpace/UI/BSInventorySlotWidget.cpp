@@ -6,6 +6,7 @@
 #include "Components/Border.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/PlayerController.h"
 
 #include "UI/Action/BSInventoryDragDrop.h"
 #include "UI/BSInventoryWidget.h"
@@ -27,8 +28,7 @@ void UBSInventorySlotWidget::SetSlot()
 	{
 		TextName->SetText(FText::GetEmpty());
 		TextQuantity->SetText(FText::GetEmpty());
-		ItemImage->SetBrushFromTexture(InventorySlot.Image);
-		ItemImage->SetBrushColor(FLinearColor(1.f, 1.f, 1.f, 1.f));
+		ItemImage->SetBrushColor(FLinearColor(1.f, 1.f, 1.f, 0.f));
 	}
 	else
 	{
@@ -58,16 +58,9 @@ void UBSInventorySlotWidget::NativeOnDragCancelled(const FDragDropEvent& InDragD
 {
 	Super::NativeOnDragCancelled(InDragDropEvent, InOperation);
 
-	TArray<UUserWidget*> InventoryWidgets;
-	TSubclassOf<UBSInventoryWidget> InventoryWidgetClass = UBSInventoryWidget::StaticClass();
-
-	UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), InventoryWidgets, InventoryWidgetClass, true);
-
-	for (UUserWidget* Widget : InventoryWidgets)
+	if (UBSInventoryDragDrop* DragDropOp = Cast<UBSInventoryDragDrop>(InOperation))
 	{
-		UBSInventoryWidget* InventoryWidget = Cast<UBSInventoryWidget>(Widget);
-		InventoryWidget->SetGrid();
-		break;
+		SetSlotAtIndex(DragDropOp->Index, DragDropOp->InventorySlot);
 	}
 }
 
@@ -77,10 +70,6 @@ void UBSInventorySlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, c
 
 	if (InventorySlot.Quantity > 0)
 	{
-		TextName->SetText(InventorySlot.Name);
-		TextQuantity->SetText(FText::AsNumber(InventorySlot.Quantity));
-		ItemImage->SetBrushFromTexture(InventorySlot.Image);
-
 		UBSInventorySlotWidget* InventorySlotWidget_DD = CreateWidget<UBSInventorySlotWidget>(GetWorld(), InventorySlotWidgetDragDrop);
 		InventorySlotWidget_DD->SetInventorySlot(InventorySlot);
 		InventorySlotWidget_DD->SetIndex(Index);
@@ -92,6 +81,8 @@ void UBSInventorySlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, c
 		DragDropOp->Index = Index;
 
 		OutOperation = DragDropOp;
+
+		SetSlotAtIndex(Index, FInventorySlot());
 	}
 }
 
@@ -99,7 +90,63 @@ bool UBSInventorySlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDr
 {
 	bool SuperResult = Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
 
-	return false;
+	UBSInventoryDragDrop* DragDropOp = Cast<UBSInventoryDragDrop>(InOperation);
+	if (DragDropOp == nullptr) return false;
+
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	if (PC == nullptr) return false;
+
+	UBSInventoryComponent* InventoryComp = PC->GetPawn()->GetComponentByClass<UBSInventoryComponent>();
+	if (InventoryComp == nullptr) return false;
+
+	const int32 FromIndex = DragDropOp->Index;
+	const int32 ToIndex = this->Index;
+
+	if (FromIndex == ToIndex)
+	{
+		return false;
+	}
+
+	InventoryComp->SetSlotAtIndex(FromIndex, DragDropOp->InventorySlot);
+	InventoryComp->SwapSlot(FromIndex, ToIndex);
+
+	return true;
+}
+
+void UBSInventorySlotWidget::NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	Super::NativeOnMouseEnter(InGeometry, InMouseEvent);
+
+	if (SelectedTexture && ItemSlot)
+	{
+		ItemSlot->SetBrushFromTexture(SelectedTexture);
+
+		if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+		{
+			if (UBSInventoryComponent* InventoryComp = PC->GetPawn()->GetComponentByClass<UBSInventoryComponent>())
+			{
+				InventoryComp->SetDescriptionSlot(InventorySlot);
+			}
+		}
+	}
+}
+
+void UBSInventorySlotWidget::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
+{
+	Super::NativeOnMouseLeave(InMouseEvent);
+
+	if (NormalTexture && ItemSlot)
+	{
+		ItemSlot->SetBrushFromTexture(NormalTexture);
+
+		if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+		{
+			if (UBSInventoryComponent* InventoryComp = PC->GetPawn()->GetComponentByClass<UBSInventoryComponent>())
+			{
+				InventoryComp->SetDescriptionSlot(FInventorySlot());
+			}
+		}
+	}
 }
 
 void UBSInventorySlotWidget::RightClickForEquip()
@@ -124,6 +171,17 @@ void UBSInventorySlotWidget::RightClickForEquip()
 		if (UBSInventoryComponent* InventoryComp = Player->GetComponentByClass<UBSInventoryComponent>())
 		{
 			InventoryComp->RemoveToSlot(Index);
+		}
+	}
+}
+
+void UBSInventorySlotWidget::SetSlotAtIndex(int32 InIndex, const FInventorySlot& InInventorySlot) const
+{
+	if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+	{
+		if (UBSInventoryComponent* InventoryComp = PC->GetPawn()->GetComponentByClass<UBSInventoryComponent>())
+		{
+			InventoryComp->SetSlotAtIndex(InIndex, InInventorySlot);
 		}
 	}
 }

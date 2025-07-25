@@ -29,7 +29,6 @@
 #include "Components/BSRotationComponent.h"
 #include "Components/BSTargetingComponent.h"
 #include "UI/BSPlayerHUDWidget.h"
-#include "UI/BSPlayerStatusWidget.h"
 #include "Interface/BSInteractInterface.h"
 #include "Interface/BSBowInterface.h"
 #include "Interface/BSUpdateAnyTypeInterface.h"
@@ -87,13 +86,6 @@ void ABSCharacterPlayer::BeginPlay()
 	if (HUDWidget)
 	{
 		HUDWidget->AddToViewport();
-	}
-
-	PlayerStatusWidget = CreateWidget<UBSPlayerStatusWidget>(GetWorld(), PlayerStatusWidgetClass);
-	if (PlayerStatusWidget)
-	{
-		PlayerStatusWidget->AddToViewport();
-		PlayerStatusWidget->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
 
@@ -177,8 +169,7 @@ void ABSCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		EnhancedInputComponent->BindAction(InputData->IA_SprintAndRolling, ETriggerEvent::Triggered, this, &ThisClass::Sprint);
 		EnhancedInputComponent->BindAction(InputData->IA_SprintAndRolling, ETriggerEvent::Completed, this, &ThisClass::StopSprint);
 		EnhancedInputComponent->BindAction(InputData->IA_SprintAndRolling, ETriggerEvent::Canceled, this, &ThisClass::Rolling);
-		EnhancedInputComponent->BindAction(InputData->IA_ToggleInventory, ETriggerEvent::Started, this, &ThisClass::ToggleInventory);
-		EnhancedInputComponent->BindAction(InputData->IA_TogglePlayerStatus, ETriggerEvent::Started, this, &ThisClass::TogglePlayerStatus);
+		EnhancedInputComponent->BindAction(InputData->IA_ToggleInventoryMenu, ETriggerEvent::Started, this, &ThisClass::ToggleInventoryMenu);
 		EnhancedInputComponent->BindAction(InputData->IA_Interact, ETriggerEvent::Started, this, &ThisClass::Interaction);
 		EnhancedInputComponent->BindAction(InputData->IA_ChangeWeapon, ETriggerEvent::Started, this, &ThisClass::ChangeWeapon);
 		EnhancedInputComponent->BindAction(InputData->IA_LockOnTarget, ETriggerEvent::Started, this, &ThisClass::LockOnTarget);
@@ -644,28 +635,9 @@ void ABSCharacterPlayer::Rolling()
 	}
 }
 
-void ABSCharacterPlayer::ToggleInventory()
+void ABSCharacterPlayer::ToggleInventoryMenu()
 {
 	InventoryComp->ToggleInventory();
-}
-
-void ABSCharacterPlayer::TogglePlayerStatus()
-{
-	if (PlayerStatusWidget)
-	{
-		if (PlayerStatusWidget->GetVisibility() == ESlateVisibility::Visible)
-		{
-			GetPlayerController()->SetInputModeGameOnly();
-
-			PlayerStatusWidget->SetVisibility(ESlateVisibility::Hidden);
-		}
-		else
-		{
-			GetPlayerController()->SetInputModeUIAndGame();
-
-			PlayerStatusWidget->SetVisibility(ESlateVisibility::Visible);
-		}
-	}
 }
 
 void ABSCharacterPlayer::Interaction()
