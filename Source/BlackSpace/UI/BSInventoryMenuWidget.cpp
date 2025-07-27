@@ -60,6 +60,16 @@ void UBSInventoryMenuWidget::NativeConstruct()
 	WidgetIndicator.Add(WidgetIndicator0);
 	WidgetIndicator.Add(WidgetIndicator1);
 	WidgetIndicator.Add(WidgetIndicator2);
+
+	for (int32 i = 0; i < WidgetIndicator.Num(); ++i)
+	{
+		if (i == CurrentTabIndex)
+		{
+			WidgetIndicator[i]->SetColorAndOpacity(FLinearColor(1.f, 1.f, 1.f, 1.f));
+			continue;
+		}
+		WidgetIndicator[i]->SetColorAndOpacity(FLinearColor(1.f, 1.f, 1.f, 0.2f));
+	}
 }
 
 void UBSInventoryMenuWidget::NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
@@ -89,11 +99,11 @@ void UBSInventoryMenuWidget::UpdateTab()
 	if (NextTabText && PreviousTabText)
 	{
 		int32 TempIndex = CurrentTabIndex;
-		const int32 NextTabIndex = (TempIndex + 1) % 3;
-		const int32 PreviousTabIndex = (TempIndex <= 0) ? TempIndex = 2 : TempIndex--;
+		const int32 RightTabIndex = (TempIndex + 1) % 3;
+		const int32 LeftTabIndex = (TempIndex <= 0) ? TempIndex = 2 : TempIndex--;
 
-		NextTabText->SetText(TabNameMappingMap[NextTabIndex]);
-		PreviousTabText->SetText(TabNameMappingMap[PreviousTabIndex]);
+		NextTabText->SetText(TabNameMappingMap[RightTabIndex]);
+		PreviousTabText->SetText(TabNameMappingMap[LeftTabIndex]);
 	}
 
 	for (int32 i = 0; i < WidgetIndicator.Num(); ++i)
