@@ -3,8 +3,10 @@
 
 #include "Components/BSInventoryComponent.h"
 
+#include "UI/BSPlayerHUDWidget.h"
 #include "UI/BSInventoryMenuWidget.h"
 #include "Player/BSPlayerController.h"
+#include "Interface/BSPlayerHUDInterface.h"
 #include "BSInventorySlot.h"
 
 UBSInventoryComponent::UBSInventoryComponent()
@@ -34,6 +36,9 @@ void UBSInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 
 void UBSInventoryComponent::ToggleInventory()
 {
+	IBSPlayerHUDInterface* HUDInterface = Cast<IBSPlayerHUDInterface>(GetOwner());
+	check(HUDInterface);
+
 	ABSPlayerController* PC = Cast<ABSPlayerController>(GetWorld()->GetFirstPlayerController());
 	if (PC)
 	{
@@ -41,11 +46,21 @@ void UBSInventoryComponent::ToggleInventory()
 		{
 			InventoryMenuWidget->SetVisibility(ESlateVisibility::Hidden);
 			PC->SetInputModeGameOnly();
+			
+			if (UBSPlayerHUDWidget* HUDWidget = HUDInterface->GetHUDWidget())
+			{
+				HUDWidget->SetVisibility(ESlateVisibility::Visible);
+			}
 		}
 		else
 		{
 			InventoryMenuWidget->SetVisibility(ESlateVisibility::Visible);
 			PC->SetInputModeUIAndGame();
+
+			if (UBSPlayerHUDWidget* HUDWidget = HUDInterface->GetHUDWidget())
+			{
+				HUDWidget->SetVisibility(ESlateVisibility::Hidden);
+			}
 		}
 	}
 }
@@ -68,11 +83,29 @@ void UBSInventoryComponent::AddToSlot(const FInventorySlot& InventorySlot)
 	}
 }
 
+void UBSInventoryComponent::AddToSlot(const FInventorySlot& InventorySlot, int32 Index)
+{
+	if (Index >= 0 && InventorySlots.Num() > Index)
+	{
+		InventorySlots[Index] = InventorySlot;
+
+		if (OnInventoryUpdated.IsBound())
+		{
+			OnInventoryUpdated.Broadcast(InventorySlots);
+		}
+	}
+}
+
 void UBSInventoryComponent::RemoveToSlot(const int32 Index)
 {
 	if (Index >= 0 && InventorySlots.Num() > Index)
 	{
 		InventorySlots[Index] = FInventorySlot();
+
+		if (OnInventoryUpdated.IsBound())
+		{
+			OnInventoryUpdated.Broadcast(InventorySlots);
+		}
 	}
 }
 
@@ -108,6 +141,22 @@ void UBSInventoryComponent::SetDescriptionSlot(const FInventorySlot& InDescripti
 	if (OnMouseEnterToSlot.IsBound())
 	{
 		OnMouseEnterToSlot.Broadcast(DescriptionSlot.Name, DescriptionSlot.Description);
+	}
+}
+
+void UBSInventoryComponent::InventoryLeftPage()
+{
+	if (InventoryMenuWidget->IsVisible())
+	{
+		InventoryMenuWidget->OnLeftTab();
+	}
+}
+
+void UBSInventoryComponent::InventoryRightPage()
+{
+	if (InventoryMenuWidget->IsVisible())
+	{
+		InventoryMenuWidget->OnRightTab();
 	}
 }
 

@@ -8,6 +8,7 @@
 #include "Interface/BSComboWindowInterface.h"
 #include "Interface/BSBowFireInterface.h"
 #include "Interface/BSPlayerAttackedInterface.h"
+#include "Interface/BSPlayerHUDInterface.h"
 #include "BSCharacterPlayer.generated.h"
 
 
@@ -35,10 +36,11 @@ class BLACKSPACE_API ABSCharacterPlayer
 	, public IBSComboWindowInterface
 	, public IBSBowFireInterface
 	, public IBSPlayerAttackedInterface
+	, public IBSPlayerHUDInterface
 {
 	GENERATED_BODY()
 
-// Input
+	// Input
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	TMap<EWeaponType, UInputMappingContext*> InputMap;
@@ -46,7 +48,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	TObjectPtr<UBSInputData> InputData;
 
-// Camera
+	// Camera
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<UCameraComponent> CameraComp;
@@ -60,7 +62,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
 	float AimingSpringArmLength = 200.f;
 
-// Component
+	// Component
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
 	TObjectPtr<UBSAttributeComponent> AttributeComp;
@@ -83,7 +85,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
 	TObjectPtr<UBSTargetingComponent> TargetingComp;
 
-// UI
+	// UI
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UBSPlayerHUDWidget> HUDWidgetClass;
@@ -91,7 +93,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 	TObjectPtr<UBSPlayerHUDWidget> HUDWidget;
 
-// Stat
+	// Stat
 protected:
 	UPROPERTY(EditAnywhere, Category = "Stat")
 	float WalkSpeed = 500.f;
@@ -129,7 +131,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Stat")
 	bool bPostureAttack = false;
 
-// Combo
+	// Combo
 protected:
 	bool bComboSequenceRunning = false;
 	bool bCanComboInput = false;
@@ -137,12 +139,12 @@ protected:
 	int32 ComboCounter = 0;
 	FTimerHandle ComboResetTimerHandle;
 
-// Parry
+	// Parry
 protected:
 	FTimerHandle ParryStartTimer;
 	FTimerHandle ParryEndTimer;
 
-// Arrow
+	// Arrow
 protected:
 	UPROPERTY(EditAnywhere, Category = "Arrow")
 	TSubclassOf<ABSArrow> ArrowClass;
@@ -150,7 +152,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Arrow")
 	TObjectPtr<ABSArrow> Arrow;
 
-// BackAttack
+	// BackAttack
 protected:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<APawn> VitalAttackTarget;
@@ -184,12 +186,15 @@ public:
 	virtual void GSwordSpecialAttackExecuted(UAnimMontage* Montage) override;
 	void GSwordSpecialAttackExecutedMotionWarp() const;
 
+	/* IBSPlayerHUDInterface Implement */
+	virtual UBSPlayerHUDWidget* GetHUDWidget() const override;
+
 	void AttackFinished(const float ComboResetDelay);
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	bool IsDead() const;
 
-// 피격
+	// 피격
 protected:
 	virtual void OnDeath() override;
 	virtual void ImpactEffect(const FVector& Location) override;
@@ -212,6 +217,8 @@ private:
 	void StopSprint();
 	void Rolling();
 	void ToggleInventoryMenu();
+	void InventoryLeftPage();
+	void InventoryRightPage();
 	void Interaction();
 	void ChangeWeapon();
 
@@ -231,7 +238,7 @@ private:
 	void LeftTarget();
 	void RightTarget();
 
-// 콤보 공격
+	// 콤보 공격
 private:
 	/* 현재 상태에서 수행 가능한 일반 공격 */
 	FGameplayTag GetAttackPerform() const;
@@ -244,7 +251,7 @@ private:
 
 	void ResetCombo();
 
-// 활 공격
+	// 활 공격
 private:
 	bool CanPullingString();
 	void PullString();
@@ -259,13 +266,13 @@ private:
 	void ToggleCameraViewAdjust();
 	void ToggleAimingFlag(bool InIsAiming);
 
-// 급소 공격
+	// 급소 공격
 private:
 	bool DetectForBackAttackTarget(FHitResult& OutResult);
 	void BackAttackMotionWarp();
 	void PostureAttackMotionWarp();
 
-// Input 변경
+	// Input 변경
 private:
 	void ChagnedWeapon(const struct FInventorySlot&);
 	void SetInputMapping(const EWeaponType& InWeaponType);

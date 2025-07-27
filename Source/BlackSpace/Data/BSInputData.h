@@ -33,6 +33,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Common | UI")
 	TObjectPtr<UInputAction> IA_ToggleInventoryMenu;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Common | UI")
+	TObjectPtr<UInputAction> IA_InventoryLeftPage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Common | UI")
+	TObjectPtr<UInputAction> IA_InventoryRightPage;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Common | Weapon")
 	TObjectPtr<UInputAction> IA_ChangeWeapon;
 

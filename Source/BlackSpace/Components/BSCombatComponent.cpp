@@ -135,11 +135,6 @@ void UBSCombatComponent::SetUnequipSecondaryWeapon()
 
 void UBSCombatComponent::ChangeMainWeapon(ABSWeapon* NewWeapon)
 {
-	if (UBSInventoryComponent* InventoryComp = GetOwner()->GetComponentByClass<UBSInventoryComponent>())
-	{
-		InventoryComp->AddToSlot(MainWeapon->GetInventoryInfo());
-	}
-
 	MainWeapon->UnequipItem();
 
 	MainWeapon = NewWeapon;

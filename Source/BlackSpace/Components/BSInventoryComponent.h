@@ -57,6 +57,7 @@ public:
 	void ToggleInventory();
 
 	void AddToSlot(const FInventorySlot& InventorySlot);
+	void AddToSlot(const FInventorySlot& InventorySlot, int32 Index);
 
 	void RemoveToSlot(const int32 Index);
 
@@ -65,4 +66,8 @@ public:
 	void SetSlotAtIndex(int32 Index, const FInventorySlot& SlotData);
 	
 	void SetDescriptionSlot(const FInventorySlot& InDescriptionSlot);
+
+	void InventoryLeftPage();
+
+	void InventoryRightPage();
 };

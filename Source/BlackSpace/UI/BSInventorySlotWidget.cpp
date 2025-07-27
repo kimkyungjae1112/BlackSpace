@@ -10,8 +10,11 @@
 
 #include "UI/Action/BSInventoryDragDrop.h"
 #include "UI/BSInventoryWidget.h"
+#include "UI/BSInventoryMenuWidget.h"
+#include "UI/BSMixtureWeaponWidget.h"
 #include "Equipments/BSWeapon.h"
 #include "Components/BSInventoryComponent.h"
+#include "Components/BSCombatComponent.h"
 
 UBSInventorySlotWidget::UBSInventorySlotWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -153,24 +156,65 @@ void UBSInventorySlotWidget::RightClickForEquip()
 {
 	if (InventorySlot.Quantity > 0)
 	{
-		AActor* Player = GetWorld()->GetFirstPlayerController()->GetPawn();
+		APawn* Player = GetWorld()->GetFirstPlayerController()->GetPawn();
 		if (Player == nullptr) return;
+
+		if (UBSInventoryMenuWidget::CurrentTabIndex == 2)
+		{
+			TArray<UUserWidget*> Widgets;
+			TSubclassOf<UBSInventoryMenuWidget> InventoryWidgetClass = UBSInventoryMenuWidget::StaticClass();
+			UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), Widgets, InventoryWidgetClass, true);
+			for (UUserWidget* Widget : Widgets)
+			{
+				UBSInventoryMenuWidget* InventoryMenuWidget = Cast<UBSInventoryMenuWidget>(Widget);
+				
+				InventoryMenuWidget->SetWeaponSlot(InventorySlot);
+				// 아래 함수들이 줄줄이 달려있음
+				// UBSMixtureWeaponWidget->SetWeaponSlot()
+				// UBSMixtureMaterialWidget->SetWeaponSlot()
+				
+				if (UBSInventoryComponent* InventoryComp = Player->GetComponentByClass<UBSInventoryComponent>())
+				{
+					InventoryComp->RemoveToSlot(Index);
+				}
+
+				break;
+			}
+			return;
+		}
 
 		FActorSpawnParameters Param;
 		Param.Owner = Player;
 
-		ABSWeapon* Weapon = GetWorld()->SpawnActor<ABSWeapon>(InventorySlot.ItemClass, Player->GetActorTransform(), Param);
-		if (Weapon)
+		FInventorySlot OldInventorySlot;
+		if (UBSCombatComponent* CombatComp = Player->GetComponentByClass<UBSCombatComponent>())
+		{
+			if (CombatComp->CheckHasMainWeapon())
+			{
+				if (ABSWeapon* OldWeapon = CombatComp->GetMainWeapon())
+				{
+					OldInventorySlot = OldWeapon->GetInventoryInfo();
+				}
+			}
+		}
+
+		if (ABSWeapon* Weapon = GetWorld()->SpawnActor<ABSWeapon>(InventorySlot.ItemClass, Player->GetActorTransform(), Param))
 		{
 			Weapon->EquipItem();
 		}
 
-		InventorySlot = FInventorySlot();
-		SetSlot();
-
 		if (UBSInventoryComponent* InventoryComp = Player->GetComponentByClass<UBSInventoryComponent>())
 		{
 			InventoryComp->RemoveToSlot(Index);
+
+			// 우클릭을 통해 무기를 장착했는데, 이때 메인 무기가 장착되어 있었을 때
+			if (UBSCombatComponent* CombatComp = Player->GetComponentByClass<UBSCombatComponent>())
+			{
+				if (CombatComp->CheckHasMainWeapon())
+				{				
+					InventoryComp->AddToSlot(OldInventorySlot, Index);
+				}
+			}
 		}
 	}
 }

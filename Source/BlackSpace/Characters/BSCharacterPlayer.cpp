@@ -170,6 +170,8 @@ void ABSCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		EnhancedInputComponent->BindAction(InputData->IA_SprintAndRolling, ETriggerEvent::Completed, this, &ThisClass::StopSprint);
 		EnhancedInputComponent->BindAction(InputData->IA_SprintAndRolling, ETriggerEvent::Canceled, this, &ThisClass::Rolling);
 		EnhancedInputComponent->BindAction(InputData->IA_ToggleInventoryMenu, ETriggerEvent::Started, this, &ThisClass::ToggleInventoryMenu);
+		EnhancedInputComponent->BindAction(InputData->IA_InventoryLeftPage, ETriggerEvent::Started, this, &ThisClass::InventoryLeftPage);
+		EnhancedInputComponent->BindAction(InputData->IA_InventoryRightPage, ETriggerEvent::Started, this, &ThisClass::InventoryRightPage);
 		EnhancedInputComponent->BindAction(InputData->IA_Interact, ETriggerEvent::Started, this, &ThisClass::Interaction);
 		EnhancedInputComponent->BindAction(InputData->IA_ChangeWeapon, ETriggerEvent::Started, this, &ThisClass::ChangeWeapon);
 		EnhancedInputComponent->BindAction(InputData->IA_LockOnTarget, ETriggerEvent::Started, this, &ThisClass::LockOnTarget);
@@ -258,6 +260,11 @@ void ABSCharacterPlayer::GSwordSpecialAttackExecutedMotionWarp() const
 	const FVector TargetLocation = Start + (GetActorForwardVector() * 250.f) + (GetActorRightVector() * 200.f);
 
 	MotionWarpComp->AddOrUpdateWarpTargetFromLocation(TEXT("Executed"), TargetLocation);
+}
+
+UBSPlayerHUDWidget* ABSCharacterPlayer::GetHUDWidget() const
+{
+	return HUDWidget;
 }
 
 void ABSCharacterPlayer::AttackFinished(const float ComboResetDelay)
@@ -638,6 +645,16 @@ void ABSCharacterPlayer::Rolling()
 void ABSCharacterPlayer::ToggleInventoryMenu()
 {
 	InventoryComp->ToggleInventory();
+}
+
+void ABSCharacterPlayer::InventoryLeftPage()
+{
+	InventoryComp->InventoryLeftPage();
+}
+
+void ABSCharacterPlayer::InventoryRightPage()
+{
+	InventoryComp->InventoryRightPage();
 }
 
 void ABSCharacterPlayer::Interaction()

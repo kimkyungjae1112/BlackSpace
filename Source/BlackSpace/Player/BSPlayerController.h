@@ -17,4 +17,5 @@ public:
 public:
 	void SetInputModeUIAndGame();
 	void SetInputModeGameOnly();
+	void SetInputModeUIOnly();
 };

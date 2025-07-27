@@ -20,3 +20,10 @@ void ABSPlayerController::SetInputModeGameOnly()
 	FInputModeGameOnly GameOnly;
 	SetInputMode(GameOnly);
 }
+
+void ABSPlayerController::SetInputModeUIOnly()
+{
+	bShowMouseCursor = true;
+	FInputModeUIOnly UIOnly;
+	SetInputMode(UIOnly);
+}
