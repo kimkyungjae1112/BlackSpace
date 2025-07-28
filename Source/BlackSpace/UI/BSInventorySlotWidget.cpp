@@ -190,27 +190,13 @@ void UBSInventorySlotWidget::RightClickForEquip()
 			{
 				ABSWeapon* OldWeapon = nullptr;
 				if (CombatComp->CheckHasMainWeapon() && CombatComp->CheckHasSecondaryWeapon())
-				{				
+				{
 					// 우클릭을 통해 무기를 장착했는데, 이때 메인 무기가 장착되어 있었을 때
 					OldWeapon = CombatComp->GetMainWeapon();
-					InventoryComp->EquipFromInventory(Index);
-					InventoryComp->RemoveToSlot(Index);
-					InventoryComp->AddToSlot(OldWeapon, Index);
-				} 
-				else if (CombatComp->CheckHasMainWeapon() && !CombatComp->CheckHasSecondaryWeapon())
-				{
-					// 두 번째 무기만 없을 경우
-					InventoryComp->EquipFromInventory(Index);
-					InventoryComp->RemoveToSlot(Index);
-					InventoryComp->AddToSlot(nullptr, Index);
 				}
-				else
-				{
-					// 모든 무기가 장착되어 있지 않을 경우
-					InventoryComp->EquipFromInventory(Index);
-					InventoryComp->RemoveToSlot(Index);
-					InventoryComp->AddToSlot(nullptr, Index);
-				}
+				InventoryComp->EquipFromInventory(Index);
+				InventoryComp->RemoveToSlot(Index);
+				InventoryComp->AddToSlot(OldWeapon, Index);
 			}
 		}
 	}
