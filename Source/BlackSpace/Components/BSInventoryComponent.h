@@ -8,7 +8,8 @@
 #include "BSInventoryComponent.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnInventoryUpdated, const TArray<FInventorySlot>&)
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnMouseEnterToSlot, const FText&, const FText&)
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnMouseEnterToSlot, const FInventorySlot&)
+DECLARE_MULTICAST_DELEGATE(FOnMouseLeaveFromSlot)
 
 class UBSInventoryMenuWidget;
 
@@ -24,8 +25,11 @@ public:
 	/* 인벤토리 슬롯 위로 마우스를 올렸을 때 호출되는 델리게이트 */
 	FOnMouseEnterToSlot OnMouseEnterToSlot;
 
+	/* 인벤토리 슬롯에서 마우스가 나갔을 때 호출되는 델리게이트 */
+	FOnMouseLeaveFromSlot OnMouseLeaveFromSlot;
+
 protected:
-	UPROPERTY(EditAnywhere, Category = "Inventory")
+	UPROPERTY(EditAnywhere, Category = "Inventory | Info")
 	TArray<FInventorySlot> InventorySlots;
 
 	FInventorySlot DescriptionSlot;
@@ -66,6 +70,8 @@ public:
 	void SetSlotAtIndex(int32 Index, const FInventorySlot& SlotData);
 	
 	void SetDescriptionSlot(const FInventorySlot& InDescriptionSlot);
+
+	void UnsetDescriptionSlot() const;
 
 	void InventoryLeftPage();
 

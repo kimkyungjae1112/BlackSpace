@@ -10,6 +10,7 @@
 #include "Components/BSInventoryComponent.h"
 #include "UI/BSInventorySlotWidget.h"
 #include "UI/Action/BSInventoryDragDrop.h"
+#include "UI/BSItemDescriptionWidget.h"
 
 UBSInventoryWidget::UBSInventoryWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -26,6 +27,7 @@ void UBSInventoryWidget::NativeConstruct()
 			InventoryTiles = InventoryComp->GetInventoryTiles(); 
 			InventoryComp->OnInventoryUpdated.AddUObject(this, &ThisClass::OnInventoryUpdated);
 			InventoryComp->OnMouseEnterToSlot.AddUObject(this, &ThisClass::OnMouseEnterToSlot);
+			InventoryComp->OnMouseLeaveFromSlot.AddUObject(this, &ThisClass::OnMouseLeaveFromSlot);
 		}
 	}
 
@@ -79,8 +81,16 @@ void UBSInventoryWidget::OnInventoryUpdated(const TArray<FInventorySlot>& Invent
 	SetGrid();
 }
 
-void UBSInventoryWidget::OnMouseEnterToSlot(const FText& InName, const FText& InDescription)
+void UBSInventoryWidget::OnMouseEnterToSlot(const FInventorySlot& InDescriptionSlot)
 {
-	HoveredItemNameText->SetText(InName);
-	HoveredItemMoreInfo->SetText(InDescription);
+	HoveredItemNameText->SetText(InDescriptionSlot.Name);
+	HoveredItemMoreInfo->SetText(InDescriptionSlot.Description);
+
+	WBPItemDescription->SetDescription(InDescriptionSlot);
 }
+
+void UBSInventoryWidget::OnMouseLeaveFromSlot() const
+{
+	WBPItemDescription->UnsetDescription();
+}
+

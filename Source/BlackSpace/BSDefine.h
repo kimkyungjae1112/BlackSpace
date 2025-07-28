@@ -34,6 +34,15 @@ enum class EWeaponType : uint8
 };
 
 UENUM(BlueprintType)
+enum class EWeaponGrade : uint8
+{
+	Common,
+	Rare,
+	Epic,
+	Legendary,
+};
+
+UENUM(BlueprintType)
 enum class EWeaponCollisionType : uint8
 {
 	First,

@@ -7,6 +7,8 @@
 #include "BSInventorySlot.h"
 #include "BSMixtureMaterialWidget.generated.h"
 
+DECLARE_DELEGATE(FDelegateCanMixture)
+
 class UTextBlock;
 class UImage;
 class UBorder;
@@ -16,6 +18,9 @@ class BLACKSPACE_API UBSMixtureMaterialWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	
+public:
+	static FDelegateCanMixture DelegateCanMixture;
+
 protected:
 	UPROPERTY(meta = (BindWidget), BlueprintReadWrite)
 	TObjectPtr<UBorder> Border;
@@ -43,6 +48,7 @@ public:
 	UBSMixtureMaterialWidget(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	FORCEINLINE bool CheckHasWeaponSlot() const { return bHasWeaponSlot; }
+	FORCEINLINE FInventorySlot GetInventorySlot() const { return InventorySlot; }
 
 public:
 	void SetWeaponSlot(const FInventorySlot& InInventorySlot);

@@ -6,8 +6,6 @@
 
 ABSEquipmentBase::ABSEquipmentBase()
 {
-	PrimaryActorTick.bCanEverTick = true;
-
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh Component"));
 	SetRootComponent(MeshComp);
 	MeshComp->SetCollisionProfileName(TEXT("NoCollision"));
@@ -34,6 +32,10 @@ void ABSEquipmentBase::EquipItem()
 }
 
 void ABSEquipmentBase::UnequipItem()
+{
+}
+
+void ABSEquipmentBase::OnceCalledSetWeaponDamage()
 {
 }
 

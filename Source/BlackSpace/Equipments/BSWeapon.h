@@ -32,6 +32,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Equipment | Type")
 	EWeaponType WeaponType = EWeaponType::Sword;
 
+	UPROPERTY(EditAnywhere, Category = "Equipment | Grade")
+	EWeaponGrade WeaponGrade = EWeaponGrade::Common;
+
 	// Component
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "Equipment | Component")
@@ -49,7 +52,13 @@ protected:
 	TMap<FGameplayTag, float> StaminaCosts;
 
 	UPROPERTY(EditAnywhere, Category = "Equipment | Damage")
-	float BaseDamage = 15.f;
+	TMap<EWeaponGrade, float> DamageMultiplierByGrade;
+
+	UPROPERTY(EditAnywhere, Category = "Equipment | Damage")
+	TMap<FGameplayTag, float> DamageMultiplierMap;
+
+	UPROPERTY(EditAnywhere, Category = "Equipment | Damage")
+	float BaseDamage = 10.f;
 
 public:
 	ABSWeapon();
@@ -62,6 +71,9 @@ public:
 	virtual void EquipItem() override;
 
 	virtual void UnequipItem() override;
+
+	// 무기 공격력 설정
+	virtual	void OnceCalledSetWeaponDamage() override;
 
 	void OnUpdateWeaponType();
 

@@ -59,6 +59,7 @@ void ABSPickupItem::Interact(AActor* Interactor)
 						if (Weapon)
 						{
 							Weapon->EquipItem();
+							Weapon->OnceCalledSetWeaponDamage();
 						}
 					}
 					else

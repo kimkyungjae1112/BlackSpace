@@ -44,6 +44,9 @@ public:
 
 	virtual void UnequipItem();
 
+	// 무기 공격력 설정
+	virtual	void OnceCalledSetWeaponDamage();
+
 	virtual void AttachToOwner(FName SocketName);
 
 	virtual void DetachToOwner();
