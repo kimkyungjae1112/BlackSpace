@@ -80,7 +80,9 @@ void ABSWeapon::UnequipItem()
 		}
 	}
 
-	Destroy();
+	DetachToOwner();
+
+	// Destroy();
 }
 
 void ABSWeapon::OnceCalledSetWeaponDamage()
@@ -88,7 +90,6 @@ void ABSWeapon::OnceCalledSetWeaponDamage()
 	BaseDamage = BaseDamage * DamageMultiplierByGrade[WeaponGrade];
 	BaseDamage = FMath::Clamp(BaseDamage + FMath::RandRange(-5, 5), 0, 200);
 
-	UE_LOG(LogTemp, Display, TEXT("BaseDamage : %f"), BaseDamage);
 	InventoryInfo.Damage = BaseDamage;
 }
 
