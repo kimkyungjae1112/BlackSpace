@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BSDefine.h"
 #include "BSInventorySlot.generated.h"
 
 class UTexture2D;
@@ -25,6 +26,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory | Data")
 	int32 Quantity = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory | Data")
+	float Damage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory | Data")
+	EWeaponGrade WeaponGrade;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory | Data")
 	TSubclassOf<ABSEquipmentBase> ItemClass;

@@ -140,7 +140,15 @@ void UBSInventoryComponent::SetDescriptionSlot(const FInventorySlot& InDescripti
 
 	if (OnMouseEnterToSlot.IsBound())
 	{
-		OnMouseEnterToSlot.Broadcast(DescriptionSlot.Name, DescriptionSlot.Description);
+		OnMouseEnterToSlot.Broadcast(InDescriptionSlot);
+	}
+}
+
+void UBSInventoryComponent::UnsetDescriptionSlot() const
+{
+	if (OnMouseLeaveFromSlot.IsBound())
+	{
+		OnMouseLeaveFromSlot.Broadcast();
 	}
 }
 

@@ -27,6 +27,15 @@ ABSWeapon::ABSWeapon()
 	StaminaCosts.Add(BSGameplayTag::Character_Attack_Heavy, 7.f);
 	StaminaCosts.Add(BSGameplayTag::Character_Attack_Running, 6.f);
 	StaminaCosts.Add(BSGameplayTag::Character_Attack_Special, 10.f);
+
+	DamageMultiplierMap.Add(BSGameplayTag::Character_Attack_Heavy, 1.8f);
+	DamageMultiplierMap.Add(BSGameplayTag::Character_Attack_Running, 1.8f);
+	DamageMultiplierMap.Add(BSGameplayTag::Character_Attack_Special, 2.1f);
+
+	DamageMultiplierByGrade.Add(EWeaponGrade::Common, 1.f);
+	DamageMultiplierByGrade.Add(EWeaponGrade::Rare, 1.5f);
+	DamageMultiplierByGrade.Add(EWeaponGrade::Epic, 2.f);
+	DamageMultiplierByGrade.Add(EWeaponGrade::Legendary, 3.f);
 }
 
 void ABSWeapon::EquipItem()
@@ -72,6 +81,15 @@ void ABSWeapon::UnequipItem()
 	}
 
 	Destroy();
+}
+
+void ABSWeapon::OnceCalledSetWeaponDamage()
+{
+	BaseDamage = BaseDamage * DamageMultiplierByGrade[WeaponGrade];
+	BaseDamage = FMath::Clamp(BaseDamage + FMath::RandRange(-5, 5), 0, 200);
+
+	UE_LOG(LogTemp, Display, TEXT("BaseDamage : %f"), BaseDamage);
+	InventoryInfo.Damage = BaseDamage;
 }
 
 void ABSWeapon::OnUpdateWeaponType()
@@ -133,6 +151,16 @@ float ABSWeapon::GetStaminaCost(const FGameplayTag& InAttackType) const
 
 float ABSWeapon::GetAttackDamage() const
 {
+	if (const AActor* OwnerActor = GetOwner())
+	{
+		const FGameplayTag LastAttackType = CombatComp->GetLastAttackType();
+
+		if (DamageMultiplierMap.Contains(LastAttackType))
+		{
+			const float Multiplier = DamageMultiplierMap[LastAttackType];
+			return BaseDamage * Multiplier;
+		}
+	}
 	return BaseDamage;
 }
 

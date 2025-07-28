@@ -12,6 +12,8 @@
 #include "Components/BSInventoryComponent.h"
 #include "BSInventorySlot.h"
 
+FDelegateCanMixture UBSMixtureMaterialWidget::DelegateCanMixture;
+
 UBSMixtureMaterialWidget::UBSMixtureMaterialWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 }
@@ -91,6 +93,11 @@ void UBSMixtureMaterialWidget::RightClickForRemove()
 				InventoryComp->AddToSlot(InventorySlot);
 
 				UnsetWeaponSlot();
+
+				if (DelegateCanMixture.IsBound())
+				{
+					DelegateCanMixture.ExecuteIfBound();
+				}
 			}
 		}
 	}

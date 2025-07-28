@@ -147,6 +147,7 @@ void UBSInventorySlotWidget::NativeOnMouseLeave(const FPointerEvent& InMouseEven
 			if (UBSInventoryComponent* InventoryComp = PC->GetPawn()->GetComponentByClass<UBSInventoryComponent>())
 			{
 				InventoryComp->SetDescriptionSlot(FInventorySlot());
+				InventoryComp->UnsetDescriptionSlot();
 			}
 		}
 	}

@@ -7,6 +7,7 @@
 #include "BSMixtureWeaponWidget.generated.h"
 
 class UBSMixtureMaterialWidget;
+class UButton;
 struct FInventorySlot;
 
 UCLASS()
@@ -21,6 +22,12 @@ protected:
 	UPROPERTY(meta = (BindWidget), BlueprintReadWrite)
 	TObjectPtr<UBSMixtureMaterialWidget> WBPMixtureSecondWeapon;
 
+	UPROPERTY(meta = (BindWidget), BlueprintReadWrite)
+	TObjectPtr<UBSMixtureMaterialWidget> WBPMixturedWeapon;
+
+	UPROPERTY(meta = (BindWidget), BlueprintReadWrite)
+	TObjectPtr<UButton> MixtureButton;
+
 public:
 	UBSMixtureWeaponWidget(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
@@ -30,4 +37,9 @@ protected:
 public:
 	void SetMixtureWeaponSlot(const FInventorySlot& InInventorySlot) const;
 
+private:
+	void DisableMixtureButton() const;
+
+	UFUNCTION()
+	void ClickMixtureButton();
 };
