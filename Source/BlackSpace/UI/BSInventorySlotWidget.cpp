@@ -184,37 +184,19 @@ void UBSInventorySlotWidget::RightClickForEquip()
 			return;
 		}
 
-		FActorSpawnParameters Param;
-		Param.Owner = Player;
-
-		FInventorySlot OldInventorySlot;
-		if (UBSCombatComponent* CombatComp = Player->GetComponentByClass<UBSCombatComponent>())
-		{
-			if (CombatComp->CheckHasMainWeapon())
-			{
-				if (ABSWeapon* OldWeapon = CombatComp->GetMainWeapon())
-				{
-					OldInventorySlot = OldWeapon->GetInventoryInfo();
-				}
-			}
-		}
-
-		if (ABSWeapon* Weapon = GetWorld()->SpawnActor<ABSWeapon>(InventorySlot.ItemClass, Player->GetActorTransform(), Param))
-		{
-			Weapon->EquipItem();
-		}
-
 		if (UBSInventoryComponent* InventoryComp = Player->GetComponentByClass<UBSInventoryComponent>())
 		{
-			InventoryComp->RemoveToSlot(Index);
-
-			// 우클릭을 통해 무기를 장착했는데, 이때 메인 무기가 장착되어 있었을 때
 			if (UBSCombatComponent* CombatComp = Player->GetComponentByClass<UBSCombatComponent>())
 			{
-				if (CombatComp->CheckHasMainWeapon())
-				{				
-					InventoryComp->AddToSlot(OldInventorySlot, Index);
+				ABSWeapon* OldWeapon = nullptr;
+				if (CombatComp->CheckHasMainWeapon() && CombatComp->CheckHasSecondaryWeapon())
+				{
+					// 우클릭을 통해 무기를 장착했는데, 이때 메인 무기가 장착되어 있었을 때
+					OldWeapon = CombatComp->GetMainWeapon();
 				}
+				InventoryComp->EquipFromInventory(Index);
+				InventoryComp->RemoveToSlot(Index);
+				InventoryComp->AddToSlot(OldWeapon, Index);
 			}
 		}
 	}

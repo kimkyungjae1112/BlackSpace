@@ -7,13 +7,13 @@
 #include "UI/BSInventoryMenuWidget.h"
 #include "Player/BSPlayerController.h"
 #include "Interface/BSPlayerHUDInterface.h"
+#include "Equipments/BSWeapon.h"
 #include "BSInventorySlot.h"
 
 UBSInventoryComponent::UBSInventoryComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
-
 	InventorySlots.SetNum(12);
+	Weapons.SetNum(12);
 }
 
 void UBSInventoryComponent::BeginPlay()
@@ -26,12 +26,6 @@ void UBSInventoryComponent::BeginPlay()
 		InventoryMenuWidget->AddToViewport();
 		InventoryMenuWidget->SetVisibility(ESlateVisibility::Hidden);
 	}
-}
-
-void UBSInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
 }
 
 void UBSInventoryComponent::ToggleInventory()
@@ -71,7 +65,15 @@ void UBSInventoryComponent::AddToSlot(const FInventorySlot& InventorySlot)
 	{
 		if (InventorySlots[i].Quantity == 0)
 		{
-			InventorySlots[i] = InventorySlot;
+			FActorSpawnParameters Param;
+			Param.Owner = GetOwner();
+
+			ABSWeapon* Weapon = GetWorld()->SpawnActor<ABSWeapon>(InventorySlot.ItemClass, GetOwner()->GetActorTransform(), Param);
+			Weapon->OnceCalledSetWeaponDamage();
+			Weapon->SetActorHiddenInGame(true);
+			Weapons[i] = Weapon;
+
+			InventorySlots[i] = Weapon->GetInventoryInfo();
 
 			if (OnInventoryUpdated.IsBound())
 			{
@@ -83,15 +85,40 @@ void UBSInventoryComponent::AddToSlot(const FInventorySlot& InventorySlot)
 	}
 }
 
-void UBSInventoryComponent::AddToSlot(const FInventorySlot& InventorySlot, int32 Index)
+void UBSInventoryComponent::AddToSlot(ABSWeapon* InWeapon, int32 Index)
 {
 	if (Index >= 0 && InventorySlots.Num() > Index)
 	{
-		InventorySlots[Index] = InventorySlot;
+		if (InWeapon != nullptr)
+		{
+			InventorySlots[Index] = InWeapon->GetInventoryInfo();
+		}
+
+		Weapons[Index] = InWeapon;
 
 		if (OnInventoryUpdated.IsBound())
 		{
 			OnInventoryUpdated.Broadcast(InventorySlots);
+		}
+	}
+}
+
+void UBSInventoryComponent::AddToSlot(ABSWeapon* InWeapon)
+{
+	for (int32 i = 0; i < InventorySlots.Num(); ++i)
+	{
+		if (InventorySlots[i].Quantity == 0 && InWeapon)
+		{
+			InventorySlots[i] = InWeapon->GetInventoryInfo();
+
+			Weapons[i] = InWeapon;
+
+			if (OnInventoryUpdated.IsBound())
+			{
+				OnInventoryUpdated.Broadcast(InventorySlots);
+			}
+
+			break;
 		}
 	}
 }
@@ -109,6 +136,18 @@ void UBSInventoryComponent::RemoveToSlot(const int32 Index)
 	}
 }
 
+void UBSInventoryComponent::EquipFromInventory(const int32 Index) const
+{
+	if (Weapons.IsValidIndex(Index))
+	{
+		if (Weapons[Index])
+		{
+			Weapons[Index]->EquipItem();
+			Weapons[Index]->SetActorHiddenInGame(false);
+		}
+	}
+}
+
 void UBSInventoryComponent::SwapSlot(int32 IndexA, int32 IndexB)
 {
 	if (!InventorySlots.IsValidIndex(IndexA) || !InventorySlots.IsValidIndex(IndexB))
@@ -116,7 +155,14 @@ void UBSInventoryComponent::SwapSlot(int32 IndexA, int32 IndexB)
 		return;
 	}
 
+	if (!Weapons.IsValidIndex(IndexA) || !Weapons.IsValidIndex(IndexB))
+	{
+		return;
+	}
+
 	InventorySlots.Swap(IndexA, IndexB);
+
+	Weapons.Swap(IndexA, IndexB);
 
 	if (OnInventoryUpdated.IsBound())
 	{

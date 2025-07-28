@@ -12,6 +12,7 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnMouseEnterToSlot, const FInventorySlot&)
 DECLARE_MULTICAST_DELEGATE(FOnMouseLeaveFromSlot)
 
 class UBSInventoryMenuWidget;
+class ABSWeapon;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BLACKSPACE_API UBSInventoryComponent : public UActorComponent
@@ -32,6 +33,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Inventory | Info")
 	TArray<FInventorySlot> InventorySlots;
 
+	UPROPERTY(EditAnywhere, Category = "Inventory | Weapon")
+	TArray<ABSWeapon*> Weapons;
+
 	FInventorySlot DescriptionSlot;
 
 // UI
@@ -48,9 +52,6 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-public:	
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
 public:
 	FORCEINLINE TArray<FInventorySlot> GetInventoryTiles() const { return InventorySlots; }
 
@@ -61,9 +62,12 @@ public:
 	void ToggleInventory();
 
 	void AddToSlot(const FInventorySlot& InventorySlot);
-	void AddToSlot(const FInventorySlot& InventorySlot, int32 Index);
+	void AddToSlot(ABSWeapon* InWeapon, int32 Index);
+	void AddToSlot(ABSWeapon* InWeapon);
 
 	void RemoveToSlot(const int32 Index);
+
+	void EquipFromInventory(const int32 Index) const;
 
 	void SwapSlot(int32 IndexA, int32 IndexB);
 

@@ -99,7 +99,7 @@ void UBSCombatComponent::SetUnequipMainWeapon()
 {
 	if (UBSInventoryComponent* InventoryComp = GetOwner()->GetComponentByClass<UBSInventoryComponent>())
 	{
-		InventoryComp->AddToSlot(MainWeapon->GetInventoryInfo());
+		InventoryComp->AddToSlot(MainWeapon);
 	}
 
 	MainWeapon->UnequipItem();
@@ -119,10 +119,10 @@ void UBSCombatComponent::SetUnequipSecondaryWeapon()
 {
 	if (UBSInventoryComponent* InventoryComp = GetOwner()->GetComponentByClass<UBSInventoryComponent>())
 	{
-		InventoryComp->AddToSlot(SecondaryWeapon->GetInventoryInfo());
+		InventoryComp->AddToSlot(SecondaryWeapon);
 	}
 
-	SecondaryWeapon->Destroy();
+	SecondaryWeapon->DetachToOwner();
 	SecondaryWeapon = nullptr;
 
 	bHasSecondaryWeapon = false;
@@ -135,7 +135,7 @@ void UBSCombatComponent::SetUnequipSecondaryWeapon()
 
 void UBSCombatComponent::ChangeMainWeapon(ABSWeapon* NewWeapon)
 {
-	MainWeapon->UnequipItem();
+	MainWeapon->DetachToOwner();
 
 	MainWeapon = NewWeapon;
 	MainWeapon->OnUpdateWeaponType();
