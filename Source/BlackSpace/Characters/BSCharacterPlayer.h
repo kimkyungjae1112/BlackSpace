@@ -157,6 +157,11 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<APawn> VitalAttackTarget;
 
+	// Dialogue
+protected:
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<AActor> DialogueTarget;
+
 public:
 	ABSCharacterPlayer();
 
@@ -221,6 +226,7 @@ private:
 	void InventoryRightPage();
 	void Interaction();
 	void ChangeWeapon();
+	void Dialogue();
 
 	// 공격
 	void LightAttack();
@@ -268,9 +274,13 @@ private:
 
 	// 급소 공격
 private:
-	bool DetectForBackAttackTarget(FHitResult& OutResult);
+	bool DetectForBackAttackTarget(OUT FHitResult& OutResult);
 	void BackAttackMotionWarp();
 	void PostureAttackMotionWarp();
+
+	// 대화
+private:
+	bool DetectForDialogue(OUT FHitResult& OutResult);
 
 	// Input 변경
 private:

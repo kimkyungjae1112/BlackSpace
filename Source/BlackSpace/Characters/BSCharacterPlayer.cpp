@@ -34,6 +34,7 @@
 #include "Interface/BSUpdateAnyTypeInterface.h"
 #include "Interface/BSAIControllerInterface.h"
 #include "Interface/BSEnemyInterface.h"
+#include "Interface/BSDialogueInterface.h"
 #include "Player/BSPlayerController.h"
 #include "Animation/BSAnimInstance.h"
 #include "Projectiles/BSArrow.h"
@@ -95,12 +96,27 @@ void ABSCharacterPlayer::Tick(float DeltaTime)
 
 	if (CanDetectForBackAttack())
 	{
-		FHitResult HitResult;
-		bool bHit = DetectForBackAttackTarget(HitResult);
+		FHitResult DialogueTargetResult;
+		bool bDialogueHit = DetectForDialogue(DialogueTargetResult);
+		
+		if (bDialogueHit)
+		{
+			if (DialogueTarget != DialogueTargetResult.GetActor())
+			{
+				DialogueTarget = DialogueTargetResult.GetActor();
+			}
+		}
+		else
+		{
+			DialogueTarget = nullptr;
+		}
+
+		FHitResult VitalTargetResult;
+		bool bHit = DetectForBackAttackTarget(VitalTargetResult);
 
 		if (bHit)
 		{
-			VitalAttackTarget = Cast<APawn>(HitResult.GetActor());
+			VitalAttackTarget = Cast<APawn>(VitalTargetResult.GetActor());
 
 			if (VitalAttackTarget)
 			{
@@ -177,6 +193,7 @@ void ABSCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		EnhancedInputComponent->BindAction(InputData->IA_LockOnTarget, ETriggerEvent::Started, this, &ThisClass::LockOnTarget);
 		EnhancedInputComponent->BindAction(InputData->IA_LeftTarget, ETriggerEvent::Started, this, &ThisClass::LeftTarget);
 		EnhancedInputComponent->BindAction(InputData->IA_RightTarget, ETriggerEvent::Started, this, &ThisClass::RightTarget);
+		EnhancedInputComponent->BindAction(InputData->IA_Dialogue, ETriggerEvent::Started, this, &ThisClass::Dialogue);
 
 		/* Sword & Poleram */
 		EnhancedInputComponent->BindAction(InputData->IA_SwordAttack, ETriggerEvent::Canceled, this, &ThisClass::LightAttack);
@@ -712,6 +729,17 @@ void ABSCharacterPlayer::ChangeWeapon()
 	}
 }
 
+void ABSCharacterPlayer::Dialogue()
+{
+	if (DialogueTarget)
+	{
+		if (IBSDialogueInterface* DialogueInterface = Cast<IBSDialogueInterface>(DialogueTarget))
+		{
+			DialogueInterface->StartDialogue();
+		}
+	}
+}
+
 void ABSCharacterPlayer::LightAttack()
 {
 	FGameplayTag AttackType = GetAttackPerform();
@@ -1137,7 +1165,7 @@ void ABSCharacterPlayer::ToggleAimingFlag(bool InIsAiming)
 	}
 }
 
-bool ABSCharacterPlayer::DetectForBackAttackTarget(FHitResult& OutResult)
+bool ABSCharacterPlayer::DetectForBackAttackTarget(OUT FHitResult& OutResult)
 {
 	const FVector Start = GetActorLocation();
 	const FVector End = Start + GetActorForwardVector() * 200.f;
@@ -1165,6 +1193,16 @@ void ABSCharacterPlayer::PostureAttackMotionWarp()
 	const FRotator TargetRotation = TargetDirection.Rotation();
 	MotionWarpComp->AddOrUpdateWarpTargetFromLocationAndRotation(TEXT("PostureAttackLoc"), Target, TargetRotation);
 	VitalAttackTarget = nullptr;
+}
+
+bool ABSCharacterPlayer::DetectForDialogue(OUT FHitResult& OutResult)
+{
+	const FVector Start = GetActorLocation();
+	const FVector End = Start + GetActorForwardVector() * 200.f;
+	FCollisionQueryParams Param(NAME_None, false, this);
+	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false);
+
+	return GetWorld()->LineTraceSingleByChannel(OutResult, Start, End, ECC_GameTraceChannel1, Param);
 }
 
 void ABSCharacterPlayer::ChagnedWeapon(const FInventorySlot&)
