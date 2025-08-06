@@ -32,6 +32,7 @@ public:
 	ABSEquipmentBase();
 
 	FORCEINLINE FInventorySlot GetInventoryInfo() const { return InventoryInfo; }
+	FORCEINLINE void SetInventoryInfo(const FInventorySlot& InInventorySlot) { InventoryInfo = InInventorySlot; }
 
 protected:
 	virtual void BeginPlay() override;

@@ -15,9 +15,9 @@ UBSInventoryMenuWidget::UBSInventoryMenuWidget(const FObjectInitializer& ObjectI
 {
 }
 
-void UBSInventoryMenuWidget::SetWeaponSlot(const FInventorySlot& InInventorySlot) const
+void UBSInventoryMenuWidget::SetWeaponSlot(const FInventorySlot& InInventorySlot, int32 InIndex) const
 {
-	WBPMixtureWeapon->SetMixtureWeaponSlot(InInventorySlot);
+	WBPMixtureWeapon->SetMixtureWeaponSlot(InInventorySlot, InIndex);
 }
 
 void UBSInventoryMenuWidget::OnLeftTab()

@@ -28,6 +28,9 @@ protected:
 	UPROPERTY(meta = (BindWidget), BlueprintReadWrite)
 	TObjectPtr<UButton> MixtureButton;
 
+protected:
+	int32 FirstWeaponIndex = 0;
+
 public:
 	UBSMixtureWeaponWidget(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
@@ -35,7 +38,7 @@ protected:
 	virtual void NativeConstruct() override;
 
 public:
-	void SetMixtureWeaponSlot(const FInventorySlot& InInventorySlot) const;
+	void SetMixtureWeaponSlot(const FInventorySlot& InInventorySlot, int32 Index);
 
 private:
 	void DisableMixtureButton() const;

@@ -32,10 +32,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Equipment | Type")
 	EWeaponType WeaponType = EWeaponType::Sword;
 
-	UPROPERTY(EditAnywhere, Category = "Equipment | Grade")
-	EWeaponGrade WeaponGrade = EWeaponGrade::Common;
-
-	// Component
+// Component
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "Equipment | Component")
 	TObjectPtr<UBSCombatComponent> CombatComp;
@@ -66,6 +63,7 @@ public:
 	FORCEINLINE FName GetEquipSocket() const { return EquipSocket; }
 	FORCEINLINE UBSWeaponCollisionComponent* GetCollision() const { return CollisionComp; }
 	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
+	FORCEINLINE float GetWeaponDamage() const { return BaseDamage; }
 
 public:
 	virtual void EquipItem() override;

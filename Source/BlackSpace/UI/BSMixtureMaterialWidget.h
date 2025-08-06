@@ -32,9 +32,14 @@ protected:
 	TObjectPtr<UImage> WeaponImage;
 
 protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bMixtured = false;
+	
 	FInventorySlot InventorySlot;
 
 	bool bHasWeaponSlot = false;
+
+	int32 Index = 0;
 
 // Texture
 protected:
@@ -49,9 +54,10 @@ public:
 
 	FORCEINLINE bool CheckHasWeaponSlot() const { return bHasWeaponSlot; }
 	FORCEINLINE FInventorySlot GetInventorySlot() const { return InventorySlot; }
+	FORCEINLINE int32 GetHasIndex() const { return Index; }
 
 public:
-	void SetWeaponSlot(const FInventorySlot& InInventorySlot);
+	void SetWeaponSlot(const FInventorySlot& InInventorySlot, int32 InIndex);
 	void UnsetWeaponSlot();
 
 protected:

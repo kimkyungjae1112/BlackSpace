@@ -17,7 +17,7 @@ class BLACKSPACE_API UBSPlayerStatusWidget : public UUserWidget
 	
 protected:
 	UPROPERTY(meta=(BindWidget), BlueprintReadWrite)
-	TObjectPtr<UTextBlock> DamageText;
+	TObjectPtr<UTextBlock> DamageTextNum;
 	
 	UPROPERTY(meta=(BindWidget), BlueprintReadWrite)
 	TObjectPtr<UTextBlock> AttackSpeedText;

@@ -40,7 +40,7 @@ void UBSInventoryComponent::ToggleInventory()
 		{
 			InventoryMenuWidget->SetVisibility(ESlateVisibility::Hidden);
 			PC->SetInputModeGameOnly();
-			
+
 			if (UBSPlayerHUDWidget* HUDWidget = HUDInterface->GetHUDWidget())
 			{
 				HUDWidget->SetVisibility(ESlateVisibility::Visible);
@@ -69,6 +69,7 @@ void UBSInventoryComponent::AddToSlot(const FInventorySlot& InventorySlot)
 			Param.Owner = GetOwner();
 
 			ABSWeapon* Weapon = GetWorld()->SpawnActor<ABSWeapon>(InventorySlot.ItemClass, GetOwner()->GetActorTransform(), Param);
+			Weapon->SetInventoryInfo(InventorySlot);
 			Weapon->OnceCalledSetWeaponDamage();
 			Weapon->SetActorHiddenInGame(true);
 			Weapons[i] = Weapon;
@@ -123,6 +124,19 @@ void UBSInventoryComponent::AddToSlot(ABSWeapon* InWeapon)
 	}
 }
 
+void UBSInventoryComponent::AddToSlot(int32 Index)
+{
+	if (InventorySlots[Index].Quantity == 0)
+	{
+		InventorySlots[Index] = Weapons[Index]->GetInventoryInfo();
+
+		if (OnInventoryUpdated.IsBound())
+		{
+			OnInventoryUpdated.Broadcast(InventorySlots);
+		}
+	}
+}
+
 void UBSInventoryComponent::RemoveToSlot(const int32 Index)
 {
 	if (Index >= 0 && InventorySlots.Num() > Index)
@@ -133,6 +147,15 @@ void UBSInventoryComponent::RemoveToSlot(const int32 Index)
 		{
 			OnInventoryUpdated.Broadcast(InventorySlots);
 		}
+	}
+}
+
+void UBSInventoryComponent::RemoveWeapon(const int32 Index)
+{
+	if (Weapons.IsValidIndex(Index))
+	{
+		Weapons[Index]->Destroy();
+		Weapons[Index] = nullptr;
 	}
 }
 

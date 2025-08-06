@@ -87,7 +87,7 @@ void ABSWeapon::UnequipItem()
 
 void ABSWeapon::OnceCalledSetWeaponDamage()
 {
-	BaseDamage = BaseDamage * DamageMultiplierByGrade[WeaponGrade];
+	BaseDamage = BaseDamage * DamageMultiplierByGrade[InventoryInfo.WeaponGrade];
 	BaseDamage = FMath::Clamp(BaseDamage + FMath::RandRange(-5, 5), 0, 200);
 
 	InventoryInfo.Damage = BaseDamage;

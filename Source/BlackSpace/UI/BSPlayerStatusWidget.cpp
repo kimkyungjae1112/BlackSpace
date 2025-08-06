@@ -8,6 +8,7 @@
 
 #include "Components/BSCombatComponent.h"
 #include "UI/BSPlayerStatusWeaponWidget.h"
+#include "Equipments/BSWeapon.h"
 #include "BSInventorySlot.h"
 
 UBSPlayerStatusWidget::UBSPlayerStatusWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
@@ -35,6 +36,19 @@ void UBSPlayerStatusWidget::SetMainWeaponState(const FInventorySlot& MainWeaponI
 {
 	MainWeaponWidget->SetWeaponImage(MainWeaponInfo.Image);
 	MainWeaponWidget->SetWeaponName(MainWeaponInfo.Name);
+
+	if (ACharacter* Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
+	{
+		if (UBSCombatComponent* CombatComp = Player->GetComponentByClass<UBSCombatComponent>())
+		{
+			if (ABSWeapon* MainWeapon = CombatComp->GetMainWeapon())
+			{
+				FNumberFormattingOptions FormatOptions;
+				FormatOptions.SetMaximumFractionalDigits(0);
+				DamageTextNum->SetText(FText::AsNumber(MainWeapon->GetWeaponDamage(), &FormatOptions));
+			}
+		}
+	}
 }
 
 void UBSPlayerStatusWidget::SetSecondaryWeaponState(const FInventorySlot& SecondaryWeaponInfo)

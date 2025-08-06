@@ -64,8 +64,10 @@ public:
 	void AddToSlot(const FInventorySlot& InventorySlot);
 	void AddToSlot(ABSWeapon* InWeapon, int32 Index);
 	void AddToSlot(ABSWeapon* InWeapon);
+	void AddToSlot(int32 Index);
 
 	void RemoveToSlot(const int32 Index);
+	void RemoveWeapon(const int32 Index);
 
 	void EquipFromInventory(const int32 Index) const;
 

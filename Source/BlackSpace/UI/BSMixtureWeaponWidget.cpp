@@ -3,8 +3,10 @@
 
 #include "UI/BSMixtureWeaponWidget.h"
 #include "Components/Button.h"
+#include "GameFramework/PlayerController.h"
 
 #include "UI/BSMixtureMaterialWidget.h"
+#include "Components/BSInventoryComponent.h"
 
 UBSMixtureWeaponWidget::UBSMixtureWeaponWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -20,17 +22,14 @@ void UBSMixtureWeaponWidget::NativeConstruct()
 		MixtureButton->OnClicked.AddDynamic(this, &ThisClass::ClickMixtureButton);
 		MixtureButton->SetIsEnabled(false);
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("No Mixture Button!"));
-	}
 }
 
-void UBSMixtureWeaponWidget::SetMixtureWeaponSlot(const FInventorySlot& InInventorySlot) const
+void UBSMixtureWeaponWidget::SetMixtureWeaponSlot(const FInventorySlot& InInventorySlot, int32 Index)
 {
 	if (!WBPMixtureFirstWeapon->CheckHasWeaponSlot())
 	{
-		WBPMixtureFirstWeapon->SetWeaponSlot(InInventorySlot);
+		WBPMixtureFirstWeapon->SetWeaponSlot(InInventorySlot, Index);
+		FirstWeaponIndex = Index;
 
 		if (WBPMixtureSecondWeapon->CheckHasWeaponSlot())
 		{
@@ -39,7 +38,7 @@ void UBSMixtureWeaponWidget::SetMixtureWeaponSlot(const FInventorySlot& InInvent
 	}
 	else
 	{
-		WBPMixtureSecondWeapon->SetWeaponSlot(InInventorySlot);
+		WBPMixtureSecondWeapon->SetWeaponSlot(InInventorySlot, Index);
 
 		MixtureButton->SetIsEnabled(true);
 	}
@@ -52,6 +51,18 @@ void UBSMixtureWeaponWidget::DisableMixtureButton() const
 
 void UBSMixtureWeaponWidget::ClickMixtureButton()
 {
+	APawn* Player = GetWorld()->GetFirstPlayerController()->GetPawn();
+	if(Player == nullptr)
+	{
+		return;
+	}
+
+	UBSInventoryComponent* InventoryComp = Player->GetComponentByClass<UBSInventoryComponent>();
+	if (InventoryComp == nullptr)
+	{
+		return;
+	}
+
 	FInventorySlot FirstSlot = WBPMixtureFirstWeapon->GetInventorySlot();
 	FInventorySlot SecondSlot = WBPMixtureSecondWeapon->GetInventorySlot();
 	FInventorySlot NewWeapon = FInventorySlot();
@@ -71,21 +82,29 @@ void UBSMixtureWeaponWidget::ClickMixtureButton()
 
 	EWeaponGrade ResultGrade = BaseGrade;
 
-	const float RandomValue = FMath::FRand();
+	const int32 RandomValue = FMath::RandRange(1, 100);
 
 	switch (BaseGrade)
 	{
 	case EWeaponGrade::Common:
-		if (RandomValue < 1.f) ResultGrade = EWeaponGrade::Rare;
+		if (RandomValue <= 30)
+		{
+			ResultGrade = EWeaponGrade::Rare;
+		}
 		break;
 	case EWeaponGrade::Rare:
-		if (RandomValue < 1.f) ResultGrade = EWeaponGrade::Epic;
+		if (RandomValue <= 20)
+		{
+			ResultGrade = EWeaponGrade::Epic;
+		}
 		break;
 	case EWeaponGrade::Epic:
-		if (RandomValue < 1.f) ResultGrade = EWeaponGrade::Legendary;
+		if (RandomValue <= 10)
+		{
+			ResultGrade = EWeaponGrade::Legendary;
+		}
 		break;
 	case EWeaponGrade::Legendary:
-		// 최상급 등급: 변화 없음
 		break;
 	default:
 		break;
@@ -93,7 +112,10 @@ void UBSMixtureWeaponWidget::ClickMixtureButton()
 	
 	NewWeapon.WeaponGrade = ResultGrade;
 
-	WBPMixturedWeapon->SetWeaponSlot(NewWeapon);
+	WBPMixturedWeapon->SetWeaponSlot(NewWeapon, FirstWeaponIndex);
+
+	InventoryComp->RemoveWeapon(WBPMixtureFirstWeapon->GetHasIndex());
+	InventoryComp->RemoveWeapon(WBPMixtureSecondWeapon->GetHasIndex());
 
 	WBPMixtureFirstWeapon->UnsetWeaponSlot();
 	WBPMixtureSecondWeapon->UnsetWeaponSlot();

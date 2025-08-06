@@ -57,7 +57,7 @@ public:
 	UBSInventoryMenuWidget(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 public:
-	void SetWeaponSlot(const FInventorySlot& InInventorySlot) const;
+	void SetWeaponSlot(const FInventorySlot& InInventorySlot, int32 InIndex) const;
 
 	void OnLeftTab();
 	void OnRightTab();

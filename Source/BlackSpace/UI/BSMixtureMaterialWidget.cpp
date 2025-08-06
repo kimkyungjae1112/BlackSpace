@@ -18,16 +18,31 @@ UBSMixtureMaterialWidget::UBSMixtureMaterialWidget(const FObjectInitializer& Obj
 {
 }
 
-void UBSMixtureMaterialWidget::SetWeaponSlot(const FInventorySlot& InInventorySlot)
+void UBSMixtureMaterialWidget::SetWeaponSlot(const FInventorySlot& InInventorySlot, int32 InIndex)
 {
+	Index = InIndex;
 	bHasWeaponSlot = true;
 	InventorySlot = InInventorySlot;
+
+	if (InventorySlot.WeaponGrade == EWeaponGrade::Common)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Weapon Grade : Common"));
+	}
+	else if (InventorySlot.WeaponGrade == EWeaponGrade::Rare)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Weapon Grade : Rare"));
+	}
+	else if (InventorySlot.WeaponGrade == EWeaponGrade::Epic)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Weapon Grade : Epic"));
+	}
 	WeaponName->SetText(InInventorySlot.Name);
 	WeaponImage->SetBrushFromTexture(InInventorySlot.Image);
 }
 
 void UBSMixtureMaterialWidget::UnsetWeaponSlot()
 {
+	Index = -1;
 	bHasWeaponSlot = false;
 	InventorySlot = FInventorySlot();
 	WeaponName->SetText(InventorySlot.Name);
@@ -90,14 +105,24 @@ void UBSMixtureMaterialWidget::RightClickForRemove()
 		{
 			if (UBSInventoryComponent* InventoryComp = Player->GetComponentByClass<UBSInventoryComponent>())
 			{
-				InventoryComp->AddToSlot(InventorySlot);
-
-				UnsetWeaponSlot();
-
-				if (DelegateCanMixture.IsBound())
+				if (!bMixtured)
 				{
-					DelegateCanMixture.ExecuteIfBound();
+					InventoryComp->AddToSlot(Index);
+
+					UnsetWeaponSlot();
+
+					if (DelegateCanMixture.IsBound())
+					{
+						DelegateCanMixture.ExecuteIfBound();
+					}
 				}
+				else
+				{
+					InventoryComp->AddToSlot(InventorySlot);
+
+					UnsetWeaponSlot();
+				}
+
 			}
 		}
 	}

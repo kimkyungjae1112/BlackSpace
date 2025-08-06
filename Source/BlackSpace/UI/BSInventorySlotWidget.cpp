@@ -169,7 +169,7 @@ void UBSInventorySlotWidget::RightClickForEquip()
 			{
 				UBSInventoryMenuWidget* InventoryMenuWidget = Cast<UBSInventoryMenuWidget>(Widget);
 				
-				InventoryMenuWidget->SetWeaponSlot(InventorySlot);
+				InventoryMenuWidget->SetWeaponSlot(InventorySlot, Index);
 				// 아래 함수들이 줄줄이 달려있음
 				// UBSMixtureWeaponWidget->SetWeaponSlot()
 				// UBSMixtureMaterialWidget->SetWeaponSlot()
@@ -191,7 +191,6 @@ void UBSInventorySlotWidget::RightClickForEquip()
 				ABSWeapon* OldWeapon = nullptr;
 				if (CombatComp->CheckHasMainWeapon() && CombatComp->CheckHasSecondaryWeapon())
 				{
-					// 우클릭을 통해 무기를 장착했는데, 이때 메인 무기가 장착되어 있었을 때
 					OldWeapon = CombatComp->GetMainWeapon();
 				}
 				InventoryComp->EquipFromInventory(Index);
