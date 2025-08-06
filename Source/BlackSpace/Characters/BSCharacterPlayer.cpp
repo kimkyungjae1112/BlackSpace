@@ -536,7 +536,7 @@ void ABSCharacterPlayer::Move(const FInputActionValue& Value)
 	check(StateComp);
 	check(RotationComp);
 
-	if (RotationComp->GetIsActive())
+	if (RotationComp->GetIsActive() && !TargetingComp->IsLockOn())
 	{
 		FVector2D InputValue = Value.Get<FVector2D>();
 
