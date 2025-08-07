@@ -206,6 +206,10 @@ void ABSCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		EnhancedInputComponent->BindAction(InputData->IA_BowStringPull, ETriggerEvent::Started, this, &ThisClass::PullStringStart);
 		EnhancedInputComponent->BindAction(InputData->IA_BowStringPull, ETriggerEvent::Canceled, this, &ThisClass::PullStringCancel);
 		EnhancedInputComponent->BindAction(InputData->IA_BowStringPull, ETriggerEvent::Triggered, this, &ThisClass::PullStringComplete);
+
+		/* Dialogue */
+		EnhancedInputComponent->BindAction(InputData->IA_NextDialogue, ETriggerEvent::Started, this, &ThisClass::NextDialogue);
+		EnhancedInputComponent->BindAction(InputData->IA_SkipDialogue, ETriggerEvent::Started, this, &ThisClass::SkipDialogue);
 	}
 }
 
@@ -282,6 +286,16 @@ void ABSCharacterPlayer::GSwordSpecialAttackExecutedMotionWarp() const
 UBSPlayerHUDWidget* ABSCharacterPlayer::GetHUDWidget() const
 {
 	return HUDWidget;
+}
+
+void ABSCharacterPlayer::EndDialogue()
+{
+	check(CombatComp);
+
+	if (ABSWeapon* CurrnetWeapon = CombatComp->GetMainWeapon())
+	{
+		SetInputMapping(CurrnetWeapon->GetWeaponType());
+	}
 }
 
 void ABSCharacterPlayer::AttackFinished(const float ComboResetDelay)
@@ -736,6 +750,29 @@ void ABSCharacterPlayer::Dialogue()
 		if (IBSDialogueInterface* DialogueInterface = Cast<IBSDialogueInterface>(DialogueTarget))
 		{
 			DialogueInterface->StartDialogue();
+			SetInputMapping();
+		}
+	}
+}
+
+void ABSCharacterPlayer::NextDialogue()
+{
+	if (DialogueTarget)
+	{
+		if (IBSDialogueInterface* DialogueInterface = Cast<IBSDialogueInterface>(DialogueTarget))
+		{
+			DialogueInterface->NextDialogue();
+		}
+	}
+}
+
+void ABSCharacterPlayer::SkipDialogue()
+{
+	if (DialogueTarget)
+	{
+		if (IBSDialogueInterface* DialogueInterface = Cast<IBSDialogueInterface>(DialogueTarget))
+		{
+			DialogueInterface->SkipDialogue();
 		}
 	}
 }
@@ -1228,6 +1265,15 @@ void ABSCharacterPlayer::SetInputMapping(const EWeaponType& InWeaponType)
 			Subsystem->ClearAllMappings();
 			Subsystem->AddMappingContext(InputMap[InWeaponType], 0);
 		}
+	}
+}
+
+void ABSCharacterPlayer::SetInputMapping()
+{
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetPlayerController()->GetLocalPlayer()))
+	{
+		Subsystem->ClearAllMappings();
+		Subsystem->AddMappingContext(InputData->IMC_Dialogue, 0);
 	}
 }
 

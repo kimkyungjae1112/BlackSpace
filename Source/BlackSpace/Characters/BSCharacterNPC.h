@@ -18,7 +18,7 @@ class BLACKSPACE_API ABSCharacterNPC
 
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "NPC | Component")
-	TObjectPtr<UBSDialogueComponent> DialogueComponent;
+	TObjectPtr<UBSDialogueComponent> DialogueComp;
 
 public:
 	ABSCharacterNPC();
@@ -29,6 +29,8 @@ protected:
 public:
 	/* IBSDialogueInterface Implement */
 	virtual void StartDialogue() override;
+	virtual void NextDialogue() override;
+	virtual void SkipDialogue() override;
 
 public:
 };

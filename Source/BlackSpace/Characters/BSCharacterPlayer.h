@@ -9,6 +9,7 @@
 #include "Interface/BSBowFireInterface.h"
 #include "Interface/BSPlayerAttackedInterface.h"
 #include "Interface/BSPlayerHUDInterface.h"
+#include "Interface/BSDialogueEndInterface.h"
 #include "BSCharacterPlayer.generated.h"
 
 
@@ -37,11 +38,15 @@ class BLACKSPACE_API ABSCharacterPlayer
 	, public IBSBowFireInterface
 	, public IBSPlayerAttackedInterface
 	, public IBSPlayerHUDInterface
+	, public IBSDialogueEndInterface
 {
 	GENERATED_BODY()
 
 	// Input
 protected:
+	// Dialogue Input Mapping Context 를 어떻게 넣을지 고민,,,,,
+	// 1. EWeaponType에 그냥 Dialogue 타입 추가 -> 근데 애니메이션 빵구
+	// 2. Dialogue 일 때만 예외처리 하기 -> 이걸로 결정
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	TMap<EWeaponType, UInputMappingContext*> InputMap;
 
@@ -194,6 +199,9 @@ public:
 	/* IBSPlayerHUDInterface Implement */
 	virtual UBSPlayerHUDWidget* GetHUDWidget() const override;
 
+	/* IBSDialogueEndInterface Implement */
+	virtual void EndDialogue() override;
+
 	void AttackFinished(const float ComboResetDelay);
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
@@ -227,6 +235,8 @@ private:
 	void Interaction();
 	void ChangeWeapon();
 	void Dialogue();
+	void NextDialogue();
+	void SkipDialogue();
 
 	// 공격
 	void LightAttack();
@@ -286,6 +296,7 @@ private:
 private:
 	void ChagnedWeapon(const struct FInventorySlot&);
 	void SetInputMapping(const EWeaponType& InWeaponType);
+	void SetInputMapping();
 
 private:
 	ABSPlayerController* GetPlayerController() const;

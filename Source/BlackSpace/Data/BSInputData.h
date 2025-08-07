@@ -76,4 +76,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bow | Attack")
 	TObjectPtr<UInputAction> IA_BowStringPull;
 
+	/***********************************************/
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dialogue | IMC")
+	TObjectPtr<UInputMappingContext> IMC_Dialogue;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dialogue | Next")
+	TObjectPtr<UInputAction> IA_NextDialogue;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dialogue | Next")
+	TObjectPtr<UInputAction> IA_SkipDialogue;
 };

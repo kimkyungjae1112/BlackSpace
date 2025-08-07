@@ -18,4 +18,6 @@ class BLACKSPACE_API IBSDialogueInterface
 
 public:
 	virtual void StartDialogue() = 0;
+	virtual void NextDialogue() = 0;
+	virtual void SkipDialogue() = 0;
 };

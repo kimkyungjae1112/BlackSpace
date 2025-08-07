@@ -6,7 +6,7 @@
 
 ABSCharacterNPC::ABSCharacterNPC()
 {
-	DialogueComponent = CreateDefaultSubobject<UBSDialogueComponent>(TEXT("Dialogue Component"));
+	DialogueComp = CreateDefaultSubobject<UBSDialogueComponent>(TEXT("Dialogue Component"));
 }
 
 void ABSCharacterNPC::BeginPlay()
@@ -17,6 +17,16 @@ void ABSCharacterNPC::BeginPlay()
 
 void ABSCharacterNPC::StartDialogue()
 {
-	DialogueComponent->StartDialogue();
+	DialogueComp->StartDialogue();
+}
+
+void ABSCharacterNPC::NextDialogue()
+{
+	DialogueComp->NextDialogue();
+}
+
+void ABSCharacterNPC::SkipDialogue()
+{
+	DialogueComp->SkipDialogue();
 }
 
