@@ -93,13 +93,13 @@ void UBSMixtureWeaponWidget::ClickMixtureButton()
 		}
 		break;
 	case EWeaponGrade::Rare:
-		if (RandomValue <= 20)
+		if (RandomValue <= 120)
 		{
 			ResultGrade = EWeaponGrade::Epic;
 		}
 		break;
 	case EWeaponGrade::Epic:
-		if (RandomValue <= 10)
+		if (RandomValue <= 110)
 		{
 			ResultGrade = EWeaponGrade::Legendary;
 		}

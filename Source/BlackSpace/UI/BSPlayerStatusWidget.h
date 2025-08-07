@@ -16,14 +16,14 @@ class BLACKSPACE_API UBSPlayerStatusWidget : public UUserWidget
 	GENERATED_BODY()
 	
 protected:
-	UPROPERTY(meta=(BindWidget), BlueprintReadWrite)
-	TObjectPtr<UTextBlock> DamageTextNum;
-	
-	UPROPERTY(meta=(BindWidget), BlueprintReadWrite)
-	TObjectPtr<UTextBlock> AttackSpeedText;
+	UPROPERTY(meta = (BindWidget), BlueprintReadWrite)
+	TObjectPtr<UTextBlock> HealthTextNum;
+
+	UPROPERTY(meta = (BindWidget), BlueprintReadWrite)
+	TObjectPtr<UTextBlock> StaminaTextNum;
 
 	UPROPERTY(meta=(BindWidget), BlueprintReadWrite)
-	TObjectPtr<UTextBlock> AttackRangeText;
+	TObjectPtr<UTextBlock> DamageTextNum;
 
 	UPROPERTY(meta = (BindWidget), BlueprintReadWrite)
 	TObjectPtr<UBSPlayerStatusWeaponWidget> MainWeaponWidget;

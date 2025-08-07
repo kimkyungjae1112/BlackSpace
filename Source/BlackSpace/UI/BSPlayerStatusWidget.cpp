@@ -7,6 +7,7 @@
 #include "Components/TextBlock.h"
 
 #include "Components/BSCombatComponent.h"
+#include "Components/BSAttributeComponent.h"
 #include "UI/BSPlayerStatusWeaponWidget.h"
 #include "Equipments/BSWeapon.h"
 #include "BSInventorySlot.h"
@@ -28,6 +29,15 @@ void UBSPlayerStatusWidget::NativeConstruct()
 
 			MainWeaponWidget->SetCombatComp(CombatComp);
 			SecondaryWeaponWidget->SetCombatComp(CombatComp);
+		}
+
+		if (UBSAttributeComponent* AttributeComp = Player->GetComponentByClass<UBSAttributeComponent>())
+		{
+			FNumberFormattingOptions FormatOptions;
+			FormatOptions.MinimumFractionalDigits = 0;
+
+			HealthTextNum->SetText(FText::AsNumber(AttributeComp->GetMaxHealth(), &FormatOptions));
+			StaminaTextNum->SetText(FText::AsNumber(AttributeComp->GetMaxStamina(), &FormatOptions));
 		}
 	}
 }

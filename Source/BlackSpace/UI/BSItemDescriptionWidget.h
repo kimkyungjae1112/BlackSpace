@@ -40,5 +40,6 @@ public:
 	void UnsetDescription();
 
 private:
-	FText GetWeaponGradeText(const EWeaponGrade& Grade);
+	FText GetWeaponGradeText(const EWeaponGrade& Grade) const;
+	FLinearColor GetWeaponGradeTextColor(const EWeaponGrade& Grade) const;
 };
