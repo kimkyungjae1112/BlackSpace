@@ -51,6 +51,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Common | LockOn")
 	TObjectPtr<UInputAction> IA_RightTarget;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Common | Dialogue")
+	TObjectPtr<UInputAction> IA_Dialogue;
+
 	/***********************************************/
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sword | Attack")
@@ -73,4 +76,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bow | Attack")
 	TObjectPtr<UInputAction> IA_BowStringPull;
 
+	/***********************************************/
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dialogue | IMC")
+	TObjectPtr<UInputMappingContext> IMC_Dialogue;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dialogue | IMC")
+	TObjectPtr<UInputMappingContext> IMC_DialogueOption;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dialogue | Next")
+	TObjectPtr<UInputAction> IA_NextDialogue;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dialogue | Next")
+	TObjectPtr<UInputAction> IA_SkipDialogue;
 };

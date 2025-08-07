@@ -9,6 +9,7 @@
 #include "Interface/BSBowFireInterface.h"
 #include "Interface/BSPlayerAttackedInterface.h"
 #include "Interface/BSPlayerHUDInterface.h"
+#include "Interface/BSDialogueEndInterface.h"
 #include "BSCharacterPlayer.generated.h"
 
 
@@ -37,11 +38,15 @@ class BLACKSPACE_API ABSCharacterPlayer
 	, public IBSBowFireInterface
 	, public IBSPlayerAttackedInterface
 	, public IBSPlayerHUDInterface
+	, public IBSDialogueEndInterface
 {
 	GENERATED_BODY()
 
 	// Input
 protected:
+	// Dialogue Input Mapping Context 를 어떻게 넣을지 고민,,,,,
+	// 1. EWeaponType에 그냥 Dialogue 타입 추가 -> 근데 애니메이션 빵구
+	// 2. Dialogue 일 때만 예외처리 하기 -> 이걸로 결정
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	TMap<EWeaponType, UInputMappingContext*> InputMap;
 
@@ -157,6 +162,11 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<APawn> VitalAttackTarget;
 
+	// Dialogue
+protected:
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<AActor> DialogueTarget;
+
 public:
 	ABSCharacterPlayer();
 
@@ -188,6 +198,11 @@ public:
 
 	/* IBSPlayerHUDInterface Implement */
 	virtual UBSPlayerHUDWidget* GetHUDWidget() const override;
+
+	/* IBSDialogueEndInterface Implement */
+	virtual void EndDialogue() override;
+	virtual void OptionDialogue() override;
+	virtual void EndOptionDialogue() override;
 
 	void AttackFinished(const float ComboResetDelay);
 
@@ -221,6 +236,9 @@ private:
 	void InventoryRightPage();
 	void Interaction();
 	void ChangeWeapon();
+	void Dialogue();
+	void NextDialogue();
+	void SkipDialogue();
 
 	// 공격
 	void LightAttack();
@@ -268,14 +286,19 @@ private:
 
 	// 급소 공격
 private:
-	bool DetectForBackAttackTarget(FHitResult& OutResult);
+	bool DetectForBackAttackTarget(OUT FHitResult& OutResult);
 	void BackAttackMotionWarp();
 	void PostureAttackMotionWarp();
+
+	// 대화
+private:
+	bool DetectForDialogue(OUT FHitResult& OutResult);
 
 	// Input 변경
 private:
 	void ChagnedWeapon(const struct FInventorySlot&);
 	void SetInputMapping(const EWeaponType& InWeaponType);
+	void SetInputMapping(class UInputMappingContext* InInputMappingContext);
 
 private:
 	ABSPlayerController* GetPlayerController() const;

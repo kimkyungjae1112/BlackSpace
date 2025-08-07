@@ -34,6 +34,7 @@
 #include "Interface/BSUpdateAnyTypeInterface.h"
 #include "Interface/BSAIControllerInterface.h"
 #include "Interface/BSEnemyInterface.h"
+#include "Interface/BSDialogueInterface.h"
 #include "Player/BSPlayerController.h"
 #include "Animation/BSAnimInstance.h"
 #include "Projectiles/BSArrow.h"
@@ -95,12 +96,27 @@ void ABSCharacterPlayer::Tick(float DeltaTime)
 
 	if (CanDetectForBackAttack())
 	{
-		FHitResult HitResult;
-		bool bHit = DetectForBackAttackTarget(HitResult);
+		FHitResult DialogueTargetResult;
+		bool bDialogueHit = DetectForDialogue(DialogueTargetResult);
+		
+		if (bDialogueHit)
+		{
+			if (DialogueTarget != DialogueTargetResult.GetActor())
+			{
+				DialogueTarget = DialogueTargetResult.GetActor();
+			}
+		}
+		else
+		{
+			DialogueTarget = nullptr;
+		}
+
+		FHitResult VitalTargetResult;
+		bool bHit = DetectForBackAttackTarget(VitalTargetResult);
 
 		if (bHit)
 		{
-			VitalAttackTarget = Cast<APawn>(HitResult.GetActor());
+			VitalAttackTarget = Cast<APawn>(VitalTargetResult.GetActor());
 
 			if (VitalAttackTarget)
 			{
@@ -177,6 +193,7 @@ void ABSCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		EnhancedInputComponent->BindAction(InputData->IA_LockOnTarget, ETriggerEvent::Started, this, &ThisClass::LockOnTarget);
 		EnhancedInputComponent->BindAction(InputData->IA_LeftTarget, ETriggerEvent::Started, this, &ThisClass::LeftTarget);
 		EnhancedInputComponent->BindAction(InputData->IA_RightTarget, ETriggerEvent::Started, this, &ThisClass::RightTarget);
+		EnhancedInputComponent->BindAction(InputData->IA_Dialogue, ETriggerEvent::Started, this, &ThisClass::Dialogue);
 
 		/* Sword & Poleram */
 		EnhancedInputComponent->BindAction(InputData->IA_SwordAttack, ETriggerEvent::Canceled, this, &ThisClass::LightAttack);
@@ -189,6 +206,10 @@ void ABSCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		EnhancedInputComponent->BindAction(InputData->IA_BowStringPull, ETriggerEvent::Started, this, &ThisClass::PullStringStart);
 		EnhancedInputComponent->BindAction(InputData->IA_BowStringPull, ETriggerEvent::Canceled, this, &ThisClass::PullStringCancel);
 		EnhancedInputComponent->BindAction(InputData->IA_BowStringPull, ETriggerEvent::Triggered, this, &ThisClass::PullStringComplete);
+
+		/* Dialogue */
+		EnhancedInputComponent->BindAction(InputData->IA_NextDialogue, ETriggerEvent::Started, this, &ThisClass::NextDialogue);
+		EnhancedInputComponent->BindAction(InputData->IA_SkipDialogue, ETriggerEvent::Started, this, &ThisClass::SkipDialogue);
 	}
 }
 
@@ -265,6 +286,26 @@ void ABSCharacterPlayer::GSwordSpecialAttackExecutedMotionWarp() const
 UBSPlayerHUDWidget* ABSCharacterPlayer::GetHUDWidget() const
 {
 	return HUDWidget;
+}
+
+void ABSCharacterPlayer::EndDialogue()
+{
+	check(CombatComp);
+
+	if (ABSWeapon* CurrnetWeapon = CombatComp->GetMainWeapon())
+	{
+		SetInputMapping(CurrnetWeapon->GetWeaponType());
+	}
+}
+
+void ABSCharacterPlayer::OptionDialogue()
+{
+	SetInputMapping(InputData->IMC_DialogueOption);
+}
+
+void ABSCharacterPlayer::EndOptionDialogue()
+{
+	SetInputMapping(InputData->IMC_Dialogue);
 }
 
 void ABSCharacterPlayer::AttackFinished(const float ComboResetDelay)
@@ -536,7 +577,7 @@ void ABSCharacterPlayer::Move(const FInputActionValue& Value)
 	check(StateComp);
 	check(RotationComp);
 
-	if (RotationComp->GetIsActive())
+	if (RotationComp->GetIsActive() && !TargetingComp->IsLockOn())
 	{
 		FVector2D InputValue = Value.Get<FVector2D>();
 
@@ -708,6 +749,40 @@ void ABSCharacterPlayer::ChangeWeapon()
 			StateComp->SetState(BSGameplayTag::Character_State_GeneralAction);
 
 			PlayAnimMontage(UnequipMontage);
+		}
+	}
+}
+
+void ABSCharacterPlayer::Dialogue()
+{
+	if (DialogueTarget)
+	{
+		if (IBSDialogueInterface* DialogueInterface = Cast<IBSDialogueInterface>(DialogueTarget))
+		{
+			DialogueInterface->StartDialogue();
+			SetInputMapping(InputData->IMC_Dialogue);
+		}
+	}
+}
+
+void ABSCharacterPlayer::NextDialogue()
+{
+	if (DialogueTarget)
+	{
+		if (IBSDialogueInterface* DialogueInterface = Cast<IBSDialogueInterface>(DialogueTarget))
+		{
+			DialogueInterface->NextDialogue();
+		}
+	}
+}
+
+void ABSCharacterPlayer::SkipDialogue()
+{
+	if (DialogueTarget)
+	{
+		if (IBSDialogueInterface* DialogueInterface = Cast<IBSDialogueInterface>(DialogueTarget))
+		{
+			DialogueInterface->SkipDialogue();
 		}
 	}
 }
@@ -1137,7 +1212,7 @@ void ABSCharacterPlayer::ToggleAimingFlag(bool InIsAiming)
 	}
 }
 
-bool ABSCharacterPlayer::DetectForBackAttackTarget(FHitResult& OutResult)
+bool ABSCharacterPlayer::DetectForBackAttackTarget(OUT FHitResult& OutResult)
 {
 	const FVector Start = GetActorLocation();
 	const FVector End = Start + GetActorForwardVector() * 200.f;
@@ -1167,6 +1242,15 @@ void ABSCharacterPlayer::PostureAttackMotionWarp()
 	VitalAttackTarget = nullptr;
 }
 
+bool ABSCharacterPlayer::DetectForDialogue(OUT FHitResult& OutResult)
+{
+	const FVector Start = GetActorLocation();
+	const FVector End = Start + GetActorForwardVector() * 400.f;
+	FCollisionQueryParams Param(NAME_None, false, this);
+
+	return GetWorld()->LineTraceSingleByChannel(OutResult, Start, End, ECC_GameTraceChannel1, Param);
+}
+
 void ABSCharacterPlayer::ChagnedWeapon(const FInventorySlot&)
 {
 	check(CombatComp);
@@ -1190,6 +1274,15 @@ void ABSCharacterPlayer::SetInputMapping(const EWeaponType& InWeaponType)
 			Subsystem->ClearAllMappings();
 			Subsystem->AddMappingContext(InputMap[InWeaponType], 0);
 		}
+	}
+}
+
+void ABSCharacterPlayer::SetInputMapping(class UInputMappingContext* InInputMappingContext)
+{
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetPlayerController()->GetLocalPlayer()))
+	{
+		Subsystem->ClearAllMappings();
+		Subsystem->AddMappingContext(InInputMappingContext, 0);
 	}
 }
 
