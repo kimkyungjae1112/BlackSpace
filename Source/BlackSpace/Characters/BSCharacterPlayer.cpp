@@ -298,6 +298,16 @@ void ABSCharacterPlayer::EndDialogue()
 	}
 }
 
+void ABSCharacterPlayer::OptionDialogue()
+{
+	SetInputMapping(InputData->IMC_DialogueOption);
+}
+
+void ABSCharacterPlayer::EndOptionDialogue()
+{
+	SetInputMapping(InputData->IMC_Dialogue);
+}
+
 void ABSCharacterPlayer::AttackFinished(const float ComboResetDelay)
 {
 	check(StateComp);
@@ -750,7 +760,7 @@ void ABSCharacterPlayer::Dialogue()
 		if (IBSDialogueInterface* DialogueInterface = Cast<IBSDialogueInterface>(DialogueTarget))
 		{
 			DialogueInterface->StartDialogue();
-			SetInputMapping();
+			SetInputMapping(InputData->IMC_Dialogue);
 		}
 	}
 }
@@ -1235,9 +1245,8 @@ void ABSCharacterPlayer::PostureAttackMotionWarp()
 bool ABSCharacterPlayer::DetectForDialogue(OUT FHitResult& OutResult)
 {
 	const FVector Start = GetActorLocation();
-	const FVector End = Start + GetActorForwardVector() * 200.f;
+	const FVector End = Start + GetActorForwardVector() * 400.f;
 	FCollisionQueryParams Param(NAME_None, false, this);
-	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false);
 
 	return GetWorld()->LineTraceSingleByChannel(OutResult, Start, End, ECC_GameTraceChannel1, Param);
 }
@@ -1268,12 +1277,12 @@ void ABSCharacterPlayer::SetInputMapping(const EWeaponType& InWeaponType)
 	}
 }
 
-void ABSCharacterPlayer::SetInputMapping()
+void ABSCharacterPlayer::SetInputMapping(class UInputMappingContext* InInputMappingContext)
 {
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetPlayerController()->GetLocalPlayer()))
 	{
 		Subsystem->ClearAllMappings();
-		Subsystem->AddMappingContext(InputData->IMC_Dialogue, 0);
+		Subsystem->AddMappingContext(InInputMappingContext, 0);
 	}
 }
 

@@ -201,6 +201,8 @@ public:
 
 	/* IBSDialogueEndInterface Implement */
 	virtual void EndDialogue() override;
+	virtual void OptionDialogue() override;
+	virtual void EndOptionDialogue() override;
 
 	void AttackFinished(const float ComboResetDelay);
 
@@ -296,7 +298,7 @@ private:
 private:
 	void ChagnedWeapon(const struct FInventorySlot&);
 	void SetInputMapping(const EWeaponType& InWeaponType);
-	void SetInputMapping();
+	void SetInputMapping(class UInputMappingContext* InInputMappingContext);
 
 private:
 	ABSPlayerController* GetPlayerController() const;

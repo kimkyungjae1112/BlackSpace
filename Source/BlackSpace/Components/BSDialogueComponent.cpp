@@ -50,7 +50,12 @@ void UBSDialogueComponent::NextDialogue()
 	{
 		if (ABSPlayerController* PC = Cast<ABSPlayerController>(GetWorld()->GetFirstPlayerController()))
 		{
-			PC->SetInputModeUIAndGame();
+			if (IBSDialogueEndInterface* DialogueEndInterface = Cast<IBSDialogueEndInterface>(PC->GetPawn()))
+			{
+				DialogueEndInterface->OptionDialogue();
+			
+				PC->SetInputModeUIAndGame();
+			}
 		}
 
 		for (const auto& OptionDataTable : DialogueTable.OptionDialogues)
@@ -89,6 +94,16 @@ void UBSDialogueComponent::SkipDialogue()
 
 void UBSDialogueComponent::OnClickButton(const FName& InIndex)
 {
+	if (ABSPlayerController* PC = Cast<ABSPlayerController>(GetWorld()->GetFirstPlayerController()))
+	{
+		if (IBSDialogueEndInterface* DialogueEndInterface = Cast<IBSDialogueEndInterface>(PC->GetPawn()))
+		{
+			DialogueEndInterface->EndOptionDialogue();
+
+			PC->SetInputModeGameOnly();
+		}
+	}
+
 	DialogueWidget->GetOptionScrollBox()->ClearChildren();
 
 	DialogueTable = *DialogueTable.DataTable->FindRow<FBSDialogueDataTable>(InIndex, TEXT(""));
@@ -103,6 +118,3 @@ void UBSDialogueComponent::DialogueOptionSpawn(const FBSDialogueOptionDataTable&
 
 	DialogueWidget->GetOptionScrollBox()->AddChild(DialogueOptionWidget);
 }
-
-
-

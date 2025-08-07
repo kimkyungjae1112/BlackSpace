@@ -18,4 +18,8 @@ class BLACKSPACE_API IBSDialogueEndInterface
 
 public:
 	virtual void EndDialogue() = 0;
+	
+	virtual void OptionDialogue() = 0;
+
+	virtual void EndOptionDialogue() = 0;
 };

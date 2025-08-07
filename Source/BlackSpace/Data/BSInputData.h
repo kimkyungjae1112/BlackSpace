@@ -81,6 +81,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dialogue | IMC")
 	TObjectPtr<UInputMappingContext> IMC_Dialogue;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dialogue | IMC")
+	TObjectPtr<UInputMappingContext> IMC_DialogueOption;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dialogue | Next")
 	TObjectPtr<UInputAction> IA_NextDialogue;
 
