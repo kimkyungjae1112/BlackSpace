@@ -334,6 +334,10 @@ bool ABSCharacterEnemy::CanBeTargeted()
 void ABSCharacterEnemy::SeesTarget(AActor* InTargetActor)
 {
 	// AIController 에서 호출하기 위한 가상함수
+	if (bUnstoppable)
+	{
+		GetMesh()->SetOverlayMaterial(OutlineMaterial);
+	}
 }
 
 void ABSCharacterEnemy::ToggleHealthBarVisibility(bool bVisibility) const
@@ -405,6 +409,11 @@ void ABSCharacterEnemy::SetDeathState()
 	ToggleBackAttackWidgetVisibility(false);
 	TogglePostureAttackWidgetVisibility(false);
 
+	if (bUnstoppable)
+	{
+		GetMesh()->SetOverlayMaterial(nullptr);
+	}
+
 	FTimerHandle DeathTimer;
 	GetWorld()->GetTimerManager().SetTimer(DeathTimer, [this]()
 		{
@@ -459,24 +468,27 @@ void ABSCharacterEnemy::HitReaction(const AActor* Attacker, const EDamageType& D
 		StunnedTime = FMath::RandRange(0.5f, 1.5f);
 	}
 
-	if (ABSWeapon* MainWeapon = CombatComp->GetMainWeapon())
+	if (!bUnstoppable)
 	{
-		if (UAnimMontage* HitReactAnimMontage = MainWeapon->GetHitReactMontage(Attacker))
+		if (ABSWeapon* MainWeapon = CombatComp->GetMainWeapon())
 		{
-			const float DelaySeconds = PlayAnimMontage(HitReactAnimMontage) + StunnedTime;
+			if (UAnimMontage* HitReactAnimMontage = MainWeapon->GetHitReactMontage(Attacker))
+			{
+				const float DelaySeconds = PlayAnimMontage(HitReactAnimMontage) + StunnedTime;
 
-			FTimerDelegate TimerDelegate;
-			TimerDelegate.BindLambda([this]()
-				{
-					FGameplayTagContainer CheckTags;
-					CheckTags.AddTag(BSGameplayTag::Character_State_Death);
-					CheckTags.AddTag(BSGameplayTag::Character_State_MaxPosture);
-					if (StateComp->IsCurrentStateEqualToAny(CheckTags) == false)
+				FTimerDelegate TimerDelegate;
+				TimerDelegate.BindLambda([this]()
 					{
-						StateComp->ClearState();
-					}
-				});
-			GetWorld()->GetTimerManager().SetTimer(StunnedDelayTimerHandle, TimerDelegate, DelaySeconds, false);
+						FGameplayTagContainer CheckTags;
+						CheckTags.AddTag(BSGameplayTag::Character_State_Death);
+						CheckTags.AddTag(BSGameplayTag::Character_State_MaxPosture);
+						if (StateComp->IsCurrentStateEqualToAny(CheckTags) == false)
+						{
+							StateComp->ClearState();
+						}
+					});
+				GetWorld()->GetTimerManager().SetTimer(StunnedDelayTimerHandle, TimerDelegate, DelaySeconds, false);
+			}
 		}
 	}
 }
@@ -517,6 +529,8 @@ void ABSCharacterEnemy::SetupAttribute()
 
 void ABSCharacterEnemy::OnPosture()
 {
+	if (bUnstoppable) return;
+
 	check(CombatComp);
 	check(StateComp);
 

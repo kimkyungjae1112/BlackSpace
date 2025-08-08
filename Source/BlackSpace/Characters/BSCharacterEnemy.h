@@ -83,7 +83,15 @@ protected:
 	bool bTakeDamageUsage = false;
 
 	UPROPERTY(EditAnywhere, Category = "Enemy | Set Value")
+	bool bUnstoppable = false;
+
+	UPROPERTY(EditAnywhere, Category = "Enemy | Set Value")
 	int32 StunnedRate = 0;
+
+// Material
+protected:
+	UPROPERTY(EditAnywhere, Category = "Enemy | Material")
+	TObjectPtr<UMaterialInstance> OutlineMaterial;
 
 public:
 	ABSCharacterEnemy();
