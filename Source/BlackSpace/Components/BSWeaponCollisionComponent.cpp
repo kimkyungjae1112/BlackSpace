@@ -2,6 +2,7 @@
 
 
 #include "Components/BSWeaponCollisionComponent.h"
+#include "GenericTeamAgentInterface.h"
 
 UBSWeaponCollisionComponent::UBSWeaponCollisionComponent()
 {
@@ -79,9 +80,16 @@ void UBSWeaponCollisionComponent::CollisionTrace()
 		{
 			AActor* HitActor = Hit.GetActor();
 
-			if (HitActor == nullptr) continue;
+			if (HitActor == nullptr || AlreadyHitActors.Contains(HitActor))
+			{
+				continue;
+			}
 
-			if (AlreadyHitActors.Contains(HitActor) == false)
+			// 첫 번째 Owner = Weapon
+			// 두 번째 Owner = Weapon 을 장착한 캐릭터
+			ETeamAttitude::Type Attitude = FGenericTeamId::GetAttitude(GetOwner()->GetOwner(), HitActor);
+
+			if (Attitude != ETeamAttitude::Friendly)
 			{
 				AlreadyHitActors.Add(HitActor);
 

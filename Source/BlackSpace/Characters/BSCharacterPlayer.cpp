@@ -77,6 +77,8 @@ ABSCharacterPlayer::ABSCharacterPlayer()
 	TargetingComp = CreateDefaultSubobject<UBSTargetingComponent>(TEXT("Targeting Component"));
 
 	Tags.Add(TEXT("Player"));
+
+	TeamId = FGenericTeamId(0);
 }
 
 void ABSCharacterPlayer::BeginPlay()
