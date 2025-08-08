@@ -88,6 +88,8 @@ ABSCharacterEnemy::ABSCharacterEnemy()
 	LockOnWidgetComp->SetDrawSize(FVector2D(30.f, 30.f));
 	LockOnWidgetComp->SetWidgetSpace(EWidgetSpace::Screen);
 	LockOnWidgetComp->SetVisibility(false);
+
+	TeamId = FGenericTeamId(1);
 }
 
 void ABSCharacterEnemy::BeginPlay()

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interface/BSCombatInterface.h"
+#include "GenericTeamAgentInterface.h"
 #include "BSDefine.h"
 #include "BSCharacterBase.generated.h"
 
@@ -16,6 +17,7 @@ UCLASS()
 class BLACKSPACE_API ABSCharacterBase 
 	: public ACharacter
 	, public IBSCombatInterface
+	, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -36,6 +38,10 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Effect")
 	TObjectPtr<UParticleSystem> BlockingImpactParticle;
 
+protected:
+	UPROPERTY(EditAnywhere, Category = "Team")
+	FGenericTeamId TeamId = FGenericTeamId(0);
+
 public:
 	ABSCharacterBase();
 
@@ -49,6 +55,9 @@ public:
 	/* IBSCombatInterface Implement */
 	virtual void ActivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType) {};
 	virtual void DeactivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType) {};
+
+	/* IGenericTeamAgentInterface Implement */
+	virtual FGenericTeamId GetGenericTeamId() const override;
 
 protected:
 	virtual void OnDeath() {};

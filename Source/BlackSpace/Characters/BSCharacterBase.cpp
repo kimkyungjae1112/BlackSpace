@@ -24,6 +24,11 @@ void ABSCharacterBase::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+FGenericTeamId ABSCharacterBase::GetGenericTeamId() const
+{
+	return TeamId;
+}
+
 
 
 
