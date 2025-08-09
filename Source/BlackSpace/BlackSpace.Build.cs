@@ -20,7 +20,8 @@ public class BlackSpace : ModuleRules
             "AnimGraphRuntime",
             "MotionWarping",
             "Niagara",
-			"NavigationSystem"
+			"NavigationSystem",
+			"SlateCore"
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

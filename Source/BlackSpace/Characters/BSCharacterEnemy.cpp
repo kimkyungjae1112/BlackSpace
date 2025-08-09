@@ -22,8 +22,9 @@
 #include "Equipments/BSWeapon.h"
 #include "Items/BSPickupItem.h"
 #include "UI/BSStatBarWidget.h"
-#include "BSDefine.h"
+#include "GameModes/BSDamageNumberSubsystem.h"
 #include "BSGameplayTag.h"
+#include "BSDefine.h"
 
 ABSCharacterEnemy::ABSCharacterEnemy()
 {
@@ -132,6 +133,11 @@ float ABSCharacterEnemy::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 	if (bTakeDamageUsage)
 	{
 		AttributeComp->TakeDamageAmount(ActualDamage);
+
+		if (UBSDamageNumberSubsystem* Subsystem = GetWorld()->GetSubsystem<UBSDamageNumberSubsystem>())
+		{
+			Subsystem->AddDamageAtSocket(GetMesh(), FName(TEXT("DamageSocket")), ActualDamage, FVector(0.f, 0.f, 15.f), 1.f);
+		}
 
 		if (!IsEnabledPostureAttack() && !IsBlockingState())
 		{
