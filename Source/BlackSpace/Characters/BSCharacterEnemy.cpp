@@ -22,8 +22,9 @@
 #include "Equipments/BSWeapon.h"
 #include "Items/BSPickupItem.h"
 #include "UI/BSStatBarWidget.h"
-#include "BSDefine.h"
+#include "GameModes/BSDamageNumberSubsystem.h"
 #include "BSGameplayTag.h"
+#include "BSDefine.h"
 
 ABSCharacterEnemy::ABSCharacterEnemy()
 {
@@ -119,6 +120,7 @@ float ABSCharacterEnemy::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	check(AttributeComp);
+	ActualDamage = ActualDamage - FMath::RandRange(0, AttributeComp->GetDefense());
 
 	// 대치 중인가
 	const bool bFacing = UKismetMathLibrary::InRange_FloatFloat(GetDotProductTo(EventInstigator->GetPawn()), -0.1f, 1.f);
@@ -132,6 +134,11 @@ float ABSCharacterEnemy::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 	if (bTakeDamageUsage)
 	{
 		AttributeComp->TakeDamageAmount(ActualDamage);
+
+		if (UBSDamageNumberSubsystem* Subsystem = GetWorld()->GetSubsystem<UBSDamageNumberSubsystem>())
+		{
+			Subsystem->AddDamageAtSocket(GetMesh(), FName(TEXT("DamageSocket")), ActualDamage, FVector(0.f, 0.f, 15.f), 1.f);
+		}
 
 		if (!IsEnabledPostureAttack() && !IsBlockingState())
 		{
@@ -336,9 +343,13 @@ bool ABSCharacterEnemy::CanBeTargeted()
 void ABSCharacterEnemy::SeesTarget(AActor* InTargetActor)
 {
 	// AIController 에서 호출하기 위한 가상함수
-	if (bUnstoppable)
+	if (bUnstoppable && InTargetActor != nullptr)
 	{
 		GetMesh()->SetOverlayMaterial(OutlineMaterial);
+	}
+	else
+	{
+		GetMesh()->SetOverlayMaterial(nullptr);
 	}
 }
 

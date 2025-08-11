@@ -132,10 +132,10 @@ void ABSCharacterEnemyKnight::PostureAttacked(UAnimMontage* PostureAttackReactio
 
 void ABSCharacterEnemyKnight::LoadBodyMeshMaterial() const
 {
-	UMaterialInterface* ArmMat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Script/Engine.MaterialInstanceConstant'/Game/_Assets/DF_DRAGON_KNIGHT/MATERIALS/INSTANCES/Fire/MI_DK_Arms_fire.MI_DK_Arms_fire'"));
-	UMaterialInterface* BodyMat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Script/Engine.MaterialInstanceConstant'/Game/_Assets/DF_DRAGON_KNIGHT/MATERIALS/INSTANCES/Fire/MI_DK_Body_Fire.MI_DK_Body_Fire'"));
-	UMaterialInterface* ClothMat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Script/Engine.MaterialInstanceConstant'/Game/_Assets/DF_DRAGON_KNIGHT/MATERIALS/INSTANCES/Fire/MI_DK_Cloth_Fire.MI_DK_Cloth_Fire'"));
-	UMaterialInterface* SwordMat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Script/Engine.MaterialInstanceConstant'/Game/_Assets/DF_DRAGON_KNIGHT/MATERIALS/INSTANCES/Fire/MI_DK_Sword_Fire.MI_DK_Sword_Fire'"));
+	UMaterialInterface* ArmMat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Script/Engine.MaterialInstanceConstant'/Game/_Assets/DF_DRAGON_KNIGHT/MATERIALS2/INSTANCES/Fire/MI_DK_Arms_fire.MI_DK_Arms_fire'"));
+	UMaterialInterface* BodyMat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Script/Engine.MaterialInstanceConstant'/Game/_Assets/DF_DRAGON_KNIGHT/MATERIALS2/INSTANCES/Fire/MI_DK_Body_Fire.MI_DK_Body_Fire'"));
+	UMaterialInterface* ClothMat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Script/Engine.MaterialInstanceConstant'/Game/_Assets/DF_DRAGON_KNIGHT/MATERIALS2/INSTANCES/Fire/MI_DK_Cloth_Fire.MI_DK_Cloth_Fire'"));
+	UMaterialInterface* SwordMat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Script/Engine.MaterialInstanceConstant'/Game/_Assets/DF_DRAGON_KNIGHT/MATERIALS2/INSTANCES/Fire/MI_DK_Sword_Fire.MI_DK_Sword_Fire'"));
 
 	if (GetMesh())
 	{
