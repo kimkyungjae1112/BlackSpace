@@ -333,6 +333,7 @@ float ABSCharacterPlayer::TakeDamage(float DamageAmount, FDamageEvent const& Dam
 
 	if (UAnimInstance* Anim = GetMesh()->GetAnimInstance())
 	{	
+		// MainWeapon 없을 때 방어 코드 필요
 		if (UAnimMontage* CurrentPlayingMontage = CombatComp->GetMainWeapon()->GetMontageForTag(BSGameplayTag::Character_Attack_MaxPostureAttack))
 		{
 			if (Anim->Montage_IsPlaying(CurrentPlayingMontage))

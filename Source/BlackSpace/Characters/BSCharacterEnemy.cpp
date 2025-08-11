@@ -107,6 +107,14 @@ void ABSCharacterEnemy::BeginPlay()
 	}
 
 	SetupAttribute();
+
+
+#if WITH_EDITOR
+	if (bRootMotionTestFlag)
+	{
+		GetMesh()->GetAnimInstance()->RootMotionMode = ERootMotionMode::IgnoreRootMotion;
+	}
+#endif
 }
 
 void ABSCharacterEnemy::Tick(float DeltaTime)
@@ -242,6 +250,7 @@ void ABSCharacterEnemy::Parried()
 
 	StateComp->SetState(BSGameplayTag::Character_State_Parried);
 	StopAnimMontage();
+	UE_LOG(LogTemp, Display, TEXT("Parried 기절"));
 
 	if (const ABSWeapon* MainWeapon = CombatComp->GetMainWeapon())
 	{
@@ -256,6 +265,7 @@ void ABSCharacterEnemy::Parried()
 				CheckTags.AddTag(BSGameplayTag::Character_State_MaxPosture);
 				if (StateComp->IsCurrentStateEqualToAny(CheckTags) == false)
 				{
+					UE_LOG(LogTemp, Display, TEXT("Parried 해제"));
 					StateComp->ClearState();
 				}
 			});

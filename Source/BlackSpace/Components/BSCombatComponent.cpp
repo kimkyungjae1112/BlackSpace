@@ -115,6 +115,30 @@ void UBSCombatComponent::SetUnequipMainWeapon()
 	}
 }
 
+void UBSCombatComponent::SetUnequipMainWeapon(const bool bCanDestroy)
+{
+	if (UBSInventoryComponent* InventoryComp = GetOwner()->GetComponentByClass<UBSInventoryComponent>())
+	{
+		InventoryComp->AddToSlot(MainWeapon);
+	}
+
+	MainWeapon->UnequipItem();
+	if (bCanDestroy)
+	{
+		MainWeapon->Destroy();
+	}
+	MainWeapon = nullptr;
+
+	bHasMainWeapon = false;
+
+	bCombatEnabled = false;
+
+	if (GetOwner()->ActorHasTag(TEXT("Player")))
+	{
+		OnChangedMainWeapon.Broadcast(FInventorySlot());
+	}
+}
+
 void UBSCombatComponent::SetUnequipSecondaryWeapon()
 {
 	if (UBSInventoryComponent* InventoryComp = GetOwner()->GetComponentByClass<UBSInventoryComponent>())

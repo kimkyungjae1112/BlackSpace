@@ -77,6 +77,7 @@ public:
 	void ChangeWeapon();
 
 	void SetUnequipMainWeapon();
+	void SetUnequipMainWeapon(const bool bCanDestroy);
 	void SetUnequipSecondaryWeapon();
 
 private:

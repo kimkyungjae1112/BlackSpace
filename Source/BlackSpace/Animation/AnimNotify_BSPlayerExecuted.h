@@ -7,6 +7,8 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "AnimNotify_BSPlayerExecuted.generated.h"
 
+class UNiagaraSystem;
+
 UCLASS(meta=(DisplayName="Player Executed"))
 class BLACKSPACE_API UAnimNotify_BSPlayerExecuted : public UAnimNotify
 {
@@ -24,6 +26,10 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	TEnumAsByte<EDrawDebugTrace::Type> DrawDebugType = EDrawDebugTrace::ForDuration;
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Niagara")
+	TObjectPtr<UNiagaraSystem> Template;
 
 public:
 	UAnimNotify_BSPlayerExecuted(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());

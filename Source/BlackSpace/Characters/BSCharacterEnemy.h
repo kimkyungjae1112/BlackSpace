@@ -76,6 +76,9 @@ protected:
 	FTimerHandle StunnedDelayTimerHandle;
 
 protected:
+	UPROPERTY(EditAnywhere, Category = "Enemy | Set Value")
+	bool bRootMotionTestFlag = false;
+
 	UPROPERTY(VisibleAnywhere, Category = "Enemy | Set Value")
 	bool bEnabledBlocking = false;
 

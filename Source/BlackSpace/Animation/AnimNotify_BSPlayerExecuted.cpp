@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "NiagaraSystem.h"
+#include "NiagaraFunctionLibrary.h"
 
 #include "Interface/BSPlayerAttackedInterface.h"
 
@@ -47,6 +49,23 @@ void UAnimNotify_BSPlayerExecuted::Notify(USkeletalMeshComponent* MeshComp, UAni
 
 			if (bHit)
 			{
+				UWorld* World = MeshComp->GetWorld();
+				if (!World)
+				{
+					return;
+				}
+
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+					World,
+					Template,
+					HitResult.ImpactPoint,
+					FRotator::ZeroRotator,
+					FVector(1.f, 1.f, 1.f),
+					true,
+					true,
+					ENCPoolMethod::None
+				);
+
 				if (UAnimInstance* Anim = Character->GetMesh()->GetAnimInstance())
 				{
 					UAnimMontage* CurrentExecuteMontage = Anim->GetCurrentActiveMontage();
@@ -58,8 +77,6 @@ void UAnimNotify_BSPlayerExecuted::Notify(USkeletalMeshComponent* MeshComp, UAni
 
 				if (IBSPlayerAttackedInterface* Interface = Cast<IBSPlayerAttackedInterface>(HitResult.GetActor()))
 				{
-					UWorld* World = Character->GetWorld();
-
 					AActor* Target = HitResult.GetActor();
 					check(Target);
 

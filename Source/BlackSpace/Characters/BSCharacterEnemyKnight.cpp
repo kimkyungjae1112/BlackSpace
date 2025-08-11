@@ -34,7 +34,7 @@ float ABSCharacterEnemyKnight::TakeDamage(float DamageAmount, FDamageEvent const
 	{
 		if (Anim->Montage_IsPlaying(SecondPhaseMontage))
 		{
-			ActualDamage /= 7.f;
+			ActualDamage /= 4.f;
 			AttributeComp->TakePostureAmount(ActualDamage);
 			return ActualDamage;
 		}
@@ -49,7 +49,7 @@ float ABSCharacterEnemyKnight::TakeDamage(float DamageAmount, FDamageEvent const
 
 	AttributeComp->TakeDamageAmount(ActualDamage);
 
-	if (AttributeComp->GetHealthRatio() <= 0.6f && !bIsActiveSecondPhase)
+	if (AttributeComp->GetHealthRatio() <= 0.65f && !bIsActiveSecondPhase)
 	{
 		ChangeWeapon();
 
@@ -275,7 +275,7 @@ void ABSCharacterEnemyKnight::BlockingEnableAction()
 
 void ABSCharacterEnemyKnight::ChangeWeapon()
 {
-	CombatComp->SetUnequipMainWeapon();
+	CombatComp->SetUnequipMainWeapon(true);
 
 	if (GreateSwordWeaponClass)
 	{
