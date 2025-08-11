@@ -24,6 +24,9 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float AttackRangeDistance = 500.f;
 
+	UPROPERTY(EditAnywhere)
+	float ApprochRangeDistance = 1000.f;
+
 public:
 	UBTService_SelectBehavior();
 

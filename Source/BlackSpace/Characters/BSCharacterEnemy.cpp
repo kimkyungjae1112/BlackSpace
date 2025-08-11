@@ -65,7 +65,7 @@ ABSCharacterEnemy::ABSCharacterEnemy()
 
 	PostureWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("Posture Widget Component"));
 	PostureWidgetComp->SetupAttachment(GetRootComponent());
-	PostureWidgetComp->SetRelativeLocation(FVector(0.f, 0.f, 90.f));
+	PostureWidgetComp->SetRelativeLocation(FVector(0.f, 0.f, 96.f));
 	PostureWidgetComp->SetDrawSize(FVector2D(100.f, 5.f));
 	PostureWidgetComp->SetWidgetSpace(EWidgetSpace::Screen);
 	PostureWidgetComp->SetVisibility(false);

@@ -4,6 +4,7 @@
 #include "AI/Service/BTService_SelectBehavior.h"
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Engine/TargetPoint.h"
 
 #include "Characters/BSCharacterEnemy.h"
 #include "Components/BSStateComponent.h"
@@ -65,6 +66,10 @@ void UBTService_SelectBehavior::UpdateBehavior(UBlackboardComponent* BlackboardC
 			if (Distance <= AttackRangeDistance)
 			{
 				SetBehaviorKey(BlackboardComp, EAIBehavior::MeleeAttack);
+			}
+			else if (ControlledEnemy->GetPatrolPoint() && TargetActor->GetDistanceTo(Cast<AActor>(ControlledEnemy->GetPatrolPoint())) > ApprochRangeDistance)
+			{
+				SetBehaviorKey(BlackboardComp, EAIBehavior::Patrol);
 			}
 			else
 			{

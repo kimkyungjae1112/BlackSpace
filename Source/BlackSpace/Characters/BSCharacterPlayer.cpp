@@ -324,11 +324,26 @@ float ABSCharacterPlayer::TakeDamage(float DamageAmount, FDamageEvent const& Dam
 {
 	check(AttributeComp);
 	check(StateComp);
+	check(CombatComp);
 
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	// 적과 대치중인 방향인지?
 	bFacingEnemy = UKismetMathLibrary::InRange_FloatFloat(GetDotProductTo(EventInstigator->GetPawn()), -0.1f, 1.f);
+
+	if (UAnimInstance* Anim = GetMesh()->GetAnimInstance())
+	{	
+		if (UAnimMontage* CurrentPlayingMontage = CombatComp->GetMainWeapon()->GetMontageForTag(BSGameplayTag::Character_Attack_MaxPostureAttack))
+		{
+			if (Anim->Montage_IsPlaying(CurrentPlayingMontage))
+			{
+				AttributeComp->TakeDamageAmount(0.f);
+				ImpactEffect(GetActorLocation());
+
+				return ActualDamage;
+			}
+		}
+	}
 
 	if (CanParrying())
 	{
