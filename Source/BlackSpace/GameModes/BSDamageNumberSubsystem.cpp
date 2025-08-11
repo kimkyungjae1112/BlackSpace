@@ -124,7 +124,7 @@ void UBSDamageNumberSubsystem::UpdateItem(int32 Index, float DeltaTime)
 {
     FDamageItem& DamageItem = Active[Index];
     DamageItem.Elapsed += DeltaTime;
-    const float T = FMath::Clamp(DamageItem.Elapsed / DamageItem.Life, 0.f, 1.f);
+    const float Time = FMath::Clamp(DamageItem.Elapsed / DamageItem.Life, 0.f, 1.f);
 
     // 타겟 추적(있으면 우선)
     if (DamageItem.TargetMesh.IsValid())
@@ -152,10 +152,13 @@ void UBSDamageNumberSubsystem::UpdateItem(int32 Index, float DeltaTime)
     }
 
     APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-    if (!PC) return;
+    if (!PC)
+    {
+        return;
+    }
 
     // 간단한 상승/흔들림
-    const float Up = FMath::Lerp(0.f, 40.f, T);
+    const float Up = FMath::Lerp(0.f, 40.f, Time);
     const float Sway = FMath::Sin(DamageItem.Elapsed * 12.f) * 6.f;
     const FVector World = DamageItem.WorldLoc + FVector(0, Sway, Up);
 
@@ -168,16 +171,20 @@ void UBSDamageNumberSubsystem::UpdateItem(int32 Index, float DeltaTime)
     if (bUseOcclusionCheck && bOnScreen)
     {
         FHitResult Hit;
-        FCollisionQueryParams Params(SCENE_QUERY_STAT(DamageNumberOcclusion), /*bTraceComplex=*/true);
-        if (APawn* Pawn = PC->GetPawn()) { Params.AddIgnoredActor(Pawn); }
+        FCollisionQueryParams Params(SCENE_QUERY_STAT(DamageNumberOcclusion), true);
+        if (APawn* Pawn = PC->GetPawn()) 
+        { 
+            Params.AddIgnoredActor(Pawn); 
+        }
+
         const FVector CamLoc = PC->PlayerCameraManager->GetCameraLocation();
         const bool bBlocked = GetWorld()->LineTraceSingleByChannel(Hit, CamLoc, World, ECC_Visibility, Params);
         bVisible = !bBlocked || (Hit.GetActor() == DamageItem.TargetActor.Get());
     }
 
     // 알파/스케일
-    const float Alpha = 1.f - T;
-    const float Scale = 1.f + 0.15f * FMath::Sin(T * PI);
+    const float Alpha = 1.f - Time;
+    const float Scale = 1.f + 0.15f * FMath::Sin(Time * PI);
 
     if (DamageItem.PoolIndex != INDEX_NONE)
     {

@@ -6,7 +6,10 @@
 
 void UBSDamageNumberEntryWidget::SetText(const FText& InText)
 {
-	if (DamageText) { DamageText->SetText(InText); }
+	if (DamageText) 
+    { 
+        DamageText->SetText(InText); 
+    }
 }
 
 void UBSDamageNumberEntryWidget::SetAlpha(float InAlpha)
@@ -15,9 +18,9 @@ void UBSDamageNumberEntryWidget::SetAlpha(float InAlpha)
     if (DamageText)
     {
         FSlateColor SlateCol = DamageText->ColorAndOpacity;
-        FLinearColor C = SlateCol.GetSpecifiedColor();
-        C.A = CurrentAlpha;
-        DamageText->SetColorAndOpacity(C);
+        FLinearColor Color = SlateCol.GetSpecifiedColor();
+        Color.A = CurrentAlpha;
+        DamageText->SetColorAndOpacity(Color);
     }
 }
 

@@ -120,6 +120,7 @@ float ABSCharacterEnemy::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	check(AttributeComp);
+	ActualDamage = ActualDamage - FMath::RandRange(0, AttributeComp->GetDefense());
 
 	// 대치 중인가
 	const bool bFacing = UKismetMathLibrary::InRange_FloatFloat(GetDotProductTo(EventInstigator->GetPawn()), -0.1f, 1.f);
@@ -342,9 +343,13 @@ bool ABSCharacterEnemy::CanBeTargeted()
 void ABSCharacterEnemy::SeesTarget(AActor* InTargetActor)
 {
 	// AIController 에서 호출하기 위한 가상함수
-	if (bUnstoppable)
+	if (bUnstoppable && InTargetActor != nullptr)
 	{
 		GetMesh()->SetOverlayMaterial(OutlineMaterial);
+	}
+	else
+	{
+		GetMesh()->SetOverlayMaterial(nullptr);
 	}
 }
 

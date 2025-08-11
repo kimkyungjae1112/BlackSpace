@@ -54,6 +54,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
 	float RegenPostureRate = 1.f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
+	int32 Defense = 1.f;
+
 	FTimerHandle StaminaRegenTimer;
 	FTimerHandle PostureRegenTimer;
 
@@ -79,6 +82,8 @@ public:
 	FORCEINLINE float GetMaxPosture() const { return MaxPosture; }
 	FORCEINLINE float GetBasePosture() const { return BasePosture; }
 	FORCEINLINE float GetPostureRatio() const { return BasePosture / MaxPosture; }
+
+	FORCEINLINE int32 GetDefense() const { return Defense; }
 
 public:
 	bool CheckHasEnoughStamina(float StaminaCost) const;

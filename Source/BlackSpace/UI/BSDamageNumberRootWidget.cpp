@@ -52,9 +52,9 @@ void UBSDamageNumberRootWidget::ReturnEntry(int32 Index)
 	}
 
 	FEntrySlot& EntrySlot = Pool[Index];
-	if (auto* TempSlot = Cast<UCanvasPanelSlot>(EntrySlot.Widget->Slot))
+	if (UCanvasPanelSlot* CanvasPanelSlot = Cast<UCanvasPanelSlot>(EntrySlot.Widget->Slot))
 	{
-		TempSlot->SetPosition(FVector2D(-10000.f, -10000.f));
+		CanvasPanelSlot->SetPosition(FVector2D(-10000.f, -10000.f));
 	}
 
 	EntrySlot.Widget->SetVisibility(ESlateVisibility::Collapsed);

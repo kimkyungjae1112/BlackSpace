@@ -41,7 +41,6 @@ protected:
     UPROPERTY()
     TObjectPtr<UBSDamageNumberRootWidget> RootWidget;
 
-    /** 에디터/런타임에서 대체 가능(없으면 /Game/UI/WBP_DamageNumberRoot 를 찾음) */
     UPROPERTY(EditDefaultsOnly, Category = "DamageNumber | UI")
     TSubclassOf<UBSDamageNumberRootWidget> RootWidgetClass;
 

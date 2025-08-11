@@ -21,10 +21,7 @@ protected:
     float CurrentAlpha = 1.f;
 
 public:
-    UFUNCTION(BlueprintCallable)
     void SetText(const FText& InText);
-
-    UFUNCTION(BlueprintCallable)
     void SetAlpha(float InAlpha);
 
 protected:
