@@ -71,6 +71,22 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Enemy | Weapon")
 	TSubclassOf<ABSWeapon> DefaultWeaponClass;
 
+// Sound
+protected:
+	UPROPERTY(EditAnywhere, Category = "Enemy | Sound")
+	TObjectPtr<USoundCue> ImpactSound;
+
+	UPROPERTY(EditAnywhere, Category = "Enemy | Sound")
+	TObjectPtr<USoundCue> BlockingImpactSound;
+
+// Particle
+protected:
+	UPROPERTY(EditAnywhere, Category = "Enemy | Particle")
+	TObjectPtr<UParticleSystem> ImpactParticle;
+
+	UPROPERTY(EditAnywhere, Category = "Enemy | Particle")
+	TObjectPtr<UParticleSystem> BlockingImpactParticle;
+
 protected:
 	FTimerHandle ParriedDelayTimerHandle;
 	FTimerHandle StunnedDelayTimerHandle;

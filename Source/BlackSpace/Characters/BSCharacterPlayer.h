@@ -28,6 +28,7 @@ class UBSRotationComponent;
 class UMotionWarpingComponent;
 class UBSTargetingComponent;
 class UBSPlayerStatusWidget;
+class USoundCue;
 class ABSPlayerController;
 class ABSArrow;
 
@@ -42,7 +43,7 @@ class BLACKSPACE_API ABSCharacterPlayer
 {
 	GENERATED_BODY()
 
-	// Input
+// Input
 protected:
 	// Dialogue Input Mapping Context 를 어떻게 넣을지 고민,,,,,
 	// 1. EWeaponType에 그냥 Dialogue 타입 추가 -> 근데 애니메이션 빵구
@@ -53,7 +54,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	TObjectPtr<UBSInputData> InputData;
 
-	// Camera
+// Camera
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<UCameraComponent> CameraComp;
@@ -67,7 +68,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
 	float AimingSpringArmLength = 200.f;
 
-	// Component
+// Component
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
 	TObjectPtr<UBSAttributeComponent> AttributeComp;
@@ -90,7 +91,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
 	TObjectPtr<UBSTargetingComponent> TargetingComp;
 
-	// UI
+// UI
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UBSPlayerHUDWidget> HUDWidgetClass;
@@ -98,7 +99,23 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 	TObjectPtr<UBSPlayerHUDWidget> HUDWidget;
 
-	// Stat
+// Sound
+protected:
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	TObjectPtr<USoundCue> ImpactSound;
+
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	TObjectPtr<USoundCue> BlockingImpactSound;
+
+// Particle
+protected:
+	UPROPERTY(EditAnywhere, Category = "Particle")
+	TObjectPtr<UParticleSystem> ImpactParticle;
+
+	UPROPERTY(EditAnywhere, Category = "Particle")
+	TObjectPtr<UParticleSystem> BlockingImpactParticle;
+
+// Stat
 protected:
 	UPROPERTY(EditAnywhere, Category = "Stat")
 	float WalkSpeed = 500.f;
@@ -302,5 +319,4 @@ private:
 
 private:
 	ABSPlayerController* GetPlayerController() const;
-
 };

@@ -6,12 +6,14 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/Character.h"
 #include "Animation/AnimInstance.h"
+#include "Sound/SoundCue.h"
 
 #include "Components/BSCombatComponent.h"
 #include "Components/BSWeaponCollisionComponent.h"
 #include "BSGameplayTag.h"
 #include "Data/BSMontageActionData.h"
 #include "Interface/BSUpdateAnyTypeInterface.h"
+#include "GameModes/BSAudioManagerSubsystem.h"
 
 ABSWeapon::ABSWeapon()
 {
@@ -171,6 +173,18 @@ void ABSWeapon::Drop()
 	MeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	MeshComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	MeshComp->SetSimulatePhysics(true);
+}
+
+void ABSWeapon::PlaySwingSound()
+{
+	// const를 붙일 수 없다
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		if (UBSAudioManagerSubsystem* AudioSubsystem = GameInstance->GetSubsystem<UBSAudioManagerSubsystem>())
+		{
+			AudioSubsystem->PlaySoundAtLocation(SwingSoundCue, GetActorLocation());
+		}
+	}
 }
 
 void ABSWeapon::ActivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType)

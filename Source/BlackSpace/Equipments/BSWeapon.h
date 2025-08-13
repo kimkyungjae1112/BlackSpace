@@ -13,6 +13,7 @@ struct FInventorySlot;
 class UBSCombatComponent;
 class UBSWeaponCollisionComponent;
 class UBSMontageActionData;
+class USoundCue;
 
 UCLASS()
 class BLACKSPACE_API ABSWeapon : public ABSEquipmentBase
@@ -43,7 +44,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Equipment | Component")
 	TObjectPtr<UBSWeaponCollisionComponent> SecondaryCollisionComp;
 
-	// Stat
+// Stat
 protected:
 	UPROPERTY(EditAnywhere, Category = "Equipment | Stamina")
 	TMap<FGameplayTag, float> StaminaCosts;
@@ -56,6 +57,11 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Equipment | Damage")
 	float BaseDamage = 10.f;
+
+// Sound
+protected:
+	UPROPERTY(EditAnywhere, Category = "Equipment | Sound")
+	TObjectPtr<USoundCue> SwingSoundCue;
 
 public:
 	ABSWeapon();
@@ -84,6 +90,8 @@ public:
 	float GetAttackDamage() const;
 
 	void Drop();
+
+	void PlaySwingSound();
 
 public:
 	void ActivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType);

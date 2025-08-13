@@ -12,6 +12,7 @@
 DECLARE_MULTICAST_DELEGATE(FDelegateOnAttackStart)
 
 class USoundCue;
+class UBSAudioManagerSubsystem;
 
 UCLASS()
 class BLACKSPACE_API ABSCharacterBase 
@@ -24,19 +25,6 @@ class BLACKSPACE_API ABSCharacterBase
 public:
 	/* 플레이어의 공격 시작을 알리는 델리게이트 */
 	static FDelegateOnAttackStart OnAttackStart;
-
-protected:
-	UPROPERTY(EditAnywhere, Category = "Effect")
-	TObjectPtr<USoundCue> ImpactSound;
-
-	UPROPERTY(EditAnywhere, Category = "Effect")
-	TObjectPtr<USoundCue> BlockingImpactSound;
-
-	UPROPERTY(EditAnywhere, Category = "Effect")
-	TObjectPtr<UParticleSystem> ImpactParticle;
-
-	UPROPERTY(EditAnywhere, Category = "Effect")
-	TObjectPtr<UParticleSystem> BlockingImpactParticle;
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Team")
@@ -63,4 +51,7 @@ protected:
 	virtual void OnDeath() {};
 	virtual void ImpactEffect(const FVector& Location) {};
 	virtual void HitReaction(const AActor* Attacker, const EDamageType& DamageType) {};
+
+protected:
+	UBSAudioManagerSubsystem* GetAudioManager();
 };

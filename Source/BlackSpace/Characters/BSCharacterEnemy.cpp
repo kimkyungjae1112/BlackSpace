@@ -23,6 +23,7 @@
 #include "Items/BSPickupItem.h"
 #include "UI/BSStatBarWidget.h"
 #include "GameModes/BSDamageNumberSubsystem.h"
+#include "GameModes/BSAudioManagerSubsystem.h"
 #include "BSGameplayTag.h"
 #include "BSDefine.h"
 
@@ -108,7 +109,7 @@ void ABSCharacterEnemy::BeginPlay()
 
 	SetupAttribute();
 
-
+// 테스트용, AI 애니메이션 움직임 제어
 #if WITH_EDITOR
 	if (bRootMotionTestFlag)
 	{
@@ -452,9 +453,12 @@ void ABSCharacterEnemy::ImpactEffect(const FVector& Location)
 	}
 	else
 	{
-		if (ImpactSound)
+		if (IsValid(GetAudioManager()))
 		{
-			UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, Location);
+			if (ImpactSound)
+			{
+				GetAudioManager()->PlaySoundAtLocation(ImpactSound, Location);
+			}
 		}
 
 		if (ImpactParticle)
@@ -466,9 +470,12 @@ void ABSCharacterEnemy::ImpactEffect(const FVector& Location)
 
 void ABSCharacterEnemy::BlockImpactEffect(const FVector& Location)
 {
-	if (BlockingImpactSound)
+	if (IsValid(GetAudioManager()))
 	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), BlockingImpactSound, Location);
+		if (BlockingImpactSound)
+		{
+			GetAudioManager()->PlaySoundAtLocation(BlockingImpactSound, Location);
+		}
 	}
 
 	if (BlockingImpactParticle)

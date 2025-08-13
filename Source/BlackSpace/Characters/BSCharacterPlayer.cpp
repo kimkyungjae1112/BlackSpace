@@ -38,6 +38,7 @@
 #include "Player/BSPlayerController.h"
 #include "Animation/BSAnimInstance.h"
 #include "Projectiles/BSArrow.h"
+#include "GameModes/BSAudioManagerSubsystem.h"
 
 ABSCharacterPlayer::ABSCharacterPlayer()
 {
@@ -331,6 +332,7 @@ float ABSCharacterPlayer::TakeDamage(float DamageAmount, FDamageEvent const& Dam
 	// 적과 대치중인 방향인지?
 	bFacingEnemy = UKismetMathLibrary::InRange_FloatFloat(GetDotProductTo(EventInstigator->GetPawn()), -0.1f, 1.f);
 
+	// 체간 공격 진행중인지?
 	if (UAnimInstance* Anim = GetMesh()->GetAnimInstance())
 	{	
 		// MainWeapon 없을 때 방어 코드 필요
@@ -433,9 +435,12 @@ void ABSCharacterPlayer::ImpactEffect(const FVector& Location)
 	}
 	else
 	{
-		if (ImpactSound)
+		if (IsValid(GetAudioManager()))
 		{
-			UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, Location);
+			if (ImpactSound)
+			{
+				GetAudioManager()->PlaySoundAtLocation(ImpactSound, Location);
+			}
 		}
 
 		if (ImpactParticle)
@@ -447,9 +452,12 @@ void ABSCharacterPlayer::ImpactEffect(const FVector& Location)
 
 void ABSCharacterPlayer::BlockImpactEffect(const FVector& Location)
 {
-	if (BlockingImpactSound)
+	if (IsValid(GetAudioManager()))
 	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), BlockingImpactSound, Location);
+		if (BlockingImpactSound)
+		{
+			GetAudioManager()->PlaySoundAtLocation(BlockingImpactSound, Location);
+		}
 	}
 
 	if (BlockingImpactParticle)
@@ -989,7 +997,7 @@ void ABSCharacterPlayer::DoAttack(const FGameplayTag& AttackType)
 	check(CombatComp);
 	check(AttributeComp);
 
-	if (const ABSWeapon* Weapon = CombatComp->GetMainWeapon())
+	if (ABSWeapon* Weapon = CombatComp->GetMainWeapon())
 	{
 		StateComp->SetState(BSGameplayTag::Character_State_Attacking);
 
@@ -1028,6 +1036,8 @@ void ABSCharacterPlayer::DoAttack(const FGameplayTag& AttackType)
 				PostureAttackMotionWarp();
 			}
 		}
+
+		Weapon->PlaySwingSound();
 		PlayAnimMontage(Montage);
 
 		const float StaminaCost = Weapon->GetStaminaCost(AttackType);
@@ -1295,6 +1305,7 @@ void ABSCharacterPlayer::SetInputMapping(const EWeaponType& InWeaponType)
 	}
 }
 
+// 대화할 때 바뀌는 InputMapping
 void ABSCharacterPlayer::SetInputMapping(class UInputMappingContext* InInputMappingContext)
 {
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetPlayerController()->GetLocalPlayer()))

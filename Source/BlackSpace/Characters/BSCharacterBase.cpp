@@ -2,6 +2,7 @@
 
 
 #include "Characters/BSCharacterBase.h"
+#include "GameModes/BSAudioManagerSubsystem.h"
 
 FDelegateOnAttackStart ABSCharacterBase::OnAttackStart;
 
@@ -29,6 +30,13 @@ FGenericTeamId ABSCharacterBase::GetGenericTeamId() const
 	return TeamId;
 }
 
-
+UBSAudioManagerSubsystem* ABSCharacterBase::GetAudioManager()
+{
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		return GameInstance->GetSubsystem<UBSAudioManagerSubsystem>();
+	}
+	return nullptr;
+}
 
 
