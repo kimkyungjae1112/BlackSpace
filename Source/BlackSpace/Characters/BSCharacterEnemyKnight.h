@@ -8,6 +8,7 @@
 #include "BSCharacterEnemyKnight.generated.h"
 
 class UBSBossHealthBarWidget;
+class UMotionWarpingComponent;
 class ABSWeapon;
 
 UCLASS()
@@ -20,6 +21,10 @@ class BLACKSPACE_API ABSCharacterEnemyKnight
 protected:
 	UPROPERTY(EditAnywhere, Category = "Enemy | Name")
 	FText BossName;
+
+protected:
+	UPROPERTY(VisibleAnywhere, Category = "Enemy | Component")
+	TObjectPtr<UMotionWarpingComponent> MotionWarp;
 
 // UI
 protected:
@@ -74,6 +79,7 @@ public:
 	/* IBSCombatInterface Implement */
 	virtual void EnemyBlocking() override;
 	virtual void EnemyDodge() override;
+	virtual void PerformAttack(const FGameplayTag& AttackTypeTag, FOnMontageEnded& MontageEndedDelegate) override;
 
 	/* IBSEnemyInterface Implement */
 	virtual void PostureAttacked(UAnimMontage* PostureAttackReactionMontage) override;
@@ -103,6 +109,9 @@ protected:
 protected:
 	bool CanDodge() const;
 
+// Motion Warping
+protected:
+	void RangedAttackMotionWarping() const;
 
 // 무기 교체
 protected:

@@ -221,7 +221,7 @@ void ABSCharacterEnemy::PerformAttack(const FGameplayTag& AttackTypeTag, FOnMont
 
 	if (StateComp->IsCurrentStateEqualToIt(BSGameplayTag::Character_State_MaxPosture)) return;
 
-	if (const ABSWeapon* Weapon = CombatComp->GetMainWeapon())
+	if (ABSWeapon* Weapon = CombatComp->GetMainWeapon())
 	{
 		StateComp->SetState(BSGameplayTag::Character_State_Attacking);
 		CombatComp->SetLastAttackType(AttackTypeTag);
@@ -231,6 +231,7 @@ void ABSCharacterEnemy::PerformAttack(const FGameplayTag& AttackTypeTag, FOnMont
 		{
 			if (UAnimInstance* Anim = GetMesh()->GetAnimInstance())
 			{
+				Weapon->PlaySwingSound();
 				Anim->Montage_Play(Montage);
 				Anim->Montage_SetEndDelegate(MontageEndedDelegate, Montage);
 			}
@@ -247,11 +248,10 @@ void ABSCharacterEnemy::Parried()
 	check(StateComp);
 	check(CombatComp);
 
-	if (StateComp->IsCurrentStateEqualToIt(BSGameplayTag::Character_State_MaxPosture)) return;
+	if (StateComp->IsCurrentStateEqualToIt(BSGameplayTag::Character_State_MaxPosture) || bUnstoppable) return;
 
 	StateComp->SetState(BSGameplayTag::Character_State_Parried);
 	StopAnimMontage();
-	UE_LOG(LogTemp, Display, TEXT("Parried 기절"));
 
 	if (const ABSWeapon* MainWeapon = CombatComp->GetMainWeapon())
 	{
@@ -266,7 +266,6 @@ void ABSCharacterEnemy::Parried()
 				CheckTags.AddTag(BSGameplayTag::Character_State_MaxPosture);
 				if (StateComp->IsCurrentStateEqualToAny(CheckTags) == false)
 				{
-					UE_LOG(LogTemp, Display, TEXT("Parried 해제"));
 					StateComp->ClearState();
 				}
 			});

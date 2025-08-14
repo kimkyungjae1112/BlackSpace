@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Animation/AnimInstance.h"
+#include "MotionWarpingComponent.h"
 
 #include "UI/BSBossHealthBarWidget.h"
 #include "Interface/BSUpdateAnyTypeInterface.h"
@@ -18,6 +19,7 @@
 
 ABSCharacterEnemyKnight::ABSCharacterEnemyKnight()
 {
+	MotionWarp = CreateDefaultSubobject<UMotionWarpingComponent>(TEXT("Motion Warping Component"));
 }
 
 void ABSCharacterEnemyKnight::Tick(float DeltaSeconds)
@@ -137,6 +139,16 @@ void ABSCharacterEnemyKnight::EnemyDodge()
 			}
 		}
 	}
+}
+
+void ABSCharacterEnemyKnight::PerformAttack(const FGameplayTag& AttackTypeTag, FOnMontageEnded& MontageEndedDelegate)
+{
+	if (AttackTypeTag == BSGameplayTag::Character_Attack_RangedAttack)
+	{
+		RangedAttackMotionWarping();
+	}
+
+	Super::PerformAttack(AttackTypeTag, MontageEndedDelegate);
 }
 
 void ABSCharacterEnemyKnight::PostureAttacked(UAnimMontage* PostureAttackReactionMontage)
@@ -303,6 +315,23 @@ bool ABSCharacterEnemyKnight::CanDodge() const
 	CheckTags.AddTag(BSGameplayTag::Character_State_Stunned);
 
 	return StateComp->IsCurrentStateEqualToAny(CheckTags) == false;
+}
+
+void ABSCharacterEnemyKnight::RangedAttackMotionWarping() const
+{
+	if (ABSEnemyAIController* AIController = Cast<ABSEnemyAIController>(GetController()))
+	{
+		if (AActor* Target = AIController->GetTarget())
+		{
+			FVector TargetLoc = Target->GetActorLocation();
+			FVector TargetToVec = TargetLoc - GetActorLocation();
+
+			if (MotionWarp)
+			{
+				MotionWarp->AddOrUpdateWarpTargetFromLocationAndRotation(TEXT("RangedAttack"), TargetLoc, TargetToVec.Rotation());
+			}
+		}
+	}
 }
 
 void ABSCharacterEnemyKnight::ChangeWeapon()

@@ -37,6 +37,11 @@ void ABSEnemyAIController::StopUpdateTarget()
 	SetTarget(nullptr);
 }
 
+AActor* ABSEnemyAIController::GetTarget() const
+{
+	return Cast<AActor>(Blackboard->GetValueAsObject(TEXT("Target")));
+}
+
 void ABSEnemyAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);

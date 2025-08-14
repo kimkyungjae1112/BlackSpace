@@ -54,6 +54,10 @@ void UBTService_SelectBehaviorKnight::UpdateBehavior(UBlackboardComponent* Black
 					{
 						SetBehaviorKey(BlackboardComp, EAIBehavior::MeleeAttack);
 					}
+					else if (Distance >= AttackRangeDistance && RangedAttackRate)
+					{
+						SetBehaviorKey(BlackboardComp, EAIBehavior::RangedAttack);
+					}
 					else
 					{
 						SetBehaviorKey(BlackboardComp, EAIBehavior::Approach);

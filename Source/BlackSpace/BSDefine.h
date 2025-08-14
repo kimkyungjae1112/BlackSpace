@@ -56,6 +56,7 @@ enum class EAIBehavior : uint8
 	Idle,
 	Patrol,
 	MeleeAttack,
+	RangedAttack,
 	Approach,
 	Stunned,
 	Strafe,

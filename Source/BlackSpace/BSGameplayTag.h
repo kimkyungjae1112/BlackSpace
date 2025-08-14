@@ -38,6 +38,7 @@ namespace BSGameplayTag
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Attack_BackAttack);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Attack_MaxPostureAttack);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Attack_ParryingAttack);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Attack_RangedAttack);
 
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Attack_Fire);
 }
