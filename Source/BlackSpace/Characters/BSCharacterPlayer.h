@@ -32,6 +32,16 @@ class USoundCue;
 class ABSPlayerController;
 class ABSArrow;
 
+USTRUCT()
+struct FMoveSpeed
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, Category = "Stat")
+	TArray<float> MoveSpeeds;
+};
+
 UCLASS()
 class BLACKSPACE_API ABSCharacterPlayer
 	: public ABSCharacterBase
@@ -118,13 +128,7 @@ protected:
 // Stat
 protected:
 	UPROPERTY(EditAnywhere, Category = "Stat")
-	float WalkSpeed = 500.f;
-
-	UPROPERTY(EditAnywhere, Category = "Stat")
-	float SprintSpeed = 850.f;
-
-	UPROPERTY(EditAnywhere, Category = "Stat")
-	float BlockSpeed = 250.f;
+	TMap<EWeaponType, FMoveSpeed> MoveSpeedMap;
 
 	UPROPERTY(EditAnywhere, Category = "Stat")
 	bool bIsSprinting = false;
@@ -153,6 +157,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Stat")
 	bool bPostureAttack = false;
 
+	UPROPERTY(VisibleAnywhere, Category = "Stat")
+	EWeaponType CurrentWeaponType;
+	
 	// Combo
 protected:
 	bool bComboSequenceRunning = false;
@@ -311,8 +318,9 @@ private:
 private:
 	bool DetectForDialogue(OUT FHitResult& OutResult);
 
-	// Input 변경
+// Input 변경
 private:
+	// 현재 무기 타입도 바꿈
 	void ChagnedWeapon(const struct FInventorySlot&);
 	void SetInputMapping(const EWeaponType& InWeaponType);
 	void SetInputMapping(class UInputMappingContext* InInputMappingContext);

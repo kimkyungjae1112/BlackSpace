@@ -80,6 +80,8 @@ ABSCharacterPlayer::ABSCharacterPlayer()
 	Tags.Add(TEXT("Player"));
 
 	TeamId = FGenericTeamId(0);
+
+	CurrentWeaponType = EWeaponType::Uncombat;
 }
 
 void ABSCharacterPlayer::BeginPlay()
@@ -660,7 +662,7 @@ void ABSCharacterPlayer::Sprint()
 
 		AttributeComp->DecreaseStamina(0.1f);
 
-		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+		GetCharacterMovement()->MaxWalkSpeed = MoveSpeedMap[CurrentWeaponType].MoveSpeeds[1];
 
 		bIsSprinting = true;
 	}
@@ -682,7 +684,7 @@ void ABSCharacterPlayer::StopSprint()
 
 	AttributeComp->ToggleStaminaRegen(true);
 
-	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = MoveSpeedMap[CurrentWeaponType].MoveSpeeds[0];
 
 	bIsSprinting = false;
 }
@@ -853,7 +855,7 @@ void ABSCharacterPlayer::Blocking()
 
 	if (CanBlockingStance())
 	{
-		GetCharacterMovement()->MaxWalkSpeed = BlockSpeed;
+		GetCharacterMovement()->MaxWalkSpeed = MoveSpeedMap[CurrentWeaponType].MoveSpeeds[2];
 		CombatComp->SetBlockingEnabled(true);
 		if (IBSUpdateAnyTypeInterface* AnimInterface = Cast<IBSUpdateAnyTypeInterface>(GetMesh()->GetAnimInstance()))
 		{
@@ -871,7 +873,7 @@ void ABSCharacterPlayer::BlockingEnd()
 	check(CombatComp);
 	check(StateComp);
 
-	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = MoveSpeedMap[CurrentWeaponType].MoveSpeeds[0];
 	CombatComp->SetBlockingEnabled(false);
 	if (IBSUpdateAnyTypeInterface* AnimInterface = Cast<IBSUpdateAnyTypeInterface>(GetMesh()->GetAnimInstance()))
 	{
@@ -1038,6 +1040,7 @@ void ABSCharacterPlayer::DoAttack(const FGameplayTag& AttackType)
 		}
 
 		Weapon->PlaySwingSound();
+		// Weapon->PlaySwordSwingCameraShake();
 		PlayAnimMontage(Montage);
 
 		const float StaminaCost = Weapon->GetStaminaCost(AttackType);
@@ -1207,7 +1210,7 @@ void ABSCharacterPlayer::ToggleCameraViewAdjust()
 	if (bProgressAiming)
 	{
 		GetCharacterMovement()->bOrientRotationToMovement = false;
-		GetCharacterMovement()->MaxWalkSpeed = 250.f;
+		GetCharacterMovement()->MaxWalkSpeed = MoveSpeedMap[CurrentWeaponType].MoveSpeeds[2];
 
 		bUseControllerRotationYaw = true;
 
@@ -1219,7 +1222,7 @@ void ABSCharacterPlayer::ToggleCameraViewAdjust()
 	else
 	{
 		GetCharacterMovement()->bOrientRotationToMovement = true;
-		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+		GetCharacterMovement()->MaxWalkSpeed = MoveSpeedMap[CurrentWeaponType].MoveSpeeds[0];
 
 		bUseControllerRotationYaw = false;
 
@@ -1285,10 +1288,12 @@ void ABSCharacterPlayer::ChagnedWeapon(const FInventorySlot&)
 
 	if (ABSWeapon* CurrnetWeapon = CombatComp->GetMainWeapon())
 	{
+		CurrentWeaponType = CurrnetWeapon->GetWeaponType();
 		SetInputMapping(CurrnetWeapon->GetWeaponType());
 	}
 	else
 	{
+		CurrentWeaponType = EWeaponType::Uncombat;
 		SetInputMapping(EWeaponType::Uncombat);
 	}
 }

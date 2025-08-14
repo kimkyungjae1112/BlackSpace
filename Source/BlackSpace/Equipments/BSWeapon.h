@@ -14,6 +14,7 @@ class UBSCombatComponent;
 class UBSWeaponCollisionComponent;
 class UBSMontageActionData;
 class USoundCue;
+class UCameraShakeBase;
 
 UCLASS()
 class BLACKSPACE_API ABSWeapon : public ABSEquipmentBase
@@ -63,6 +64,11 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Equipment | Sound")
 	TObjectPtr<USoundCue> SwingSoundCue;
 
+// Camera Shake
+protected:
+	UPROPERTY(EditAnywhere, Category = "Equipment | Camera Shake")
+	TSubclassOf<UCameraShakeBase> SwingCameraShake;
+
 public:
 	ABSWeapon();
 
@@ -91,7 +97,11 @@ public:
 
 	void Drop();
 
+	// Sound
 	void PlaySwingSound();
+	
+	// Camera Shake
+	void PlaySwordSwingCameraShake(float Scale = 1.f) const;
 
 public:
 	void ActivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType);

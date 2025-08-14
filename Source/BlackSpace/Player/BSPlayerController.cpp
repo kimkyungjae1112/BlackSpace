@@ -2,6 +2,7 @@
 
 
 #include "Player/BSPlayerController.h"
+#include "Camera/CameraShakeBase.h"
 
 ABSPlayerController::ABSPlayerController()
 {

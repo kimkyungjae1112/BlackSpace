@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/PlayerController.h"
 #include "Animation/AnimInstance.h"
 #include "Sound/SoundCue.h"
 
@@ -184,6 +185,15 @@ void ABSWeapon::PlaySwingSound()
 		{
 			AudioSubsystem->PlaySoundAtLocation(SwingSoundCue, GetActorLocation());
 		}
+	}
+}
+
+void ABSWeapon::PlaySwordSwingCameraShake(float Scale) const
+{
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	if (PC)
+	{
+		PC->ClientStartCameraShake(SwingCameraShake, Scale);
 	}
 }
 
