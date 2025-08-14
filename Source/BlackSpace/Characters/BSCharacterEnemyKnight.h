@@ -51,6 +51,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Enemy | Set Value")
 	int32 ParryingAttackRate = 30;
 
+	UPROPERTY(EditAnywhere, Category = "Enemy | Set Value")
+	int32 DodgeRate = 30;
+
 	UPROPERTY(VisibleAnywhere, Category = "Enemy | Set Value")
 	bool bIsActiveSecondPhase = false;
 
@@ -95,6 +98,11 @@ protected:
 
 	UFUNCTION()
 	void BlockingEnableAction();
+
+// 회피
+protected:
+	bool CanDodge() const;
+
 
 // 무기 교체
 protected:

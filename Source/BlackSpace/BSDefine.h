@@ -60,6 +60,7 @@ enum class EAIBehavior : uint8
 	Stunned,
 	Strafe,
 	Blocking,
+	Dodging,
 };
 
 UENUM(BlueprintType)

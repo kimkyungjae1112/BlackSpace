@@ -34,6 +34,10 @@ void UBTService_SelectBehaviorKnight::UpdateBehavior(UBlackboardComponent* Black
 		{
 			SetBehaviorKey(BlackboardComp, EAIBehavior::Blocking);
 		}
+		else if (IsValid(Target) && StateComp->IsCurrentStateEqualToIt(BSGameplayTag::Character_State_Dodge))
+		{
+			SetBehaviorKey(BlackboardComp, EAIBehavior::Dodging);
+		}
 		else if (IsValid(Target))
 		{
 			if (UBSAttributeComponent* AttributeComp = ControlledEnemy->GetComponentByClass<UBSAttributeComponent>())

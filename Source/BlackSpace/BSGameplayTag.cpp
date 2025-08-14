@@ -18,6 +18,7 @@ namespace BSGameplayTag
 	UE_DEFINE_GAMEPLAY_TAG(Character_State_Stunned, "Character.State.Stunned");
 	UE_DEFINE_GAMEPLAY_TAG(Character_State_MaxPosture, "Character.State.MaxPosture");
 	UE_DEFINE_GAMEPLAY_TAG(Character_State_MaxPostureAttacked, "Character.State.MaxPostureAttacked");
+	UE_DEFINE_GAMEPLAY_TAG(Character_State_Dodge, "Character.State.Dodge");
 
 	UE_DEFINE_GAMEPLAY_TAG(Character_Action_Equip, "Character.Action.Equip");
 	UE_DEFINE_GAMEPLAY_TAG(Character_Action_Unequip, "Character.Action.Unequip");
@@ -27,6 +28,7 @@ namespace BSGameplayTag
 	UE_DEFINE_GAMEPLAY_TAG(Character_Action_BackAttackHit, "Character.Action.BackAttackHit");
 	UE_DEFINE_GAMEPLAY_TAG(Character_Action_KnockBackHit, "Character.Action.KnockBackHit");
 	UE_DEFINE_GAMEPLAY_TAG(Character_Action_MaxPostureHit, "Character.Action.MaxPostureHit");
+	UE_DEFINE_GAMEPLAY_TAG(Character_Action_Dodge, "Character.Action.Dodge");
 
 	UE_DEFINE_GAMEPLAY_TAG(Character_Attack_Light, "Character.Attack.Light");
 	UE_DEFINE_GAMEPLAY_TAG(Character_Attack_Heavy, "Character.Attack.Heavy");

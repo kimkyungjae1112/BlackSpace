@@ -19,6 +19,7 @@ namespace BSGameplayTag
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_State_Stunned);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_State_MaxPosture);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_State_MaxPostureAttacked);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_State_Dodge);
 	
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Action_Equip);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Action_Unequip);
@@ -28,6 +29,7 @@ namespace BSGameplayTag
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Action_BackAttackHit);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Action_KnockBackHit);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Action_MaxPostureHit);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Action_Dodge);
 
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Attack_Light);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Character_Attack_Heavy);

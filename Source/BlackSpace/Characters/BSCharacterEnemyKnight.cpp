@@ -100,7 +100,7 @@ void ABSCharacterEnemyKnight::EnemyBlocking()
 		if (CanBlocking() && BlockingRate >= FMath::RandRange(1, 100) && AIController->ToTargetDist() <= 300.f)
 		{
 			StateComp->SetState(BSGameplayTag::Character_State_Blocking);
-			
+
 			if (IBSUpdateAnyTypeInterface* AnimInterface = Cast<IBSUpdateAnyTypeInterface>(GetMesh()->GetAnimInstance()))
 			{
 				AnimInterface->UpdateBlcokingState(true);
@@ -120,7 +120,23 @@ void ABSCharacterEnemyKnight::EnemyBlocking()
 
 void ABSCharacterEnemyKnight::EnemyDodge()
 {
+	check(CombatComp);
 
+	if (ABSEnemyAIController* AIController = Cast<ABSEnemyAIController>(GetController()))
+	{
+		if (CanDodge() && DodgeRate >= FMath::RandRange(1, 100) && AIController->ToTargetDist() <= 300.f)
+		{
+			if (ABSWeapon* Weapon = CombatComp->GetMainWeapon())
+			{
+				StateComp->SetState(BSGameplayTag::Character_State_Dodge);
+
+				if (UAnimMontage* DodgeMontage = Weapon->GetRandomMontageForTag(BSGameplayTag::Character_Action_Dodge))
+				{
+					PlayAnimMontage(DodgeMontage);
+				}
+			}
+		}
+	}
 }
 
 void ABSCharacterEnemyKnight::PostureAttacked(UAnimMontage* PostureAttackReactionMontage)
@@ -217,6 +233,7 @@ void ABSCharacterEnemyKnight::BeginPlay()
 	}
 
 	OnAttackStart.AddUObject(this, &ThisClass::EnemyBlocking);
+	OnAttackStart.AddUObject(this, &ThisClass::EnemyDodge);
 }
 
 void ABSCharacterEnemyKnight::OnDeath()
@@ -249,6 +266,7 @@ bool ABSCharacterEnemyKnight::CanBlocking() const
 	CheckTags.AddTag(BSGameplayTag::Character_State_MaxPosture);
 	CheckTags.AddTag(BSGameplayTag::Character_State_Parried);
 	CheckTags.AddTag(BSGameplayTag::Character_State_Stunned);
+	CheckTags.AddTag(BSGameplayTag::Character_State_Dodge);
 
 	return StateComp->IsCurrentStateEqualToAny(CheckTags) == false;
 }
@@ -271,6 +289,20 @@ void ABSCharacterEnemyKnight::BlockingEnableAction()
 			bEnabledBlocking = false;
 		}
 	}
+}
+
+bool ABSCharacterEnemyKnight::CanDodge() const
+{
+	check(StateComp);
+	check(AttributeComp);
+
+	FGameplayTagContainer CheckTags;
+	CheckTags.AddTag(BSGameplayTag::Character_State_Attacking);
+	CheckTags.AddTag(BSGameplayTag::Character_State_MaxPosture);
+	CheckTags.AddTag(BSGameplayTag::Character_State_Parried);
+	CheckTags.AddTag(BSGameplayTag::Character_State_Stunned);
+
+	return StateComp->IsCurrentStateEqualToAny(CheckTags) == false;
 }
 
 void ABSCharacterEnemyKnight::ChangeWeapon()
