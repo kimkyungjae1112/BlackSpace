@@ -2,6 +2,8 @@
 
 
 #include "UI/BSPlayerHUDWidget.h"
+#include "Components/Image.h"
+#include "Animation/WidgetAnimation.h"
 
 #include "UI/BSStatBarWidget.h"
 #include "UI/BSPlayerStatusWeaponWidget.h"
@@ -32,6 +34,11 @@ void UBSPlayerHUDWidget::NativeConstruct()
 			CombatComp->OnChangedSecondaryWeapon.AddUObject(this, &ThisClass::SetSecondaryWeaponState);
 		}
 	}
+
+	if (HitImage)
+	{
+		HitImage->SetOpacity(0.f);
+	}
 }
 
 void UBSPlayerHUDWidget::SetStatBarRatio(const EAttributeType& AttributeType, float InRatio)
@@ -44,6 +51,14 @@ void UBSPlayerHUDWidget::SetStatBarRatio(const EAttributeType& AttributeType, fl
 	case EAttributeType::Health:
 		HealthBarWidget->SetStatBarRatio(InRatio);
 		break;
+	}
+}
+
+void UBSPlayerHUDWidget::ShowHitEffect()
+{
+	if (FadeOut_Anim)
+	{
+		PlayAnimation(FadeOut_Anim);
 	}
 }
 

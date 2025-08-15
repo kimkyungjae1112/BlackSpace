@@ -9,6 +9,8 @@
 
 class UBSStatBarWidget;
 class UBSPlayerStatusWeaponWidget;
+class UWidgetAnimation;
+class UImage;
 struct FInventorySlot;
 
 UCLASS()
@@ -29,6 +31,12 @@ protected:
 	UPROPERTY(meta = (BindWidget), BlueprintReadWrite)
 	TObjectPtr<UBSPlayerStatusWeaponWidget> SecondaryWeaponWidget;
 
+	UPROPERTY(meta = (BindWidget), BlueprintReadWrite)
+	TObjectPtr<UImage> HitImage;
+
+	UPROPERTY(meta = (BindWidgetAnim), Transient)
+	UWidgetAnimation* FadeOut_Anim;
+
 public:
 	UBSPlayerHUDWidget(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
@@ -38,6 +46,7 @@ protected:
 
 public:
 	void SetStatBarRatio(const EAttributeType& AttributeType, float InRatio);
+	void ShowHitEffect();
 
 protected:
 	void SetMainWeaponState(const FInventorySlot& MainWeaponInfo);

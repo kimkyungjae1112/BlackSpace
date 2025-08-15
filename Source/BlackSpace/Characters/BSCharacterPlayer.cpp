@@ -431,6 +431,8 @@ void ABSCharacterPlayer::ImpactEffect(const FVector& Location)
 {
 	check(CombatComp);
 
+	HUDWidget->ShowHitEffect();
+
 	if (CanAttackBlocking())
 	{
 		BlockImpactEffect(Location);

@@ -99,7 +99,7 @@ void ABSCharacterEnemyKnight::EnemyBlocking()
 {
 	if (ABSEnemyAIController* AIController = Cast<ABSEnemyAIController>(GetController()))
 	{
-		if (CanBlocking() && BlockingRate >= FMath::RandRange(1, 100) && AIController->ToTargetDist() <= 300.f)
+		if (CanBlocking() && BlockingRate >= FMath::RandRange(1, 100) && AIController->ToTargetDist() <= 400.f && AIController->ToTargetDist() > 0.f)
 		{
 			StateComp->SetState(BSGameplayTag::Character_State_Blocking);
 
@@ -126,7 +126,7 @@ void ABSCharacterEnemyKnight::EnemyDodge()
 
 	if (ABSEnemyAIController* AIController = Cast<ABSEnemyAIController>(GetController()))
 	{
-		if (CanDodge() && DodgeRate >= FMath::RandRange(1, 100) && AIController->ToTargetDist() <= 300.f)
+		if (CanDodge() && DodgeRate >= FMath::RandRange(1, 100) && AIController->ToTargetDist() <= 400.f && AIController->ToTargetDist() > 0.f)
 		{
 			if (ABSWeapon* Weapon = CombatComp->GetMainWeapon())
 			{
