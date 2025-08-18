@@ -71,6 +71,18 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Enemy | Weapon")
 	TSubclassOf<ABSWeapon> DefaultWeaponClass;
 
+	UPROPERTY(EditAnywhere, Category = "Enemy | Weapon")
+	TSubclassOf<ABSWeapon> Sword_1_WeaponClass;
+
+	UPROPERTY(EditAnywhere, Category = "Enemy | Weapon")
+	TSubclassOf<ABSWeapon> Sword_2_WeaponClass;
+
+	UPROPERTY(EditAnywhere, Category = "Enemy | Weapon")
+	TSubclassOf<ABSWeapon> PolearmWeaponClass;
+
+	UPROPERTY(EditAnywhere, Category = "Enemy | Weapon")
+	TSubclassOf<ABSWeapon> BowWeaponClass;
+
 // Sound
 protected:
 	UPROPERTY(EditAnywhere, Category = "Enemy | Sound")
@@ -141,6 +153,7 @@ public:
 	virtual bool IsEnabledPostureAttack() const override;
 	virtual void TogglePostureAttackWidgetVisibility(const bool bShouldPostureAttack) const override;
 	virtual void PostureAttacked(UAnimMontage* PostureAttackReactionMontage) override;
+	FORCEINLINE virtual bool IsUnstoppable() const override { return bUnstoppable; }
 
 	/* IBSTargeting Implement */
 	virtual void OnTargeted(bool bTargeted) override;

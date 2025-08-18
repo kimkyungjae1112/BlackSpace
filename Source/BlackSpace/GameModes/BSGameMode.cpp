@@ -5,6 +5,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/CapsuleComponent.h"
+#include "Blueprint/UserWidget.h"
 
 #include "GameModes/BSAudioManagerSubsystem.h"
 #include "Gimmick/BSCheckPoint.h"
@@ -27,6 +28,14 @@ void ABSGameMode::BeginPlay()
 	if (UBSAudioManagerSubsystem* AudioManager = GetWorld()->GetGameInstance()->GetSubsystem<UBSAudioManagerSubsystem>())
 	{
 		AudioManager->PlayMusic(BGM, true);
+	}
+
+	if (bIsTutorial)
+	{
+		if (UUserWidget* TutorialWidget = CreateWidget<UUserWidget>(GetWorld(), ToturialWidgetClass))
+		{
+			TutorialWidget->AddToViewport();
+		}
 	}
 }
 

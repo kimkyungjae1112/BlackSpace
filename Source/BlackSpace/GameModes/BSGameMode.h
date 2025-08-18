@@ -24,6 +24,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "CheckPoint")
 	TObjectPtr<ABSCheckPoint> CheckPoint;
 
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UUserWidget> ToturialWidgetClass;
+
 protected:
 	virtual void BeginPlay() override;
 

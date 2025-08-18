@@ -411,7 +411,24 @@ void ABSCharacterEnemy::OnDeath()
 	if (ABSWeapon* Weapon = CombatComp->GetMainWeapon())
 	{
 		ABSPickupItem* PickupItem = GetWorld()->SpawnActorDeferred<ABSPickupItem>(ABSPickupItem::StaticClass(), GetActorTransform(), nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
-		PickupItem->SetEquipmentClass(Weapon->GetClass());
+		int32 SpawnRate = FMath::RandRange(1, 100);
+		if (SpawnRate >= 1 && SpawnRate <= 30)
+		{
+			PickupItem->SetEquipmentClass(Sword_1_WeaponClass);
+		}
+		else if (SpawnRate >= 31 && SpawnRate <= 60)
+		{
+			PickupItem->SetEquipmentClass(Sword_2_WeaponClass);
+		}
+		else if (SpawnRate >= 61 && SpawnRate <= 90)
+		{
+			PickupItem->SetEquipmentClass(PolearmWeaponClass);
+		}
+		else
+		{
+			PickupItem->SetEquipmentClass(BowWeaponClass);
+		}
+
 		PickupItem->FinishSpawning(GetMesh()->GetSocketTransform(TEXT("hand_rSocket")));
 
 		Weapon->Destroy();
@@ -494,6 +511,11 @@ void ABSCharacterEnemy::HitReaction(const AActor* Attacker, const EDamageType& D
 	{
 		StateComp->SetState(BSGameplayTag::Character_State_Stunned);
 		StunnedTime = FMath::RandRange(0.5f, 1.5f);
+	}
+	else
+	{
+		StateComp->SetState(BSGameplayTag::Character_State_Stunned);
+		StunnedTime = FMath::RandRange(0.1f, 0.3f);
 	}
 
 	if (!bUnstoppable)

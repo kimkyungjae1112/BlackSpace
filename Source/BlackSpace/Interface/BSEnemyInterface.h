@@ -24,4 +24,5 @@ public:
 	virtual void TogglePostureAttackWidgetVisibility(const bool bShouldPostureAttack) const = 0;
 	virtual void PostureAttacked(UAnimMontage* PostureAttackReactionMontage) = 0;
 
+	virtual bool IsUnstoppable() const = 0;
 };

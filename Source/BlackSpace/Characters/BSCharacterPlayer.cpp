@@ -132,7 +132,7 @@ void ABSCharacterPlayer::Tick(float DeltaTime)
 					{
 						if (IBSEnemyInterface* EnemyInterface = Cast<IBSEnemyInterface>(VitalAttackTarget))
 						{
-							if (bBackAttack != bHit)
+							if (bBackAttack != bHit && !EnemyInterface->IsUnstoppable())
 							{
 								bBackAttack = bHit;
 								EnemyInterface->ToggleBackAttackWidgetVisibility(bHit);
