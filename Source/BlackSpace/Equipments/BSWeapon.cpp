@@ -85,7 +85,7 @@ void ABSWeapon::UnequipItem()
 
 	DetachToOwner();
 
-	// Destroy();
+	SetActorHiddenInGame(true);
 }
 
 void ABSWeapon::OnceCalledSetWeaponDamage()

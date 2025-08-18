@@ -16,11 +16,14 @@ void UBSPlayerStatusWeaponWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	WeaponImage->SetRenderOpacity(0.f);
 }
 
 void UBSPlayerStatusWeaponWidget::SetWeaponImage(UTexture2D* NewWeaponImage)
 {
 	WeaponImage->SetBrushFromTexture(NewWeaponImage);
+
+	NewWeaponImage ? WeaponImage->SetRenderOpacity(1.f) : WeaponImage->SetRenderOpacity(0.f);
 }
 
 void UBSPlayerStatusWeaponWidget::SetWeaponName(const FText& NewWeaponName)

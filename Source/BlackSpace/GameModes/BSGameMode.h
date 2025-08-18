@@ -12,5 +12,12 @@ class BLACKSPACE_API ABSGameMode : public AGameModeBase
 	GENERATED_BODY()
 
 protected:
+	UPROPERTY(EditAnywhere)
+	bool bIsTutorial = false;
+
+protected:
 	virtual void BeginPlay() override;
+
+public:
+	FORCEINLINE bool IsTutorial() const { return bIsTutorial; }
 };

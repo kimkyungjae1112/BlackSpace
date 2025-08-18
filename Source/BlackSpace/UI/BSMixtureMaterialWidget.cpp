@@ -38,6 +38,7 @@ void UBSMixtureMaterialWidget::SetWeaponSlot(const FInventorySlot& InInventorySl
 	}
 	WeaponName->SetText(InInventorySlot.Name);
 	WeaponImage->SetBrushFromTexture(InInventorySlot.Image);
+	WeaponImage->SetOpacity(1.f);
 }
 
 void UBSMixtureMaterialWidget::UnsetWeaponSlot()
@@ -47,11 +48,14 @@ void UBSMixtureMaterialWidget::UnsetWeaponSlot()
 	InventorySlot = FInventorySlot();
 	WeaponName->SetText(InventorySlot.Name);
 	WeaponImage->SetBrushFromTexture(InventorySlot.Image);
+	WeaponImage->SetOpacity(0.f);
 }
 
 void UBSMixtureMaterialWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+
+	WeaponImage->SetOpacity(0.f);
 }
 
 FReply UBSMixtureMaterialWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)

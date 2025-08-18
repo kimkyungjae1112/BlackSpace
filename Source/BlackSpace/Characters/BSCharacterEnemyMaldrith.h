@@ -7,6 +7,7 @@
 #include "BSCharacterEnemyMaldrith.generated.h"
 
 class UBSBossHealthBarWidget;
+class USoundCue;
 
 UCLASS()
 class BLACKSPACE_API ABSCharacterEnemyMaldrith : public ABSCharacterEnemy
@@ -27,10 +28,7 @@ protected:
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Enemy | Sound")
-	TObjectPtr<USoundWave> MaldrithMusicAsset;
-
-	UPROPERTY(EditAnywhere, Category = "Enemy | Sound")
-	TObjectPtr<UAudioComponent> MaldrithMusicComp;
+	TObjectPtr<USoundCue> MaldrithMusicAsset;
 
 	bool bStartedBossMusic = false;
 
@@ -38,8 +36,6 @@ public:
 	ABSCharacterEnemyMaldrith();
 
 public:
-	virtual void Tick(float DeltaSeconds) override;
-
 	/* IBSEnemyInterface Implement */
 	virtual void PostureAttacked(UAnimMontage* PostureAttackReactionMontage) override;
 

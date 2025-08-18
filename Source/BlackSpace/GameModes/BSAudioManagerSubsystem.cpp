@@ -49,7 +49,7 @@ void UBSAudioManagerSubsystem::StopMusic()
 {
     if (MusicComponent && MusicComponent->IsActive())
     {
-        MusicComponent->Stop();
+        MusicComponent->FadeOut(2.f, 0);
     }
 }
 

@@ -57,6 +57,10 @@ void UBSPlayerStatusWidget::SetMainWeaponState(const FInventorySlot& MainWeaponI
 				FormatOptions.SetMaximumFractionalDigits(0);
 				DamageTextNum->SetText(FText::AsNumber(MainWeapon->GetWeaponDamage(), &FormatOptions));
 			}
+			else
+			{
+				DamageTextNum->SetText(FText::AsNumber(0));
+			}
 		}
 	}
 }

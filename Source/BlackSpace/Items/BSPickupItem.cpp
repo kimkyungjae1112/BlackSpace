@@ -58,8 +58,8 @@ void ABSPickupItem::Interact(AActor* Interactor)
 						ABSEquipmentBase* Weapon = GetWorld()->SpawnActor<ABSEquipmentBase>(EquipmentClass, Player->GetActorTransform(), Param);
 						if (Weapon)
 						{
-							Weapon->EquipItem();
 							Weapon->OnceCalledSetWeaponDamage();
+							Weapon->EquipItem();
 						}
 					}
 					else

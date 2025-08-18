@@ -17,7 +17,7 @@ void UBSDamageNumberEntryWidget::SetAlpha(float InAlpha)
     CurrentAlpha = FMath::Clamp(InAlpha, 0.f, 1.f);
     if (DamageText)
     {
-        FSlateColor SlateCol = DamageText->ColorAndOpacity;
+        FSlateColor SlateCol = DamageText->GetColorAndOpacity();
         FLinearColor Color = SlateCol.GetSpecifiedColor();
         Color.A = CurrentAlpha;
         DamageText->SetColorAndOpacity(Color);

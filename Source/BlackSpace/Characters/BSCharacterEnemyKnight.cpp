@@ -3,11 +3,11 @@
 
 #include "Characters/BSCharacterEnemyKnight.h"
 #include "Components/WidgetComponent.h"
-#include "Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Animation/AnimInstance.h"
 #include "MotionWarpingComponent.h"
+#include "Sound/SoundCue.h"
 
 #include "UI/BSBossHealthBarWidget.h"
 #include "Interface/BSUpdateAnyTypeInterface.h"
@@ -16,16 +16,12 @@
 #include "Components/BSCombatComponent.h"
 #include "AI/Controller/BSEnemyAIController.h"
 #include "Equipments/BSWeapon.h"
+#include "GameModes/BSAudioManagerSubsystem.h"
+#include "GameModes/BSGameMode.h"
 
 ABSCharacterEnemyKnight::ABSCharacterEnemyKnight()
 {
 	MotionWarp = CreateDefaultSubobject<UMotionWarpingComponent>(TEXT("Motion Warping Component"));
-}
-
-void ABSCharacterEnemyKnight::Tick(float DeltaSeconds)
-{
-	Super::Tick(DeltaSeconds);
-
 }
 
 float ABSCharacterEnemyKnight::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -203,13 +199,25 @@ void ABSCharacterEnemyKnight::SeesTarget(AActor* InTargetActor)
 		}
 	}
 
-	if (KnightMusicAsset)
+	if (ABSGameMode* GameMode = Cast<ABSGameMode>(GetWorld()->GetAuthGameMode()))
 	{
-		if (!bStartedBossMusic)
+		if (!GameMode->IsTutorial())
 		{
-			bStartedBossMusic = true;
-			KnightMusicComp = UGameplayStatics::SpawnSound2D(this, KnightMusicAsset);
-			KnightMusicComp->FadeIn(1.f);
+			if (KnightMusicAsset)
+			{
+				if (!bStartedBossMusic)
+				{
+					bStartedBossMusic = true;
+
+					if (IsValid(GetAudioManager()))
+					{
+						if (ImpactSound)
+						{
+							GetAudioManager()->PlayMusic(KnightMusicAsset, true);
+						}
+					}
+				}
+			}
 		}
 	}
 }
@@ -257,9 +265,15 @@ void ABSCharacterEnemyKnight::OnDeath()
 		BossHealthBarWidget->SetVisibility(ESlateVisibility::Hidden);
 	}
 
-	if (IsValid(KnightMusicComp))
+	if (ABSGameMode* GameMode = Cast<ABSGameMode>(GetWorld()->GetAuthGameMode()))
 	{
-		KnightMusicComp->FadeOut(2.f, 0);
+		if (!GameMode->IsTutorial())
+		{
+			if (IsValid(GetAudioManager()))
+			{
+				GetAudioManager()->StopMusic();
+			}
+		}
 	}
 }
 

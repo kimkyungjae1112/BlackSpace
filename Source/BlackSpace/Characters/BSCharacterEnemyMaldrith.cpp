@@ -3,20 +3,15 @@
 
 #include "Characters/BSCharacterEnemyMaldrith.h"
 #include "Components/WidgetComponent.h"
-#include "Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 
 #include "UI/BSBossHealthBarWidget.h"
+#include "GameModes/BSAudioManagerSubsystem.h"
+#include "GameModes/BSGameMode.h"
 
 ABSCharacterEnemyMaldrith::ABSCharacterEnemyMaldrith()
 {
-	PrimaryActorTick.bCanEverTick = true;
-}
-
-void ABSCharacterEnemyMaldrith::Tick(float DeltaSeconds)
-{
-	Super::Tick(DeltaSeconds);
-
 }
 
 void ABSCharacterEnemyMaldrith::PostureAttacked(UAnimMontage* PostureAttackReactionMontage)
@@ -36,13 +31,25 @@ void ABSCharacterEnemyMaldrith::SeesTarget(AActor* InTargetActor)
 		}
 	}
 
-	if (MaldrithMusicAsset)
+	if (ABSGameMode* GameMode = Cast<ABSGameMode>(GetWorld()->GetAuthGameMode()))
 	{
-		if (!bStartedBossMusic)
+		if (!GameMode->IsTutorial())
 		{
-			bStartedBossMusic = true;
-			MaldrithMusicComp = UGameplayStatics::SpawnSound2D(this, MaldrithMusicAsset);
-			MaldrithMusicComp->FadeIn(1.f);
+			if (MaldrithMusicAsset)
+			{
+				if (!bStartedBossMusic)
+				{
+					bStartedBossMusic = true;
+
+					if (IsValid(GetAudioManager()))
+					{
+						if (ImpactSound)
+						{
+							GetAudioManager()->PlayMusic(MaldrithMusicAsset, true);
+						}
+					}
+				}
+			}
 		}
 	}
 }
@@ -87,9 +94,15 @@ void ABSCharacterEnemyMaldrith::OnDeath()
 		BossHealthBarWidget->SetVisibility(ESlateVisibility::Hidden);
 	}
 
-	if (IsValid(MaldrithMusicComp))
+	if (ABSGameMode* GameMode = Cast<ABSGameMode>(GetWorld()->GetAuthGameMode()))
 	{
-		MaldrithMusicComp->FadeOut(2.f, 0);
+		if (!GameMode->IsTutorial())
+		{
+			if (IsValid(GetAudioManager()))
+			{
+				GetAudioManager()->StopMusic();
+			}
+		}
 	}
 }
 

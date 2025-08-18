@@ -9,6 +9,7 @@
 
 class UBSBossHealthBarWidget;
 class UMotionWarpingComponent;
+class USoundCue;
 class ABSWeapon;
 
 UCLASS()
@@ -37,10 +38,7 @@ protected:
 // Sound
 protected:
 	UPROPERTY(EditAnywhere, Category = "Enemy | Sound")
-	TObjectPtr<USoundWave> KnightMusicAsset;
-
-	UPROPERTY(EditAnywhere, Category = "Enemy | Sound")
-	TObjectPtr<UAudioComponent> KnightMusicComp;
+	TObjectPtr<USoundCue> KnightMusicAsset;
 
 	bool bStartedBossMusic = false;
 
@@ -72,7 +70,6 @@ public:
 	ABSCharacterEnemyKnight();
 
 public:
-	virtual void Tick(float DeltaSeconds) override;
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
