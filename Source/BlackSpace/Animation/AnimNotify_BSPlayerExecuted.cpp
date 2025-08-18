@@ -8,8 +8,10 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "NiagaraSystem.h"
 #include "NiagaraFunctionLibrary.h"
+#include "Sound/SoundCue.h"
 
 #include "Interface/BSPlayerAttackedInterface.h"
+#include "GameModes/BSAudioManagerSubsystem.h"
 
 UAnimNotify_BSPlayerExecuted::UAnimNotify_BSPlayerExecuted(const FObjectInitializer& ObjectInitializer)
 {
@@ -65,6 +67,11 @@ void UAnimNotify_BSPlayerExecuted::Notify(USkeletalMeshComponent* MeshComp, UAni
 					true,
 					ENCPoolMethod::None
 				);
+
+				if (UBSAudioManagerSubsystem* AudioManager = World->GetGameInstance()->GetSubsystem<UBSAudioManagerSubsystem>())
+				{
+					AudioManager->PlaySoundAtLocation(SoundCue, Character->GetActorLocation());
+				}
 
 				if (UAnimInstance* Anim = Character->GetMesh()->GetAnimInstance())
 				{

@@ -8,6 +8,7 @@
 #include "AnimNotify_BSPlayerExecuted.generated.h"
 
 class UNiagaraSystem;
+class USoundCue;
 
 UCLASS(meta=(DisplayName="Player Executed"))
 class BLACKSPACE_API UAnimNotify_BSPlayerExecuted : public UAnimNotify
@@ -30,6 +31,9 @@ protected:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Niagara")
 	TObjectPtr<UNiagaraSystem> Template;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Niagara")
+	TObjectPtr<USoundCue> SoundCue;
 
 public:
 	UAnimNotify_BSPlayerExecuted(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
