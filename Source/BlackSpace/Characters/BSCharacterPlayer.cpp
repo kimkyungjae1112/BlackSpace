@@ -1041,7 +1041,7 @@ void ABSCharacterPlayer::DoAttack(const FGameplayTag& AttackType)
 			}
 		}
 
-		Weapon->PlaySwingSound();
+		// Weapon->PlaySwingSound();
 		// Weapon->PlaySwordSwingCameraShake();
 		PlayAnimMontage(Montage);
 
@@ -1306,6 +1306,7 @@ void ABSCharacterPlayer::SetInputMapping(const EWeaponType& InWeaponType)
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetPlayerController()->GetLocalPlayer()))
 		{
+			GetCharacterMovement()->MaxWalkSpeed = MoveSpeedMap[CurrentWeaponType].MoveSpeeds[0];
 			Subsystem->ClearAllMappings();
 			Subsystem->AddMappingContext(InputMap[InWeaponType], 0);
 		}
