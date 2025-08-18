@@ -6,12 +6,11 @@
 #include "GameFramework/GameModeBase.h"
 #include "BSGameMode.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class BLACKSPACE_API ABSGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
+protected:
+	virtual void BeginPlay() override;
 };

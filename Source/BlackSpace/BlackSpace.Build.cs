@@ -21,7 +21,10 @@ public class BlackSpace : ModuleRules
             "MotionWarping",
             "Niagara",
 			"NavigationSystem",
-			"SlateCore"
+			"SlateCore",
+            "Slate",
+            "MoviePlayer",
+            "UMG"
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
