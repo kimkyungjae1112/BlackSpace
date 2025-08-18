@@ -237,6 +237,11 @@ void ABSCharacterPlayer::DisableComboWindow()
 	}
 }
 
+void ABSCharacterPlayer::ToggleIFrame(const bool bEnableIFrame)
+{
+	bEnabledIFrame = bEnableIFrame;
+}
+
 void ABSCharacterPlayer::BowFireFinished()
 {
 	check(StateComp);
@@ -325,11 +330,17 @@ void ABSCharacterPlayer::AttackFinished(const float ComboResetDelay)
 
 float ABSCharacterPlayer::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+
 	check(AttributeComp);
 	check(StateComp);
 	check(CombatComp);
 
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	if (IsEnabledIFrame())
+	{
+		return ActualDamage;
+	}
 
 	// 적과 대치중인 방향인지?
 	bFacingEnemy = UKismetMathLibrary::InRange_FloatFloat(GetDotProductTo(EventInstigator->GetPawn()), -0.1f, 1.f);

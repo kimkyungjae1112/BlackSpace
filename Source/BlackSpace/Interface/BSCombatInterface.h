@@ -32,4 +32,6 @@ public:
 	virtual void EnemyBlocking() {}
 
 	virtual void EnemyDodge() {}
+
+	virtual void ToggleIFrame(const bool bEnableIFrame) {}
 };

@@ -17,6 +17,7 @@
 #include "AI/Controller/BSEnemyAIController.h"
 #include "Equipments/BSWeapon.h"
 #include "GameModes/BSAudioManagerSubsystem.h"
+#include "GameModes/BSDamageNumberSubsystem.h"
 #include "GameModes/BSGameMode.h"
 
 ABSCharacterEnemyKnight::ABSCharacterEnemyKnight()
@@ -27,6 +28,11 @@ ABSCharacterEnemyKnight::ABSCharacterEnemyKnight()
 float ABSCharacterEnemyKnight::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	if (IsEnabledIFrame())
+	{
+		return ActualDamage;
+	}
 
 	if (UAnimInstance* Anim = GetMesh()->GetAnimInstance())
 	{
@@ -46,6 +52,11 @@ float ABSCharacterEnemyKnight::TakeDamage(float DamageAmount, FDamageEvent const
 	const bool bFacing = UKismetMathLibrary::InRange_FloatFloat(GetDotProductTo(EventInstigator->GetPawn()), -0.1f, 1.f);
 
 	AttributeComp->TakeDamageAmount(ActualDamage);
+
+	if (UBSDamageNumberSubsystem* Subsystem = GetWorld()->GetSubsystem<UBSDamageNumberSubsystem>())
+	{
+		Subsystem->AddDamageAtSocket(GetMesh(), FName(TEXT("DamageSocket")), ActualDamage, FVector(0.f, 0.f, 15.f), 1.f);
+	}
 
 	if (AttributeComp->GetHealthRatio() <= 0.65f && !bIsActiveSecondPhase)
 	{
@@ -145,6 +156,11 @@ void ABSCharacterEnemyKnight::PerformAttack(const FGameplayTag& AttackTypeTag, F
 	}
 
 	Super::PerformAttack(AttackTypeTag, MontageEndedDelegate);
+}
+
+void ABSCharacterEnemyKnight::ToggleIFrame(const bool bEnableIFrame)
+{
+	bEnabledIFrame = bEnableIFrame;
 }
 
 void ABSCharacterEnemyKnight::PostureAttacked(UAnimMontage* PostureAttackReactionMontage)

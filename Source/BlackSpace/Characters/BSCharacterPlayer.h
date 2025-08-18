@@ -157,10 +157,15 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Stat")
 	bool bPostureAttack = false;
 
+	// 구르기 할 때 무적 프레임 플래그
+	UPROPERTY(EditAnywhere, Category = "Stat")
+	bool bEnabledIFrame = false;
+
 	UPROPERTY(VisibleAnywhere, Category = "Stat")
 	EWeaponType CurrentWeaponType;
+
 	
-	// Combo
+// Combo
 protected:
 	bool bComboSequenceRunning = false;
 	bool bCanComboInput = false;
@@ -168,7 +173,7 @@ protected:
 	int32 ComboCounter = 0;
 	FTimerHandle ComboResetTimerHandle;
 
-	// Parry
+// Parry
 protected:
 	FTimerHandle ParryStartTimer;
 	FTimerHandle ParryEndTimer;
@@ -195,6 +200,7 @@ public:
 	ABSCharacterPlayer();
 
 	FORCEINLINE APawn* GetVitalAttackTarget() const { return VitalAttackTarget; }
+	FORCEINLINE bool IsEnabledIFrame() const { return bEnabledIFrame; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -208,6 +214,7 @@ public:
 	/* IBSComboWindowInterface Implement */
 	virtual void EnableComboWindow() override;
 	virtual void DisableComboWindow() override;
+	virtual void ToggleIFrame(const bool bEnableIFrame) override;
 
 	/* IBSBowFireInterface Implement */
 	virtual void BowFireFinished() override;

@@ -59,6 +59,10 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "Enemy | Set Value")
 	bool bIsActiveSecondPhase = false;
+	
+	// 구르기 할 때 무적 프레임 플래그
+	UPROPERTY(EditAnywhere, Category = "Stat")
+	bool bEnabledIFrame = false;
 
 	FTimerHandle BlockingDelayTimerHandle;
 
@@ -69,6 +73,8 @@ protected:
 public:
 	ABSCharacterEnemyKnight();
 
+	FORCEINLINE bool IsEnabledIFrame() const { return bEnabledIFrame; }
+
 public:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -77,6 +83,7 @@ public:
 	virtual void EnemyBlocking() override;
 	virtual void EnemyDodge() override;
 	virtual void PerformAttack(const FGameplayTag& AttackTypeTag, FOnMontageEnded& MontageEndedDelegate) override;
+	virtual void ToggleIFrame(const bool bEnableIFrame) override;
 
 	/* IBSEnemyInterface Implement */
 	virtual void PostureAttacked(UAnimMontage* PostureAttackReactionMontage) override;
