@@ -134,6 +134,15 @@ void UBSAttributeComponent::TakePostureAmount(float DamageAmount)
 	BroadcastAttributeChanged(EAttributeType::Posture);
 }
 
+void UBSAttributeComponent::ResetAttribute()
+{
+	BaseHealth = MaxHealth;
+	BaseStamina = MaxStamina;
+
+	BroadcastAttributeChanged(EAttributeType::Health);
+	BroadcastAttributeChanged(EAttributeType::Stamina);
+}
+
 void UBSAttributeComponent::RegenerateStaminaHandle()
 {
 	BaseStamina = FMath::Clamp(BaseStamina + RegenStaminaRate, 0.f, MaxStamina);
@@ -157,4 +166,3 @@ void UBSAttributeComponent::RegeneratePostureHandle()
 
 	BroadcastAttributeChanged(EAttributeType::Posture);
 }
-

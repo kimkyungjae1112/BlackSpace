@@ -100,6 +100,8 @@ public:
 
 	void TakePostureAmount(float DamageAmount);
 
+	void ResetAttribute();
+
 private:
 	void RegenerateStaminaHandle();
 	void RegeneratePostureHandle();

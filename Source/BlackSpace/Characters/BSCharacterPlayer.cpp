@@ -39,6 +39,7 @@
 #include "Animation/BSAnimInstance.h"
 #include "Projectiles/BSArrow.h"
 #include "GameModes/BSAudioManagerSubsystem.h"
+#include "GameModes/BSGameMode.h"
 
 ABSCharacterPlayer::ABSCharacterPlayer()
 {
@@ -103,7 +104,7 @@ void ABSCharacterPlayer::Tick(float DeltaTime)
 	{
 		FHitResult DialogueTargetResult;
 		bool bDialogueHit = DetectForDialogue(DialogueTargetResult);
-		
+
 		if (bDialogueHit)
 		{
 			if (DialogueTarget != DialogueTargetResult.GetActor())
@@ -277,7 +278,7 @@ void ABSCharacterPlayer::GSwordSpecialAttackExecuted(UAnimMontage* Montage)
 {
 	check(StateComp);
 	check(AttributeComp);
-	
+
 	StateComp->SetState(BSGameplayTag::Character_State_Hit);
 	AttributeComp->TakeDamageAmount(30.f);
 
@@ -347,7 +348,7 @@ float ABSCharacterPlayer::TakeDamage(float DamageAmount, FDamageEvent const& Dam
 
 	// 체간 공격 진행중인지?
 	if (UAnimInstance* Anim = GetMesh()->GetAnimInstance())
-	{	
+	{
 		// MainWeapon 없을 때 방어 코드 필요
 		if (UAnimMontage* CurrentPlayingMontage = CombatComp->GetMainWeapon()->GetMontageForTag(BSGameplayTag::Character_Attack_MaxPostureAttack))
 		{
@@ -381,12 +382,17 @@ float ABSCharacterPlayer::TakeDamage(float DamageAmount, FDamageEvent const& Dam
 	if (CanAttackBlocking())
 	{
 		AttributeComp->ToggleStaminaRegen(false);
+		AttributeComp->DecreaseStamina(20.f);
 		AttributeComp->TakeDamageAmount(ActualDamage / 0.3f);
+
 		StateComp->SetState(BSGameplayTag::Character_Action_BlockingHit);
+
+		AttributeComp->ToggleStaminaRegen(true, 1.f);
 	}
 	else
 	{
 		AttributeComp->TakeDamageAmount(ActualDamage);
+
 		StateComp->SetState(BSGameplayTag::Character_State_Hit);
 	}
 
@@ -432,10 +438,20 @@ bool ABSCharacterPlayer::IsDead() const
 void ABSCharacterPlayer::OnDeath()
 {
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	DisableInput(GetPlayerController());
 
 	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetMesh()->SetSimulatePhysics(true);
+
+	FTimerHandle RespawnTimer;
+	GetWorld()->GetTimerManager().SetTimer(RespawnTimer, [&]()
+		{
+			if (ABSGameMode* GameMode = Cast<ABSGameMode>(GetWorld()->GetAuthGameMode()))
+			{
+				GameMode->RespawnPlayer();
+			}
+		}, 3.f, false);
 }
 
 void ABSCharacterPlayer::ImpactEffect(const FVector& Location)

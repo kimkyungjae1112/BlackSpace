@@ -176,27 +176,6 @@ void ABSWeapon::Drop()
 	MeshComp->SetSimulatePhysics(true);
 }
 
-void ABSWeapon::PlaySwingSound()
-{
-	// const를 붙일 수 없다
-	if (UGameInstance* GameInstance = GetGameInstance())
-	{
-		if (UBSAudioManagerSubsystem* AudioSubsystem = GameInstance->GetSubsystem<UBSAudioManagerSubsystem>())
-		{
-			AudioSubsystem->PlaySoundAtLocation(SwingSoundCue, GetActorLocation());
-		}
-	}
-}
-
-void ABSWeapon::PlaySwordSwingCameraShake(float Scale) const
-{
-	APlayerController* PC = GetWorld()->GetFirstPlayerController();
-	if (PC)
-	{
-		PC->ClientStartCameraShake(SwingCameraShake, Scale);
-	}
-}
-
 void ABSWeapon::ActivateWeaponCollision(const EWeaponCollisionType& WeaponCollisionType)
 {
 	switch (WeaponCollisionType)

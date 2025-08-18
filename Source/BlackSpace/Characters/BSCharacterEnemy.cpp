@@ -231,7 +231,6 @@ void ABSCharacterEnemy::PerformAttack(const FGameplayTag& AttackTypeTag, FOnMont
 		{
 			if (UAnimInstance* Anim = GetMesh()->GetAnimInstance())
 			{
-				Weapon->PlaySwingSound();
 				Anim->Montage_Play(Montage);
 				Anim->Montage_SetEndDelegate(MontageEndedDelegate, Montage);
 			}

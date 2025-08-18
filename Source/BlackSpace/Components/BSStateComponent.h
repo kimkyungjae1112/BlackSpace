@@ -40,6 +40,7 @@ public:
 
 		CurrentState = NewState; 
 	}
+	FORCEINLINE void RespawnState() { CurrentState = FGameplayTag::EmptyTag; }
 
 public:
 	void ToggleMovementInput(bool bEnabled, float Duration = 0.f);
