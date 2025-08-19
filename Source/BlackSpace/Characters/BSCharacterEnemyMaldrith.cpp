@@ -9,6 +9,8 @@
 #include "UI/BSBossHealthBarWidget.h"
 #include "GameModes/BSAudioManagerSubsystem.h"
 #include "GameModes/BSGameMode.h"
+#include "Equipments/BSWeapon.h"
+#include "Components/BSStateComponent.h"
 
 ABSCharacterEnemyMaldrith::ABSCharacterEnemyMaldrith()
 {
@@ -21,6 +23,25 @@ void ABSCharacterEnemyMaldrith::PostureAttacked(UAnimMontage* PostureAttackReact
 	PlayAnimMontage(PostureAttackReactionMontage);
 }
 
+void ABSCharacterEnemyMaldrith::EquipWeapon()
+{
+	if (DefaultWeaponClass && bSeparatedWeaponEquip)
+	{
+		FActorSpawnParameters Param;
+		Param.Owner = this;
+
+		ABSWeapon* Weapon = GetWorld()->SpawnActor<ABSWeapon>(DefaultWeaponClass, GetActorTransform(), Param);
+		Weapon->EquipItem();
+	}
+}
+
+void ABSCharacterEnemyMaldrith::PlayEquipMontage()
+{
+	check(StateComp);
+
+	PlayAnimMontage(EquipMontage);
+}
+
 void ABSCharacterEnemyMaldrith::SeesTarget(AActor* InTargetActor)
 {
 	if (IsValid(InTargetActor))
@@ -28,6 +49,13 @@ void ABSCharacterEnemyMaldrith::SeesTarget(AActor* InTargetActor)
 		if (BossHealthBarWidget)
 		{
 			BossHealthBarWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		}
+	}
+	else
+	{
+		if (BossHealthBarWidget)
+		{
+			BossHealthBarWidget->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
 

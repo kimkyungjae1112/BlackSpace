@@ -309,6 +309,10 @@ void ABSCharacterPlayer::EndDialogue()
 	{
 		SetInputMapping(CurrnetWeapon->GetWeaponType());
 	}
+	else
+	{
+		SetInputMapping(EWeaponType::Uncombat);
+	}
 }
 
 void ABSCharacterPlayer::OptionDialogue()

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Characters/BSCharacterEnemy.h"
 #include "Interface/BSSecondPhaseMatInterface.h"
+#include "Interface/BSBossWeaponEquipInterface.h"
 #include "BSCharacterEnemyKnight.generated.h"
 
 class UBSBossHealthBarWidget;
@@ -16,6 +17,7 @@ UCLASS()
 class BLACKSPACE_API ABSCharacterEnemyKnight 
 	: public ABSCharacterEnemy
 	, public IBSSecondPhaseMatInterface
+	, public IBSBossWeaponEquipInterface
 {
 	GENERATED_BODY()
 	
@@ -70,6 +72,11 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Enemy | Montage")
 	TObjectPtr<UAnimMontage> SecondPhaseMontage;
 	
+// Animation
+protected:
+	UPROPERTY(EditAnywhere, Category = "Enemy | Animation")
+	TObjectPtr<UAnimMontage> EquipMontage;
+
 public:
 	ABSCharacterEnemyKnight();
 
@@ -90,6 +97,10 @@ public:
 
 	/* IBSSecondePhaseInterface Implement */
 	virtual void LoadBodyMeshMaterial() const override;
+
+	/* IBSBossWeaponEquipInterface Implement */
+	virtual void EquipWeapon() override;
+	virtual void PlayEquipMontage() override;
 
 public:
 	virtual void SeesTarget(AActor* InTargetActor) override;

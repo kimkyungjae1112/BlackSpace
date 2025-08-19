@@ -117,6 +117,9 @@ protected:
 	bool bUnstoppable = false;
 
 	UPROPERTY(EditAnywhere, Category = "Enemy | Set Value")
+	bool bSeparatedWeaponEquip = false;
+
+	UPROPERTY(EditAnywhere, Category = "Enemy | Set Value")
 	int32 StunnedRate = 0;
 
 // Material

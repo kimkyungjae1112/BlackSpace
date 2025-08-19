@@ -4,13 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "Characters/BSCharacterEnemy.h"
+#include "Interface/BSBossWeaponEquipInterface.h"
 #include "BSCharacterEnemyMaldrith.generated.h"
 
 class UBSBossHealthBarWidget;
 class USoundCue;
 
 UCLASS()
-class BLACKSPACE_API ABSCharacterEnemyMaldrith : public ABSCharacterEnemy
+class BLACKSPACE_API ABSCharacterEnemyMaldrith 
+	: public ABSCharacterEnemy
+	, public IBSBossWeaponEquipInterface
 {
 	GENERATED_BODY()
 	
@@ -32,12 +35,21 @@ protected:
 
 	bool bStartedBossMusic = false;
 
+// Animation
+protected:
+	UPROPERTY(EditAnywhere, Category = "Enemy | Animation")
+	TObjectPtr<UAnimMontage> EquipMontage;
+
 public:
 	ABSCharacterEnemyMaldrith();
 
 public:
 	/* IBSEnemyInterface Implement */
 	virtual void PostureAttacked(UAnimMontage* PostureAttackReactionMontage) override;
+
+	/* IBSBossWeaponEquipInterface Implement */
+	virtual void EquipWeapon() override;
+	virtual void PlayEquipMontage() override;
 
 public:
 	virtual void SeesTarget(AActor* InTargetActor) override;

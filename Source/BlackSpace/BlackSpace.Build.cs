@@ -24,7 +24,9 @@ public class BlackSpace : ModuleRules
 			"SlateCore",
             "Slate",
             "MoviePlayer",
-            "UMG"
+            "UMG",
+            "LevelSequence", 
+			"MovieScene"
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

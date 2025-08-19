@@ -205,6 +205,25 @@ void ABSCharacterEnemyKnight::LoadBodyMeshMaterial() const
 	}
 }
 
+void ABSCharacterEnemyKnight::EquipWeapon()
+{
+	if (DefaultWeaponClass && bSeparatedWeaponEquip)
+	{
+		FActorSpawnParameters Param;
+		Param.Owner = this;
+
+		ABSWeapon* Weapon = GetWorld()->SpawnActor<ABSWeapon>(DefaultWeaponClass, GetActorTransform(), Param);
+		Weapon->EquipItem();
+	}
+}
+
+void ABSCharacterEnemyKnight::PlayEquipMontage()
+{
+	check(StateComp);
+
+	PlayAnimMontage(EquipMontage);
+}
+
 void ABSCharacterEnemyKnight::SeesTarget(AActor* InTargetActor)
 {
 	if (IsValid(InTargetActor))
@@ -212,6 +231,13 @@ void ABSCharacterEnemyKnight::SeesTarget(AActor* InTargetActor)
 		if (BossHealthBarWidget)
 		{
 			BossHealthBarWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		}
+	}
+	else
+	{
+		if (BossHealthBarWidget)
+		{
+			BossHealthBarWidget->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
 

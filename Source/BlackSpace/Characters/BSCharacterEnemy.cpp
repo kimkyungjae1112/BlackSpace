@@ -98,7 +98,7 @@ void ABSCharacterEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (DefaultWeaponClass)
+	if (DefaultWeaponClass && !bSeparatedWeaponEquip)
 	{
 		FActorSpawnParameters Param;
 		Param.Owner = this;
