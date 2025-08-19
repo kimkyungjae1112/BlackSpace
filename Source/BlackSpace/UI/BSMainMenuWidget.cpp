@@ -35,21 +35,11 @@ void UBSMainMenuWidget::NativeConstruct()
 
 void UBSMainMenuWidget::GameStart() 
 {
-	if (UBSGameInstance* GI = GetGameInstance<UBSGameInstance>())
-	{
-		GI->ShowLoadingScreen(3.f);
-	}
-
 	UGameplayStatics::OpenLevel(GetWorld(), TEXT("Gothic_Cathedral"));
 }
 
 void UBSMainMenuWidget::TutorialStart() 
 {
-	if (UBSGameInstance* GI = GetGameInstance<UBSGameInstance>())
-	{
-		GI->ShowLoadingScreen(3.f);
-	}
-
 	UGameplayStatics::OpenLevel(GetWorld(), TEXT("ThirdPersonMap"));
 }
 

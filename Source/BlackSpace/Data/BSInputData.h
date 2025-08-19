@@ -34,6 +34,9 @@ public:
 	TObjectPtr<UInputAction> IA_ToggleInventoryMenu;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Common | UI")
+	TObjectPtr<UInputAction> IA_TogglePauseMenu;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Common | UI")
 	TObjectPtr<UInputAction> IA_InventoryLeftPage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Common | UI")

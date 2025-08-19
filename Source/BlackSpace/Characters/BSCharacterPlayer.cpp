@@ -29,6 +29,7 @@
 #include "Components/BSRotationComponent.h"
 #include "Components/BSTargetingComponent.h"
 #include "UI/BSPlayerHUDWidget.h"
+#include "UI/BSPauseMenuWidget.h"
 #include "Interface/BSInteractInterface.h"
 #include "Interface/BSBowInterface.h"
 #include "Interface/BSUpdateAnyTypeInterface.h"
@@ -192,6 +193,7 @@ void ABSCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		EnhancedInputComponent->BindAction(InputData->IA_SprintAndRolling, ETriggerEvent::Completed, this, &ThisClass::StopSprint);
 		EnhancedInputComponent->BindAction(InputData->IA_SprintAndRolling, ETriggerEvent::Canceled, this, &ThisClass::Rolling);
 		EnhancedInputComponent->BindAction(InputData->IA_ToggleInventoryMenu, ETriggerEvent::Started, this, &ThisClass::ToggleInventoryMenu);
+		EnhancedInputComponent->BindAction(InputData->IA_TogglePauseMenu, ETriggerEvent::Started, this, &ThisClass::TogglePauseMenu);
 		EnhancedInputComponent->BindAction(InputData->IA_InventoryLeftPage, ETriggerEvent::Started, this, &ThisClass::InventoryLeftPage);
 		EnhancedInputComponent->BindAction(InputData->IA_InventoryRightPage, ETriggerEvent::Started, this, &ThisClass::InventoryRightPage);
 		EnhancedInputComponent->BindAction(InputData->IA_Interact, ETriggerEvent::Started, this, &ThisClass::Interaction);
@@ -677,8 +679,9 @@ void ABSCharacterPlayer::Sprint()
 {
 	check(AttributeComp);
 	check(CombatComp);
+	check(TargetingComp)
 
-	if (bProgressAiming) return;
+	if (bProgressAiming || TargetingComp->IsLockOn()) return;
 
 	if (CombatComp->IsBlockingEnabled())
 	{
@@ -743,6 +746,21 @@ void ABSCharacterPlayer::Rolling()
 void ABSCharacterPlayer::ToggleInventoryMenu()
 {
 	InventoryComp->ToggleInventory();
+}
+
+void ABSCharacterPlayer::TogglePauseMenu()
+{
+	if (PauseMenuWidget)
+	{
+		PauseMenuWidget->RemoveFromParent();
+	}
+	else
+	{
+		if (PauseMenuWidget = CreateWidget<UBSPauseMenuWidget>(GetWorld(), PauseMenuWidgetClass))
+		{
+			PauseMenuWidget->AddToViewport();
+		}
+	}
 }
 
 void ABSCharacterPlayer::InventoryLeftPage()
@@ -942,6 +960,7 @@ void ABSCharacterPlayer::ParryEnd()
 void ABSCharacterPlayer::LockOnTarget()
 {
 	TargetingComp->ToggleLockOn();
+	StopSprint();
 }
 
 void ABSCharacterPlayer::LeftTarget()

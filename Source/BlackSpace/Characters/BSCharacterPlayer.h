@@ -29,6 +29,7 @@ class UMotionWarpingComponent;
 class UBSTargetingComponent;
 class UBSPlayerStatusWidget;
 class USoundCue;
+class UBSPauseMenuWidget;
 class ABSPlayerController;
 class ABSArrow;
 
@@ -108,6 +109,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 	TObjectPtr<UBSPlayerHUDWidget> HUDWidget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UBSPauseMenuWidget> PauseMenuWidgetClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
+	TObjectPtr<UBSPauseMenuWidget> PauseMenuWidget;
 
 // Sound
 protected:
@@ -263,6 +270,7 @@ private:
 	void StopSprint();
 	void Rolling();
 	void ToggleInventoryMenu();
+	void TogglePauseMenu();
 	void InventoryLeftPage();
 	void InventoryRightPage();
 	void Interaction();
