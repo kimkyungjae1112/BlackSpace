@@ -92,4 +92,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dialogue | Next")
 	TObjectPtr<UInputAction> IA_SkipDialogue;
+
+	/***********************************************/
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory | IMC")
+	TObjectPtr<UInputMappingContext> IMC_Inventory;
 };

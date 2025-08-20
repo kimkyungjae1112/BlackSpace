@@ -46,6 +46,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UI")
 	TObjectPtr<UBSInventoryMenuWidget> InventoryMenuWidget;
 
+protected:
+	bool bIsInViewport = false;
+
 public:	
 	UBSInventoryComponent();
 
@@ -57,6 +60,7 @@ public:
 
 	FORCEINLINE FInventorySlot GetDescriptionSlot() const { return DescriptionSlot; }
 	
+	FORCEINLINE bool IsInViewport() const { return bIsInViewport; }
 
 public:
 	void ToggleInventory();
@@ -69,7 +73,7 @@ public:
 	void RemoveToSlot(const int32 Index);
 	void RemoveWeapon(const int32 Index);
 
-	void EquipFromInventory(const int32 Index) const;
+	void EquipFromInventory(const int32 Index, const bool bIsHidden) const;
 
 	void SwapSlot(int32 IndexA, int32 IndexB);
 

@@ -189,11 +189,17 @@ void UBSInventorySlotWidget::RightClickForEquip()
 			if (UBSCombatComponent* CombatComp = Player->GetComponentByClass<UBSCombatComponent>())
 			{
 				ABSWeapon* OldWeapon = nullptr;
+				bool bIsHidden = true;
 				if (CombatComp->CheckHasMainWeapon() && CombatComp->CheckHasSecondaryWeapon())
 				{
 					OldWeapon = CombatComp->GetMainWeapon();
+					bIsHidden = false;
 				}
-				InventoryComp->EquipFromInventory(Index);
+				else if (!CombatComp->CheckHasMainWeapon())
+				{
+					bIsHidden = false;
+				}
+				InventoryComp->EquipFromInventory(Index, bIsHidden);
 				InventoryComp->RemoveToSlot(Index);
 				InventoryComp->AddToSlot(OldWeapon, Index);
 			}

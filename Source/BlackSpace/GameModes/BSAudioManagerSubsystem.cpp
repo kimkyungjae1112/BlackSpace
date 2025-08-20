@@ -42,7 +42,7 @@ void UBSAudioManagerSubsystem::PlayMusic(USoundBase* MusicSound, bool bLoop)
         MusicComponent->Stop();
     }
 
-    MusicComponent = UGameplayStatics::SpawnSound2D(GetWorld(), MusicSound, 1.0f, 1.0f, 0.0f, nullptr, false, bLoop);
+    MusicComponent = UGameplayStatics::SpawnSound2D(GetWorld(), MusicSound, 1.0f, 1.0f, 0.0f, nullptr, bLoop, false);
 }
 
 void UBSAudioManagerSubsystem::StopMusic()

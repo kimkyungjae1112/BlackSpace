@@ -23,8 +23,8 @@ void UBSGameInstance::Init()
 {
 	Super::Init();
 
-    FCoreUObjectDelegates::PreLoadMap.AddUObject(this, &ThisClass::HandlePreLoadMap);
-    FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &ThisClass::HandlePostLoadMap);
+    /*FCoreUObjectDelegates::PreLoadMap.AddUObject(this, &ThisClass::HandlePreLoadMap);
+    FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &ThisClass::HandlePostLoadMap);*/
 
     FGenericTeamId::SetAttitudeSolver(&BSGetTeamAttitude);
 }

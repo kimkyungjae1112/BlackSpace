@@ -39,6 +39,8 @@ void UBSInventoryComponent::ToggleInventory()
 		if (InventoryMenuWidget->IsVisible())
 		{
 			InventoryMenuWidget->SetVisibility(ESlateVisibility::Hidden);
+			bIsInViewport = false;
+
 			PC->SetInputModeGameOnly();
 
 			if (UBSPlayerHUDWidget* HUDWidget = HUDInterface->GetHUDWidget())
@@ -49,6 +51,8 @@ void UBSInventoryComponent::ToggleInventory()
 		else
 		{
 			InventoryMenuWidget->SetVisibility(ESlateVisibility::Visible);
+			bIsInViewport = true;
+
 			PC->SetInputModeUIAndGame();
 
 			if (UBSPlayerHUDWidget* HUDWidget = HUDInterface->GetHUDWidget())
@@ -159,14 +163,14 @@ void UBSInventoryComponent::RemoveWeapon(const int32 Index)
 	}
 }
 
-void UBSInventoryComponent::EquipFromInventory(const int32 Index) const
+void UBSInventoryComponent::EquipFromInventory(const int32 Index, const bool bIsHidden) const
 {
 	if (Weapons.IsValidIndex(Index))
 	{
 		if (Weapons[Index])
 		{
 			Weapons[Index]->EquipItem();
-			Weapons[Index]->SetActorHiddenInGame(false);
+			Weapons[Index]->SetActorHiddenInGame(bIsHidden);
 		}
 	}
 }

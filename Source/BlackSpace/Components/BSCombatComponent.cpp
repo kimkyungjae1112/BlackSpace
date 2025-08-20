@@ -159,6 +159,7 @@ void UBSCombatComponent::SetUnequipSecondaryWeapon()
 
 void UBSCombatComponent::ChangeMainWeapon(ABSWeapon* NewWeapon)
 {
+	MainWeapon->SetActorHiddenInGame(true);
 	MainWeapon->DetachToOwner();
 
 	MainWeapon = NewWeapon;

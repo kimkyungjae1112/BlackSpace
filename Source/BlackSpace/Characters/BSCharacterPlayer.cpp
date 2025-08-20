@@ -749,7 +749,25 @@ void ABSCharacterPlayer::Rolling()
 
 void ABSCharacterPlayer::ToggleInventoryMenu()
 {
+	check(InventoryComp)
+
 	InventoryComp->ToggleInventory();
+
+	if (InventoryComp->IsInViewport())
+	{
+		SetInputMapping(InputData->IMC_Inventory);
+	}
+	else if (!InventoryComp->IsInViewport())
+	{
+		if (CurrentWeaponType == EWeaponType::Uncombat)
+		{
+			SetInputMapping(InputData->IMC_Default);
+		}
+		else
+		{
+			SetInputMapping(CurrentWeaponType);
+		}
+	}
 }
 
 void ABSCharacterPlayer::TogglePauseMenu()
@@ -798,7 +816,7 @@ void ABSCharacterPlayer::Interaction()
 		ObjectTypes,
 		false,
 		ActorsToIgnore,
-		EDrawDebugTrace::ForDuration,
+		EDrawDebugTrace::None,
 		HitResult,
 		true
 	);

@@ -87,7 +87,7 @@ void UBSMixtureWeaponWidget::ClickMixtureButton()
 	switch (BaseGrade)
 	{
 	case EWeaponGrade::Common:
-		if (RandomValue <= 30)
+		if (RandomValue <= 100)
 		{
 			ResultGrade = EWeaponGrade::Rare;
 		}
