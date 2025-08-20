@@ -29,12 +29,17 @@ protected:
 
 	FTimerHandle PerceptionTimerHandle;
 
+protected:
+	UPROPERTY(EditAnywhere, Category = "Set Value")
+	bool bIsBoss = false;
+
 public:
 	ABSEnemyAIController();
 
 public:
 	virtual bool IsDetectedPlayer() const override;
 
+	void BossPossess();
 	float ToTargetDist() const;
 	void StopUpdateTarget();
 

@@ -12,8 +12,6 @@ ABSBossStageActor::ABSBossStageActor()
 void ABSBossStageActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	Super::BeginPlay();
 
 	// 이동 시작 시, 초기 위치와 목표 위치를 설정합니다.
 	StartLocation = GetActorLocation();

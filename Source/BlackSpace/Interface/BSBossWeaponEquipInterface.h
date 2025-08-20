@@ -20,4 +20,6 @@ public:
 	virtual void EquipWeapon() = 0;
 
 	virtual void PlayEquipMontage() = 0;
+
+	virtual AController* GetBossController() const = 0;
 };

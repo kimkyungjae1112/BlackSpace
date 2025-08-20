@@ -106,23 +106,26 @@ void ABSCharacterEnemyKnight::EnemyBlocking()
 {
 	if (ABSEnemyAIController* AIController = Cast<ABSEnemyAIController>(GetController()))
 	{
-		if (CanBlocking() && BlockingRate >= FMath::RandRange(1, 100) && AIController->ToTargetDist() <= 400.f && AIController->ToTargetDist() > 0.f)
+		if (AIController->IsDetectedPlayer())
 		{
-			StateComp->SetState(BSGameplayTag::Character_State_Blocking);
-
-			if (IBSUpdateAnyTypeInterface* AnimInterface = Cast<IBSUpdateAnyTypeInterface>(GetMesh()->GetAnimInstance()))
+			if (CanBlocking() && BlockingRate >= FMath::RandRange(1, 100) && AIController->ToTargetDist() <= 400.f && AIController->ToTargetDist() > 0.f)
 			{
-				AnimInterface->UpdateBlcokingState(true);
-				bEnabledBlocking = true;
+				StateComp->SetState(BSGameplayTag::Character_State_Blocking);
+
+				if (IBSUpdateAnyTypeInterface* AnimInterface = Cast<IBSUpdateAnyTypeInterface>(GetMesh()->GetAnimInstance()))
+				{
+					AnimInterface->UpdateBlcokingState(true);
+					bEnabledBlocking = true;
+				}
+
+				FLatentActionInfo LatentAction;
+				LatentAction.CallbackTarget = this;
+				LatentAction.ExecutionFunction = "BlockingEnableAction";
+				LatentAction.Linkage = 0;
+				LatentAction.UUID = 0;
+
+				UKismetSystemLibrary::RetriggerableDelay(GetWorld(), 2.f, LatentAction);
 			}
-
-			FLatentActionInfo LatentAction;
-			LatentAction.CallbackTarget = this;
-			LatentAction.ExecutionFunction = "BlockingEnableAction";
-			LatentAction.Linkage = 0;
-			LatentAction.UUID = 0;
-
-			UKismetSystemLibrary::RetriggerableDelay(GetWorld(), 2.f, LatentAction);
 		}
 	}
 }
@@ -133,15 +136,18 @@ void ABSCharacterEnemyKnight::EnemyDodge()
 
 	if (ABSEnemyAIController* AIController = Cast<ABSEnemyAIController>(GetController()))
 	{
-		if (CanDodge() && DodgeRate >= FMath::RandRange(1, 100) && AIController->ToTargetDist() <= 400.f && AIController->ToTargetDist() > 0.f)
+		if (AIController->IsDetectedPlayer())
 		{
-			if (ABSWeapon* Weapon = CombatComp->GetMainWeapon())
+			if (CanDodge() && DodgeRate >= FMath::RandRange(1, 100) && AIController->ToTargetDist() <= 400.f && AIController->ToTargetDist() > 0.f)
 			{
-				StateComp->SetState(BSGameplayTag::Character_State_Dodge);
-
-				if (UAnimMontage* DodgeMontage = Weapon->GetRandomMontageForTag(BSGameplayTag::Character_Action_Dodge))
+				if (ABSWeapon* Weapon = CombatComp->GetMainWeapon())
 				{
-					PlayAnimMontage(DodgeMontage);
+					StateComp->SetState(BSGameplayTag::Character_State_Dodge);
+
+					if (UAnimMontage* DodgeMontage = Weapon->GetRandomMontageForTag(BSGameplayTag::Character_Action_Dodge))
+					{
+						PlayAnimMontage(DodgeMontage);
+					}
 				}
 			}
 		}
@@ -222,6 +228,11 @@ void ABSCharacterEnemyKnight::PlayEquipMontage()
 	check(StateComp);
 
 	PlayAnimMontage(EquipMontage);
+}
+
+AController* ABSCharacterEnemyKnight::GetBossController() const
+{
+	return GetController();
 }
 
 void ABSCharacterEnemyKnight::SeesTarget(AActor* InTargetActor)
@@ -403,6 +414,30 @@ void ABSCharacterEnemyKnight::ChangeWeapon()
 		if (GreateSword)
 		{
 			GreateSword->EquipItem();
+		}
+	}
+}
+
+void ABSCharacterEnemyKnight::OnPosture()
+{
+	if (UAnimInstance* Anim = GetMesh()->GetAnimInstance())
+	{
+		if (Anim->Montage_IsPlaying(SecondPhaseMontage))
+		{
+			return;
+		}
+	}
+
+	check(CombatComp);
+	check(StateComp);
+
+	StateComp->SetState(BSGameplayTag::Character_State_MaxPosture);
+
+	if (ABSWeapon* Weapon = CombatComp->GetMainWeapon())
+	{
+		if (UAnimMontage* Montage = Weapon->GetMontageForTag(BSGameplayTag::Character_State_MaxPosture))
+		{
+			PlayAnimMontage(Montage);
 		}
 	}
 }

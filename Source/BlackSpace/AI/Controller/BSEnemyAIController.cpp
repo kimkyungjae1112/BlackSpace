@@ -20,6 +20,13 @@ bool ABSEnemyAIController::IsDetectedPlayer() const
 	return (Blackboard->GetValueAsObject(TEXT("Target")) != nullptr) ? true : false;
 }
 
+void ABSEnemyAIController::BossPossess()
+{
+	RunBehaviorTree(BehaviorTreeAsset);
+
+	GetWorld()->GetTimerManager().SetTimer(PerceptionTimerHandle, this, &ThisClass::UpdateTarget, 0.1f, true);
+}
+
 float ABSEnemyAIController::ToTargetDist() const
 {
 	AActor* Target = Cast<AActor>(Blackboard->GetValueAsObject(TEXT("Target")));
@@ -50,7 +57,10 @@ void ABSEnemyAIController::OnPossess(APawn* InPawn)
 
 	RunBehaviorTree(BehaviorTreeAsset);
 
-	GetWorld()->GetTimerManager().SetTimer(PerceptionTimerHandle, this, &ThisClass::UpdateTarget, 0.1f, true);
+	if (!bIsBoss)
+	{
+		GetWorld()->GetTimerManager().SetTimer(PerceptionTimerHandle, this, &ThisClass::UpdateTarget, 0.1f, true);
+	}
 }
 
 void ABSEnemyAIController::OnUnPossess()
@@ -112,5 +122,5 @@ void ABSEnemyAIController::SetTarget(AActor* NewTarget) const
 			RotationComp->SetTargetActor(NewTarget);
 		}
 	}
-	
+
 }

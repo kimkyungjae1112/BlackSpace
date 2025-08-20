@@ -101,6 +101,7 @@ public:
 	/* IBSBossWeaponEquipInterface Implement */
 	virtual void EquipWeapon() override;
 	virtual void PlayEquipMontage() override;
+	virtual AController* GetBossController() const override;
 
 public:
 	virtual void SeesTarget(AActor* InTargetActor) override;
@@ -131,4 +132,8 @@ protected:
 // 무기 교체
 protected:
 	void ChangeWeapon();
+
+// 두 번째 페이즈 몽타주 재생 중 체간 공격 방지
+protected:
+	virtual void OnPosture() override;;
 };

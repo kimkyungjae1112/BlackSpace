@@ -13,6 +13,7 @@
 #include "Characters/BSCharacterEnemyKnight.h"
 #include "Characters/BSCharacterEnemyMaldrith.h"
 #include "Gimmick/BSBossStageActor.h"
+#include "AI/Controller/BSEnemyAIController.h"
 
 ABSBossTrigger::ABSBossTrigger()
 {
@@ -20,7 +21,7 @@ ABSBossTrigger::ABSBossTrigger()
 	SetRootComponent(BoxComp);
 	BoxComp->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnOverlap);
 
-	static ConstructorHelpers::FObjectFinder<ULevelSequence> LevelSequenceAssetRef(TEXT("/Script/LevelSequence.LevelSequence'/Game/_Game/Blueprints/LevelSequence/NewLevelSequence.NewLevelSequence'"));
+	static ConstructorHelpers::FObjectFinder<ULevelSequence> LevelSequenceAssetRef(TEXT("/Script/LevelSequence.LevelSequence'/Game/_Game/Blueprints/LevelSequence/LS_Knight.LS_Knight'"));
 	if (LevelSequenceAssetRef.Object)
 	{
 		LevelSequenceAsset = LevelSequenceAssetRef.Object;
@@ -37,48 +38,57 @@ void ABSBossTrigger::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 {
 	if (OtherActor && OtherActor->ActorHasTag(TEXT("Player")))
 	{
-		ULevelSequence* Sequence = LevelSequenceAsset.Get();
-		ALevelSequenceActor* SequenceActor;
-		if (Sequence)
-		{
-			// 시퀀스 플레이어와 액터 생성
-			FMovieSceneSequencePlaybackSettings PlaybackSettings;
-			LevelSequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(
-				GetWorld(),
-				Sequence,
-				PlaybackSettings,
-				SequenceActor
-			);
-		}
-
-		if (LevelSequencePlayer)
-		{
-			LevelSequencePlayer->OnFinished.AddDynamic(this, &ThisClass::OnSequenceFinished);
-			LevelSequencePlayer->Play();
-
-			if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
-			{
-				if (KnightAppearCameraShake)
-				{
-					PC->ClientStartCameraShake(KnightAppearCameraShake);
-				}
-			}
-		}
-
-		if (ABSBossStageActor* BossStageActor = Cast<ABSBossStageActor>(UGameplayStatics::GetActorOfClass(GetWorld(), ABSBossStageActor::StaticClass())))
-		{
-			BossStageActor->SetMovingFlag(true);
-		}
-
 		switch (BossType)
 		{
 		case EBossType::Maldrith:
 			if (IBSBossWeaponEquipInterface* BWE = Cast<IBSBossWeaponEquipInterface>(UGameplayStatics::GetActorOfClass(GetWorld(), ABSCharacterEnemyMaldrith::StaticClass())))
 			{
 				BWE->PlayEquipMontage();
+				if (ABSEnemyAIController* AIPC = Cast<ABSEnemyAIController>(BWE->GetBossController()))
+				{
+					AIPC->BossPossess();
+				}
 			}
 			break;
 		case EBossType::Knight:
+			ULevelSequence* Sequence = LevelSequenceAsset.Get();
+			ALevelSequenceActor* SequenceActor;
+			if (Sequence)
+			{
+				// 시퀀스 플레이어와 액터 생성
+				FMovieSceneSequencePlaybackSettings PlaybackSettings;
+				LevelSequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(
+					GetWorld(),
+					Sequence,
+					PlaybackSettings,
+					SequenceActor
+				);
+			}
+
+			if (LevelSequencePlayer)
+			{
+				LevelSequencePlayer->OnFinished.AddDynamic(this, &ThisClass::OnSequenceFinished);
+				LevelSequencePlayer->Play();
+
+				if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+				{
+					if (KnightAppearCameraShake)
+					{
+						PC->ClientStartCameraShake(KnightAppearCameraShake);
+					}
+
+					if (APawn* Player = PC->GetPawn())
+					{
+						Player->DisableInput(PC);
+					}
+				}
+			}
+
+			if (ABSBossStageActor* BossStageActor = Cast<ABSBossStageActor>(UGameplayStatics::GetActorOfClass(GetWorld(), ABSBossStageActor::StaticClass())))
+			{
+				BossStageActor->SetMovingFlag(true);
+			}
+
 			if (IBSBossWeaponEquipInterface* BWE = Cast<IBSBossWeaponEquipInterface>(UGameplayStatics::GetActorOfClass(GetWorld(), ABSCharacterEnemyKnight::StaticClass())))
 			{
 				BWE->PlayEquipMontage();
@@ -90,7 +100,21 @@ void ABSBossTrigger::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 
 void ABSBossTrigger::OnSequenceFinished()
 {
+	if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+	{
+		if (APawn* Player = PC->GetPawn())
+		{
+			Player->EnableInput(PC);
+		}
+	}
 
+	if (IBSBossWeaponEquipInterface* BWE = Cast<IBSBossWeaponEquipInterface>(UGameplayStatics::GetActorOfClass(GetWorld(), ABSCharacterEnemyKnight::StaticClass())))
+	{
+		if (ABSEnemyAIController* AIPC = Cast<ABSEnemyAIController>(BWE->GetBossController()))
+		{
+			AIPC->BossPossess();
+		}
+	}
 
 	Destroy();
 }

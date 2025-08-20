@@ -42,6 +42,11 @@ void ABSCharacterEnemyMaldrith::PlayEquipMontage()
 	PlayAnimMontage(EquipMontage);
 }
 
+AController* ABSCharacterEnemyMaldrith::GetBossController() const
+{
+	return GetController();
+}
+
 void ABSCharacterEnemyMaldrith::SeesTarget(AActor* InTargetActor)
 {
 	if (IsValid(InTargetActor))

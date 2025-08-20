@@ -178,7 +178,7 @@ protected:
 	void OnChangedAttribute(const EAttributeType& AttributeType, float InRatio);
 	void SetupAttribute();
 	
-	void OnPosture();
+	virtual void OnPosture();
 
 // 방어
 protected:

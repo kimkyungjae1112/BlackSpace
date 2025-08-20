@@ -50,6 +50,7 @@ public:
 	/* IBSBossWeaponEquipInterface Implement */
 	virtual void EquipWeapon() override;
 	virtual void PlayEquipMontage() override;
+	virtual AController* GetBossController() const override;
 
 public:
 	virtual void SeesTarget(AActor* InTargetActor) override;
