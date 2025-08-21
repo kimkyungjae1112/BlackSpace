@@ -5,15 +5,30 @@
 #include "Components/WidgetComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
+#include "Kismet/GameplayStatics.h"
+#include "MotionWarpingComponent.h"
 
 #include "UI/BSBossHealthBarWidget.h"
 #include "GameModes/BSAudioManagerSubsystem.h"
 #include "GameModes/BSGameMode.h"
 #include "Equipments/BSWeapon.h"
 #include "Components/BSStateComponent.h"
+#include "Gimmick/BSBossStageWall.h"
+#include "AI/Controller/BSEnemyAIController.h"
 
 ABSCharacterEnemyMaldrith::ABSCharacterEnemyMaldrith()
 {
+	MotionWarpComp = CreateDefaultSubobject<UMotionWarpingComponent>(TEXT("Motion Warping Component"));
+}
+
+void ABSCharacterEnemyMaldrith::PerformAttack(const FGameplayTag& AttackTypeTag, FOnMontageEnded& MontageEndedDelegate)
+{
+	if (AttackTypeTag == BSGameplayTag::Character_Attack_RangedAttack)
+	{
+		RangedAttackMotionWarping();
+	}
+
+	Super::PerformAttack(AttackTypeTag, MontageEndedDelegate);
 }
 
 void ABSCharacterEnemyMaldrith::PostureAttacked(UAnimMontage* PostureAttackReactionMontage)
@@ -137,8 +152,33 @@ void ABSCharacterEnemyMaldrith::OnDeath()
 			}
 		}
 	}
+
+	if (ABSBossStageWall* Wall = Cast<ABSBossStageWall>(UGameplayStatics::GetActorOfClass(GetWorld(), ABSBossStageWall::StaticClass())))
+	{
+		Wall->Destroy();
+	}
 }
 
 void ABSCharacterEnemyMaldrith::HitReaction(const AActor* Attacker, const EDamageType& DamageType)
 {
+}
+
+void ABSCharacterEnemyMaldrith::RangedAttackMotionWarping() const
+{
+	if (ABSEnemyAIController* AIController = Cast<ABSEnemyAIController>(GetController()))
+	{
+		if (AActor* Target = AIController->GetTarget())
+		{
+			FVector TargetLoc = Target->GetActorLocation();
+			FVector TargetToVec = TargetLoc - GetActorLocation();
+
+			TargetLoc.X += FMath::RandRange(-100.f, 100.f);
+			TargetLoc.Y += FMath::RandRange(-100.f, 100.f);
+
+			if (MotionWarpComp)
+			{
+				MotionWarpComp->AddOrUpdateWarpTargetFromLocationAndRotation(TEXT("RangedAttack"), TargetLoc, TargetToVec.Rotation());
+			}
+		}
+	}
 }

@@ -27,12 +27,12 @@ ABSCharacterEnemyKnight::ABSCharacterEnemyKnight()
 
 float ABSCharacterEnemyKnight::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-
 	if (IsEnabledIFrame())
 	{
-		return ActualDamage;
+		return DamageAmount;
 	}
+
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	if (UAnimInstance* Anim = GetMesh()->GetAnimInstance())
 	{

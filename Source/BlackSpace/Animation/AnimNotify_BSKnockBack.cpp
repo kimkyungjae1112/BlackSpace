@@ -57,10 +57,11 @@ void UAnimNotify_BSKnockBack::Notify(USkeletalMeshComponent* MeshComp, UAnimSequ
 			AActor* HitActor = HitResult.GetActor();
 			ETeamAttitude::Type Attitude = FGenericTeamId::GetAttitude(OwnerPawn, HitActor);
 
-			if (Attitude != ETeamAttitude::Friendly)
+			if (Attitude != ETeamAttitude::Friendly && HitActor != AlreadyHitActor)
 			{
 				TArray<AActor*> IgnoreActors;
 				IgnoreActors.Add(OwnerPawn);
+				AlreadyHitActor = HitActor;
 
 				UGameplayStatics::ApplyRadialDamage(OwnerPawn, BaseDamage, OriginLocation, DamageRadius, nullptr, IgnoreActors, nullptr, OwnerController, false, ECC_Visibility);
 			}

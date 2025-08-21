@@ -12,6 +12,9 @@ class BLACKSPACE_API UAnimNotify_BSKnockBack : public UAnimNotify
 	GENERATED_BODY()
 	
 protected:
+	UPROPERTY()
+	TObjectPtr<AActor> AlreadyHitActor;
+
 protected:
 	UPROPERTY(EditAnywhere)
 	float BaseDamage = 10.f;

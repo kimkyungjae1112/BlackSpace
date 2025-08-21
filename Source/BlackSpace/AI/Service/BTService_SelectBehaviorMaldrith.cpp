@@ -46,6 +46,10 @@ void UBTService_SelectBehaviorMaldrith::UpdateBehavior(UBlackboardComponent* Bla
 					{
 						SetBehaviorKey(BlackboardComp, EAIBehavior::MeleeAttack);
 					}
+					else if (Distance >= AttackRangeDistance && RangedAttackRate)
+					{
+						SetBehaviorKey(BlackboardComp, EAIBehavior::RangedAttack);
+					}
 					else
 					{
 						SetBehaviorKey(BlackboardComp, EAIBehavior::Approach);

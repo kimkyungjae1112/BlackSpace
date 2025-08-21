@@ -15,6 +15,9 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float StaminaCheckValue = 40.f;
 
+	UPROPERTY(EditAnywhere)
+	int32 RangedAttackRate = 30.f;
+
 protected:
 	virtual void UpdateBehavior(UBlackboardComponent* BlackboardComp, ABSCharacterEnemy* ControlledEnemy) const override;
 };

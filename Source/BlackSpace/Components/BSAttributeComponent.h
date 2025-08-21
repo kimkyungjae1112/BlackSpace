@@ -49,7 +49,7 @@ protected:
 	float WeightPosture = 1.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
-	float RegenStaminaRate = 2.f;
+	float RegenStaminaRate = 5.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat")
 	float RegenPostureRate = 1.f;

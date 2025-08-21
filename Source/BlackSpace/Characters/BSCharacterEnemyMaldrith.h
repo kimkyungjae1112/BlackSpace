@@ -8,6 +8,7 @@
 #include "BSCharacterEnemyMaldrith.generated.h"
 
 class UBSBossHealthBarWidget;
+class UMotionWarpingComponent;
 class USoundCue;
 
 UCLASS()
@@ -20,6 +21,11 @@ class BLACKSPACE_API ABSCharacterEnemyMaldrith
 protected:
 	UPROPERTY(EditAnywhere, Category = "Enemy | Name")
 	FText BossName;
+
+// Component
+protected:
+	UPROPERTY(VisibleAnywhere, Category = "Enemy | Component")
+	TObjectPtr<UMotionWarpingComponent> MotionWarpComp;
 
 // UI
 protected:
@@ -44,6 +50,9 @@ public:
 	ABSCharacterEnemyMaldrith();
 
 public:
+	/* IBSCombatInterface Implement */
+	virtual void PerformAttack(const FGameplayTag& AttackTypeTag, FOnMontageEnded& MontageEndedDelegate) override;
+
 	/* IBSEnemyInterface Implement */
 	virtual void PostureAttacked(UAnimMontage* PostureAttackReactionMontage) override;
 
@@ -62,4 +71,8 @@ protected:
 protected:
 	virtual void OnDeath() override;
 	virtual void HitReaction(const AActor* Attacker, const EDamageType& DamageType) override;
+
+// MotionWarping
+protected:
+	void RangedAttackMotionWarping() const;
 };

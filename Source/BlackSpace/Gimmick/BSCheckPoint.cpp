@@ -44,9 +44,7 @@ void ABSCheckPoint::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
 		GetWorld()->GetTimerManager().SetTimer(FinishTimer, [this, CheckpointUI]()
 			{
 				CheckpointUI->RemoveFromParent();
-
-				Destroy();
-			}, 5.f, false);
+			}, 3.f, false);
 	}
 }
 

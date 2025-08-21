@@ -355,15 +355,17 @@ float ABSCharacterPlayer::TakeDamage(float DamageAmount, FDamageEvent const& Dam
 	// 체간 공격 진행중인지?
 	if (UAnimInstance* Anim = GetMesh()->GetAnimInstance())
 	{
-		// MainWeapon 없을 때 방어 코드 필요
-		if (UAnimMontage* CurrentPlayingMontage = CombatComp->GetMainWeapon()->GetMontageForTag(BSGameplayTag::Character_Attack_MaxPostureAttack))
+		if (ABSWeapon* Weapon = CombatComp->GetMainWeapon())
 		{
-			if (Anim->Montage_IsPlaying(CurrentPlayingMontage))
+			if (UAnimMontage* CurrentPlayingMontage = Weapon->GetMontageForTag(BSGameplayTag::Character_Attack_MaxPostureAttack))
 			{
-				AttributeComp->TakeDamageAmount(0.f);
-				ImpactEffect(GetActorLocation());
+				if (Anim->Montage_IsPlaying(CurrentPlayingMontage))
+				{
+					AttributeComp->TakeDamageAmount(0.f);
+					ImpactEffect(GetActorLocation());
 
-				return ActualDamage;
+					return ActualDamage;
+				}
 			}
 		}
 	}
