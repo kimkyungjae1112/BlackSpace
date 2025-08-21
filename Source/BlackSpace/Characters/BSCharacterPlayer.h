@@ -262,6 +262,7 @@ private:
 	bool CanAttackBlocking() const;
 	bool CanParrying() const;
 	bool CanDetectForBackAttack() const;
+	bool CanDetectForDialogue() const;
 
 private:
 	void Move(const FInputActionValue& Value);
@@ -278,6 +279,7 @@ private:
 	void Dialogue();
 	void NextDialogue();
 	void SkipDialogue();
+	void ForTestMaxHealth();
 
 	// 공격
 	void LightAttack();

@@ -57,6 +57,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Common | Dialogue")
 	TObjectPtr<UInputAction> IA_Dialogue;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Common | Test")
+	TObjectPtr<UInputAction> IA_TestMaxHealth;
+
 	/***********************************************/
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sword | Attack")

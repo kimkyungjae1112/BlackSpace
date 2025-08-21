@@ -101,7 +101,7 @@ void ABSCharacterPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (CanDetectForBackAttack())
+	if (CanDetectForDialogue())
 	{
 		FHitResult DialogueTargetResult;
 		bool bDialogueHit = DetectForDialogue(DialogueTargetResult);
@@ -117,7 +117,10 @@ void ABSCharacterPlayer::Tick(float DeltaTime)
 		{
 			DialogueTarget = nullptr;
 		}
+	}
 
+	if (CanDetectForBackAttack())
+	{
 		FHitResult VitalTargetResult;
 		bool bHit = DetectForBackAttackTarget(VitalTargetResult);
 
@@ -202,6 +205,7 @@ void ABSCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		EnhancedInputComponent->BindAction(InputData->IA_LeftTarget, ETriggerEvent::Started, this, &ThisClass::LeftTarget);
 		EnhancedInputComponent->BindAction(InputData->IA_RightTarget, ETriggerEvent::Started, this, &ThisClass::RightTarget);
 		EnhancedInputComponent->BindAction(InputData->IA_Dialogue, ETriggerEvent::Started, this, &ThisClass::Dialogue);
+		EnhancedInputComponent->BindAction(InputData->IA_TestMaxHealth, ETriggerEvent::Started, this, &ThisClass::ForTestMaxHealth);
 
 		/* Sword & Poleram */
 		EnhancedInputComponent->BindAction(InputData->IA_SwordAttack, ETriggerEvent::Canceled, this, &ThisClass::LightAttack);
@@ -637,6 +641,22 @@ bool ABSCharacterPlayer::CanDetectForBackAttack() const
 	return StateComp->IsCurrentStateEqualToAny(CheckTags) == false;
 }
 
+bool ABSCharacterPlayer::CanDetectForDialogue() const
+{
+	check(StateComp);
+	check(CombatComp);
+
+	FGameplayTagContainer CheckTags;
+	CheckTags.AddTag(BSGameplayTag::Character_State_Attacking);
+	CheckTags.AddTag(BSGameplayTag::Character_State_Aiming);
+	CheckTags.AddTag(BSGameplayTag::Character_State_Hit);
+	CheckTags.AddTag(BSGameplayTag::Character_State_Death);
+	CheckTags.AddTag(BSGameplayTag::Character_State_Rolling);
+	CheckTags.AddTag(BSGameplayTag::Character_State_Parrying);
+
+	return StateComp->IsCurrentStateEqualToAny(CheckTags) == false;
+}
+
 void ABSCharacterPlayer::Move(const FInputActionValue& Value)
 {
 	check(StateComp);
@@ -854,10 +874,13 @@ void ABSCharacterPlayer::ChangeWeapon()
 
 void ABSCharacterPlayer::Dialogue()
 {
+	UE_LOG(LogTemp, Display, TEXT("함수 실행"));
 	if (DialogueTarget)
 	{
+		UE_LOG(LogTemp, Display, TEXT("NPC가 탐지 되나?"));
 		if (IBSDialogueInterface* DialogueInterface = Cast<IBSDialogueInterface>(DialogueTarget))
 		{
+			UE_LOG(LogTemp, Display, TEXT("젤 안쪽"));
 			DialogueInterface->StartDialogue();
 			SetInputMapping(InputData->IMC_Dialogue);
 		}
@@ -884,6 +907,13 @@ void ABSCharacterPlayer::SkipDialogue()
 			DialogueInterface->SkipDialogue();
 		}
 	}
+}
+
+void ABSCharacterPlayer::ForTestMaxHealth()
+{
+	check(StateComp);
+
+	StateComp->RespawnState();
 }
 
 void ABSCharacterPlayer::LightAttack()

@@ -8,7 +8,6 @@
 
 UBSAttributeComponent::UBSAttributeComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
 
 }
 
@@ -18,12 +17,6 @@ void UBSAttributeComponent::BeginPlay()
 	Super::BeginPlay();
 
 	
-}
-
-void UBSAttributeComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
 }
 
 bool UBSAttributeComponent::CheckHasEnoughStamina(float StaminaCost) const

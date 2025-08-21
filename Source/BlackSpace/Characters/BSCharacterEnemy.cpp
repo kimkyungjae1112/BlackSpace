@@ -109,7 +109,7 @@ void ABSCharacterEnemy::BeginPlay()
 
 	SetupAttribute();
 
-// 테스트용, AI 애니메이션 움직임 제어
+	// 테스트용, AI 애니메이션 움직임 제어
 #if WITH_EDITOR
 	if (bRootMotionTestFlag)
 	{
@@ -504,13 +504,13 @@ void ABSCharacterEnemy::HitReaction(const AActor* Attacker, const EDamageType& D
 	check(CombatComp);
 	check(StateComp);
 
-	if (StateComp->IsCurrentStateEqualToIt(BSGameplayTag::Character_State_MaxPosture)) return;
+	if (StateComp->IsCurrentStateEqualToIt(BSGameplayTag::Character_State_MaxPosture) || bUnstoppable) return;
 
 	float StunnedTime = 0.f;
 	if (StunnedRate >= FMath::RandRange(1, 100))
 	{
 		StateComp->SetState(BSGameplayTag::Character_State_Stunned);
-		StunnedTime = FMath::RandRange(0.5f, 1.5f);
+		StunnedTime = FMath::RandRange(0.5f, 1.f);
 	}
 	else
 	{
@@ -518,29 +518,27 @@ void ABSCharacterEnemy::HitReaction(const AActor* Attacker, const EDamageType& D
 		StunnedTime = FMath::RandRange(0.1f, 0.3f);
 	}
 
-	if (!bUnstoppable)
+	if (ABSWeapon* MainWeapon = CombatComp->GetMainWeapon())
 	{
-		if (ABSWeapon* MainWeapon = CombatComp->GetMainWeapon())
+		if (UAnimMontage* HitReactAnimMontage = MainWeapon->GetHitReactMontage(Attacker))
 		{
-			if (UAnimMontage* HitReactAnimMontage = MainWeapon->GetHitReactMontage(Attacker))
-			{
-				const float DelaySeconds = PlayAnimMontage(HitReactAnimMontage) + StunnedTime;
+			const float DelaySeconds = PlayAnimMontage(HitReactAnimMontage) + StunnedTime;
 
-				FTimerDelegate TimerDelegate;
-				TimerDelegate.BindLambda([this]()
+			FTimerDelegate TimerDelegate;
+			TimerDelegate.BindLambda([this]()
+				{
+					FGameplayTagContainer CheckTags;
+					CheckTags.AddTag(BSGameplayTag::Character_State_Death);
+					CheckTags.AddTag(BSGameplayTag::Character_State_MaxPosture);
+					if (StateComp->IsCurrentStateEqualToAny(CheckTags) == false)
 					{
-						FGameplayTagContainer CheckTags;
-						CheckTags.AddTag(BSGameplayTag::Character_State_Death);
-						CheckTags.AddTag(BSGameplayTag::Character_State_MaxPosture);
-						if (StateComp->IsCurrentStateEqualToAny(CheckTags) == false)
-						{
-							StateComp->ClearState();
-						}
-					});
-				GetWorld()->GetTimerManager().SetTimer(StunnedDelayTimerHandle, TimerDelegate, DelaySeconds, false);
-			}
+						StateComp->ClearState();
+					}
+				});
+			GetWorld()->GetTimerManager().SetTimer(StunnedDelayTimerHandle, TimerDelegate, DelaySeconds, false);
 		}
 	}
+
 }
 
 void ABSCharacterEnemy::OnChangedAttribute(const EAttributeType& AttributeType, float InRatio)

@@ -14,6 +14,7 @@
 #include "Equipments/BSWeapon.h"
 #include "Components/BSStateComponent.h"
 #include "Gimmick/BSBossStageWall.h"
+#include "Gimmick/BSBossStageDoor.h"
 #include "AI/Controller/BSEnemyAIController.h"
 
 ABSCharacterEnemyMaldrith::ABSCharacterEnemyMaldrith()
@@ -156,6 +157,16 @@ void ABSCharacterEnemyMaldrith::OnDeath()
 	if (ABSBossStageWall* Wall = Cast<ABSBossStageWall>(UGameplayStatics::GetActorOfClass(GetWorld(), ABSBossStageWall::StaticClass())))
 	{
 		Wall->Destroy();
+	}
+
+	TArray<AActor*> Doors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABSBossStageDoor::StaticClass(), Doors);
+	for (AActor* FindDoor : Doors)
+	{
+		if (ABSBossStageDoor* Door = Cast<ABSBossStageDoor>(FindDoor))
+		{
+			Door->OpenDoor();
+		}
 	}
 }
 
