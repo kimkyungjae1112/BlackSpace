@@ -25,10 +25,7 @@ void ABSGameMode::BeginPlay()
 		PC->SetInputMode(FInputModeGameOnly());
 	}
 
-	if (UBSAudioManagerSubsystem* AudioManager = GetWorld()->GetGameInstance()->GetSubsystem<UBSAudioManagerSubsystem>())
-	{
-		AudioManager->PlayMusic(BGM, true);
-	}
+	StartBGM();
 
 	if (bIsTutorial)
 	{
@@ -81,4 +78,12 @@ void ABSGameMode::RespawnPlayer()
 	Player->GetMesh()->AttachToComponent(Player->GetCapsuleComponent(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	Player->GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -(Player->GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight())));
 	Player->GetMesh()->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
+}
+
+void ABSGameMode::StartBGM() const
+{
+	if (UBSAudioManagerSubsystem* AudioManager = GetWorld()->GetGameInstance()->GetSubsystem<UBSAudioManagerSubsystem>())
+	{
+		AudioManager->PlayMusic(BGM, true);
+	}
 }

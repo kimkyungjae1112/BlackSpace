@@ -205,7 +205,7 @@ void ABSCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		EnhancedInputComponent->BindAction(InputData->IA_LeftTarget, ETriggerEvent::Started, this, &ThisClass::LeftTarget);
 		EnhancedInputComponent->BindAction(InputData->IA_RightTarget, ETriggerEvent::Started, this, &ThisClass::RightTarget);
 		EnhancedInputComponent->BindAction(InputData->IA_Dialogue, ETriggerEvent::Started, this, &ThisClass::Dialogue);
-		EnhancedInputComponent->BindAction(InputData->IA_TestMaxHealth, ETriggerEvent::Started, this, &ThisClass::ForTestMaxHealth);
+		EnhancedInputComponent->BindAction(InputData->IA_TestMaxHealth, ETriggerEvent::Started, this, &ThisClass::OnDeath);
 
 		/* Sword & Poleram */
 		EnhancedInputComponent->BindAction(InputData->IA_SwordAttack, ETriggerEvent::Canceled, this, &ThisClass::LightAttack);

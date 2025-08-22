@@ -151,6 +151,11 @@ void ABSCharacterEnemyMaldrith::OnDeath()
 			{
 				GetAudioManager()->StopMusic();
 			}
+
+			if (IsValid(GetAudioManager()))
+			{
+				GameMode->StartBGM();
+			}
 		}
 	}
 

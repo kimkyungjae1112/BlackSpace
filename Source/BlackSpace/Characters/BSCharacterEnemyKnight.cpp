@@ -326,6 +326,11 @@ void ABSCharacterEnemyKnight::OnDeath()
 			{
 				GetAudioManager()->StopMusic();
 			}
+
+			if (IsValid(GetAudioManager()))
+			{
+				GameMode->StartBGM();
+			}
 		}
 	}
 }

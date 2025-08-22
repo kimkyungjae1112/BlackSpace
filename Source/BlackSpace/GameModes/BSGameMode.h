@@ -34,5 +34,6 @@ public:
 	FORCEINLINE bool IsTutorial() const { return bIsTutorial; }
 	void SetCheckpoint(ABSCheckPoint* InCheckPoint);
 	void RespawnPlayer();
+	void StartBGM() const;
 };
 
