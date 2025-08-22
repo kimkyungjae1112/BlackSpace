@@ -3,6 +3,7 @@
 - 개발 기간 : 2025.07.02 ~ 2025.08.22
 - 개발 인원 : 1인
 - 장르 : 소울라이크 + RPG
+- 영상 : [유튜브 링크](https://youtu.be/vjcz6WjcW7I)
 
 <br> 
 
@@ -236,9 +237,363 @@ FGameplayTag ABSCharacterPlayer::GetAttackPerform() const
 }
 ```
 
+<br>
 
+# 인벤토리 UI
+- 인벤토리는 미리 공간을 할당받은 뒤 객체들을 배열에서 관리하는 객체 풀 방식을 사용합니다.
+```
+UBSInventoryComponent::UBSInventoryComponent()
+{
+	InventorySlots.SetNum(12);
+	Weapons.SetNum(12);
+}
+```
 
+<br>
 
+- 무기를 획득하는 방법은 PickupItem 클래스로 만들어진 Blueprint와 상호작용 하는 것 입니다.
+```
+void ABSPickupItem::Interact(AActor* Interactor)
+{
+	if (EquipmentClass)
+	{
+		if (ABSEquipmentBase* CDO = EquipmentClass->GetDefaultObject<ABSEquipmentBase>())
+		{
+			if (ACharacter* Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
+			{
+				if (UBSCombatComponent* CombatComp = Player->GetComponentByClass<UBSCombatComponent>())
+				{
+					if (CombatComp->GetMainWeapon() == nullptr || CombatComp->GetSecondaryWeapon() == nullptr)
+					{
+						FActorSpawnParameters Param;
+						Param.Owner = Player;
+
+						ABSEquipmentBase* Weapon = GetWorld()->SpawnActor<ABSEquipmentBase>(EquipmentClass, Player->GetActorTransform(), Param);
+						if (Weapon)
+						{
+							Weapon->OnceCalledSetWeaponDamage();
+							Weapon->EquipItem();
+						}
+					}
+					else
+					{
+						if (UBSInventoryComponent* InventoryComp = Player->GetComponentByClass<UBSInventoryComponent>())
+						{
+							InventoryComp->AddToSlot(CDO->GetInventoryInfo());
+						}
+					}
+				}
+			}
+		}
+	}
+
+	Destroy();
+}
+```
+
+<br>
+
+- 메인 무기와 보조 무기를 가지고 있는 상태일 때 인벤토리에 저장되기 시작합니다.
+- **AddToSlot**은 다음과 같이 정의되어 있으며, 상황에 따라 오버로딩된 다른 함수들을 호출합니다.
+```
+void UBSInventoryComponent::AddToSlot(const FInventorySlot& InventorySlot)
+{
+	for (int32 i = 0; i < InventorySlots.Num(); ++i)
+	{
+		if (InventorySlots[i].Quantity == 0)
+		{
+			FActorSpawnParameters Param;
+			Param.Owner = GetOwner();
+
+			ABSWeapon* Weapon = GetWorld()->SpawnActor<ABSWeapon>(InventorySlot.ItemClass, GetOwner()->GetActorTransform(), Param);
+			Weapon->SetInventoryInfo(InventorySlot);
+			Weapon->OnceCalledSetWeaponDamage();
+			Weapon->SetActorHiddenInGame(true);
+			Weapons[i] = Weapon;
+
+			InventorySlots[i] = Weapon->GetInventoryInfo();
+
+			if (OnInventoryUpdated.IsBound())
+			{
+				OnInventoryUpdated.Broadcast(InventorySlots);
+			}
+
+			break;
+		}
+	}
+}
+```
+
+<br>
+
+- 인벤토리 UI는 **UWidgetSwitcher**를 이용해서 플레이어 상태 창, 인벤토리 창,  조합 창을 넘어다니며 볼 수 있습니다.
+- 인벤토리에 있는 슬롯들은 각각이 개별 클래스이며 아래의 함수들을 오버라이딩하여 UI 기능을 구현했습니다.
+```
+	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual void NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
+	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual void NativeOnMouseLeave(const FPointerEvent & InMouseEvent) override;
+```
+
+<br>
+
+- 슬롯 위에서 우클릭을 할 때 무기 장착과 조합 슬롯에 무기를 넣는 두 가지 이벤트를 구분합니다.
+```
+FReply UBSInventorySlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	if (InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
+	{
+		return UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton).NativeReply;
+	}
+
+	if (InMouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
+	{
+		RightClickForEquip();
+		return FReply::Handled();
+	}
+
+	return Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
+}
+
+void UBSInventorySlotWidget::RightClickForEquip()
+{
+	if (InventorySlot.Quantity > 0)
+	{
+		APawn* Player = GetWorld()->GetFirstPlayerController()->GetPawn();
+		if (Player == nullptr) return;
+
+		if (UBSInventoryMenuWidget::CurrentTabIndex == 2)
+		{
+			TArray<UUserWidget*> Widgets;
+			TSubclassOf<UBSInventoryMenuWidget> InventoryWidgetClass = UBSInventoryMenuWidget::StaticClass();
+			UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), Widgets, InventoryWidgetClass, true);
+			for (UUserWidget* Widget : Widgets)
+			{
+				UBSInventoryMenuWidget* InventoryMenuWidget = Cast<UBSInventoryMenuWidget>(Widget);
+				
+				InventoryMenuWidget->SetWeaponSlot(InventorySlot, Index);
+				// 아래 함수들이 줄줄이 달려있음
+				// UBSMixtureWeaponWidget->SetWeaponSlot()
+				// UBSMixtureMaterialWidget->SetWeaponSlot()
+				
+				if (UBSInventoryComponent* InventoryComp = Player->GetComponentByClass<UBSInventoryComponent>())
+				{
+					InventoryComp->RemoveToSlot(Index);
+				}
+
+				break;
+			}
+			return;
+		}
+
+		if (UBSInventoryComponent* InventoryComp = Player->GetComponentByClass<UBSInventoryComponent>())
+		{
+			if (UBSCombatComponent* CombatComp = Player->GetComponentByClass<UBSCombatComponent>())
+			{
+				ABSWeapon* OldWeapon = nullptr;
+				bool bIsHidden = true;
+				if (CombatComp->CheckHasMainWeapon() && CombatComp->CheckHasSecondaryWeapon())
+				{
+					OldWeapon = CombatComp->GetMainWeapon();
+					bIsHidden = false;
+				}
+				else if (!CombatComp->CheckHasMainWeapon())
+				{
+					bIsHidden = false;
+				}
+				InventoryComp->EquipFromInventory(Index, bIsHidden);
+				InventoryComp->RemoveToSlot(Index);
+				InventoryComp->AddToSlot(OldWeapon, Index);
+			}
+		}
+	}
+}
+```
+
+<br>
+
+# 적 AI
+- Service 노드를 통해 현재 AI의 상태를 계속해서 확인하고 그 상태에 맞는 행동을 하도록 설정합니다.
+```
+// 일반 적의 행동 결정 메서드
+void UBTService_SelectBehavior::UpdateBehavior(UBlackboardComponent* BlackboardComp, ABSCharacterEnemy* ControlledEnemy) const
+{
+	check(BlackboardComp);
+	check(ControlledEnemy);
+	AActor* TargetActor = Cast<AActor>(BlackboardComp->GetValueAsObject(TargetKey.SelectedKeyName));
+
+	UBSStateComponent* StateComp = ControlledEnemy->GetComponentByClass<UBSStateComponent>();
+	check(StateComp);
+
+	FGameplayTagContainer CheckTags;
+	CheckTags.AddTag(BSGameplayTag::Character_State_Parried);
+	CheckTags.AddTag(BSGameplayTag::Character_State_BackAttacked);
+	CheckTags.AddTag(BSGameplayTag::Character_State_Stunned);
+	CheckTags.AddTag(BSGameplayTag::Character_State_MaxPosture);
+	CheckTags.AddTag(BSGameplayTag::Character_State_MaxPostureAttacked);
+
+	if (StateComp->IsCurrentStateEqualToAny(CheckTags))
+	{
+		SetBehaviorKey(BlackboardComp, EAIBehavior::Stunned);
+	}
+	else
+	{
+		if (IsValid(TargetActor))
+		{
+			const float Distance = TargetActor->GetDistanceTo(ControlledEnemy);
+
+			if (Distance <= AttackRangeDistance)
+			{
+				SetBehaviorKey(BlackboardComp, EAIBehavior::MeleeAttack);
+			}
+			else if (ControlledEnemy->GetPatrolPoint() && TargetActor->GetDistanceTo(Cast<AActor>(ControlledEnemy->GetPatrolPoint())) > ApprochRangeDistance)
+			{
+				SetBehaviorKey(BlackboardComp, EAIBehavior::Patrol);
+			}
+			else
+			{
+				SetBehaviorKey(BlackboardComp, EAIBehavior::Approach);
+			}
+		}
+		else
+		{
+			if (ControlledEnemy->GetPatrolPoint() != nullptr)
+			{
+				SetBehaviorKey(BlackboardComp, EAIBehavior::Patrol);
+			}
+			else
+			{
+				SetBehaviorKey(BlackboardComp, EAIBehavior::Idle);
+			}
+		}
+	}
+}
+
+// Maldrith 보스의 행동 결정 메서드
+void UBTService_SelectBehaviorMaldrith::UpdateBehavior(UBlackboardComponent* BlackboardComp, ABSCharacterEnemy* ControlledEnemy) const
+{
+	check(BlackboardComp);
+	check(ControlledEnemy);
+
+	AActor* Target = Cast<AActor>(BlackboardComp->GetValueAsObject(TargetKey.SelectedKeyName));
+	
+	UBSStateComponent* StateComp = ControlledEnemy->GetComponentByClass<UBSStateComponent>();
+	check(StateComp);
+
+	FGameplayTagContainer CheckTags;
+	CheckTags.AddTag(BSGameplayTag::Character_State_Parried);
+	CheckTags.AddTag(BSGameplayTag::Character_State_Stunned);
+	CheckTags.AddTag(BSGameplayTag::Character_State_MaxPosture);
+	CheckTags.AddTag(BSGameplayTag::Character_State_MaxPostureAttacked);
+
+	if (StateComp->IsCurrentStateEqualToAny(CheckTags))
+	{
+		SetBehaviorKey(BlackboardComp, EAIBehavior::Stunned);
+	}
+	else
+	{
+		if (IsValid(Target))
+		{
+			if (UBSAttributeComponent* AttributeComp = ControlledEnemy->GetComponentByClass<UBSAttributeComponent>())
+			{
+				if (AttributeComp->GetBaseStamina() <= StaminaCheckValue)
+				{
+					SetBehaviorKey(BlackboardComp, EAIBehavior::Strafe);
+				}
+				else
+				{
+					const float Distance = Target->GetDistanceTo(ControlledEnemy);
+
+					if (Distance < AttackRangeDistance)
+					{
+						SetBehaviorKey(BlackboardComp, EAIBehavior::MeleeAttack);
+					}
+					else if (Distance >= AttackRangeDistance && RangedAttackRate)
+					{
+						SetBehaviorKey(BlackboardComp, EAIBehavior::RangedAttack);
+					}
+					else
+					{
+						SetBehaviorKey(BlackboardComp, EAIBehavior::Approach);
+					}
+				}
+			}
+		}
+		else
+		{
+			SetBehaviorKey(BlackboardComp, EAIBehavior::Idle);
+		}
+	}
+}
+
+// Knight 보스의 행동 결정 메서드
+void UBTService_SelectBehaviorKnight::UpdateBehavior(UBlackboardComponent* BlackboardComp, ABSCharacterEnemy* ControlledEnemy) const
+{
+	check(BlackboardComp);
+	check(ControlledEnemy);
+
+	AActor* Target = Cast<AActor>(BlackboardComp->GetValueAsObject(TargetKey.SelectedKeyName));
+
+	UBSStateComponent* StateComp = ControlledEnemy->GetComponentByClass<UBSStateComponent>();
+	check(StateComp);
+
+	FGameplayTagContainer CheckTags;
+	CheckTags.AddTag(BSGameplayTag::Character_State_Parried);
+	CheckTags.AddTag(BSGameplayTag::Character_State_Stunned);
+	CheckTags.AddTag(BSGameplayTag::Character_State_MaxPosture);
+	CheckTags.AddTag(BSGameplayTag::Character_State_MaxPostureAttacked);
+
+	if (StateComp->IsCurrentStateEqualToAny(CheckTags))
+	{
+		SetBehaviorKey(BlackboardComp, EAIBehavior::Stunned);
+	}
+	else
+	{
+		if (IsValid(Target) && StateComp->IsCurrentStateEqualToIt(BSGameplayTag::Character_State_Blocking))
+		{
+			SetBehaviorKey(BlackboardComp, EAIBehavior::Blocking);
+		}
+		else if (IsValid(Target) && StateComp->IsCurrentStateEqualToIt(BSGameplayTag::Character_State_Dodge))
+		{
+			SetBehaviorKey(BlackboardComp, EAIBehavior::Dodging);
+		}
+		else if (IsValid(Target))
+		{
+			if (UBSAttributeComponent* AttributeComp = ControlledEnemy->GetComponentByClass<UBSAttributeComponent>())
+			{
+				if (AttributeComp->GetBaseStamina() <= StaminaCheckValue)
+				{
+					SetBehaviorKey(BlackboardComp, EAIBehavior::Strafe);
+				}
+				else
+				{
+					const float Distance = Target->GetDistanceTo(ControlledEnemy);
+
+					if (Distance < AttackRangeDistance)
+					{
+						SetBehaviorKey(BlackboardComp, EAIBehavior::MeleeAttack);
+					}
+					else if (Distance >= AttackRangeDistance && RangedAttackRate)
+					{
+						SetBehaviorKey(BlackboardComp, EAIBehavior::RangedAttack);
+					}
+					else
+					{
+						SetBehaviorKey(BlackboardComp, EAIBehavior::Approach);
+					}
+				}
+			}
+		}
+		else
+		{
+			SetBehaviorKey(BlackboardComp, EAIBehavior::Idle);
+		}
+	}
+}
+
+```
 
 
 
